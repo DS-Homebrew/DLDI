@@ -1,0 +1,8 @@
+# Binary File
+*.dldi
+*.elf
+*.DS_Store
+
+# Build Directory
+*build/
+

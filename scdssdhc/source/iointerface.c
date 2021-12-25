@@ -72,22 +72,6 @@ void cardPolledTransfer(u32 flags, u32 *destination, u32 length, const u8 *comma
 	} while (REG_ROMCTRL & CARD_BUSY);
 }
 
-u32 sdmode_sdhc(void) {
-	u8 command[8];
-	u32 ret;
-	u32 address=0x7fa00-0x20;
-	command[0] = 0xb0;
-	command[1] = 0;
-	command[2] = 0;
-	command[3] = address & 0xff;
-	command[4] = (address >> 8) & 0xff;
-	command[5] = (address >> 16) & 0xff;
-	command[1] = (address >> 24) & 0xff;
-	command[7] = 0x70;
-	cardPolledTransfer(0xa7180000, &ret, 1, command);
-	return ret;
-}
-
 u32 sd_command(u8 cmd)
 {
 	REG_CARD_COMMAND[0] = cmd;
@@ -159,7 +143,7 @@ return true if it was successful, false if it failed for any reason
 bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
     int i;
-	if(sdmode_sdhc())
+	if(sdmode_sdhc)
     {
 		for (i=0;i<numSectors ;i++ )
 		{
@@ -185,7 +169,7 @@ return true if it was successful, false if it failed for any reason
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
     int i;
-	if(sdmode_sdhc())
+	if(sdmode_sdhc)
     {
 		for (i=0;i<numSectors ;i++ )
 		{
@@ -208,6 +192,19 @@ Initialize the interface, geting it into an idle, ready state
 returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
 bool startup(void) {
+	u8 command[8];
+	u32 ret;
+	u32 address=0x7fa00-0x20;
+	command[0] = 0xb0;
+	command[1] = 0;
+	command[2] = 0;
+	command[3] = address & 0xff;
+	command[4] = (address >> 8) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[6] = (address >> 24) & 0xff;
+	command[7] = 0x70;
+	cardPolledTransfer(0xa7180000, &ret, 1, command);
+	sdmode_sdhc = ret;
 	return true;
 }
 

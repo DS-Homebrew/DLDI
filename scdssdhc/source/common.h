@@ -42,3 +42,5 @@
 // read bits
 #define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
 #define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+#define	sdmode_sdhc		(*(vu32*)0x023FEE60)	//FIXME: DLDI could not alloc global memory ??

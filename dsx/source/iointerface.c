@@ -34,7 +34,7 @@
 #endif
 
 #ifdef NDS
- #include <nds/ndstypes.h>
+ #include <nds/jtypes.h>
 #else
  #include "gba_types.h"
 #endif
@@ -115,10 +115,10 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 	
 	for(i=0; i<2; i++)
 	{
-		REG_CARD_COMMAND[i*4+0] = command[i]>>24;
-		REG_CARD_COMMAND[i*4+1] = command[i]>>16;
-		REG_CARD_COMMAND[i*4+2] = command[i]>>8;
-		REG_CARD_COMMAND[i*4+3] = command[i]>>0;
+		CARD_COMMAND[i*4+0] = command[i]>>24;
+		CARD_COMMAND[i*4+1] = command[i]>>16;
+		CARD_COMMAND[i*4+2] = command[i]>>8;
+		CARD_COMMAND[i*4+3] = command[i]>>0;
 	}
 
 
@@ -137,15 +137,15 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 		break;	
 	}
 	
-	REG_ROMCTRL = CARD_START | CARD_RESET | pageSize | ((*(unsigned int*)0x02fffe60) & ~0x07001FFF) | latency;
+	CARD_CR2 = CARD_START | CARD_RESET | pageSize | ((*(unsigned int*)0x027ffe60) & ~0x07001FFF) | latency;
 
 	do
 	{
-		ctrl = REG_ROMCTRL;
+		ctrl = CARD_CR2;
 
 		if (ctrl & CARD_DATAREADY)
 		{
-			data = REG_CARD_DATA_RD;
+			data = CARD_DATA_RD;
 
 			if (useBuf32)
 			{
@@ -263,7 +263,7 @@ bool dsxReadSectors (u32 sector, u32 numSectors, void* buffer) {
 	unsigned int command[2];
 	unsigned int lba = sector + 0x6000;
 
-	REG_AUXSPICNT = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
+	CARD_CR1 = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
 	
 	dsxPoll();
 
@@ -302,7 +302,7 @@ bool dsxWriteSectors (u32 sector, u32 numSectors, void* buffer) {
 	unsigned int writeResult;
 	unsigned int lba = sector + 0x6000;
 	
-	REG_AUXSPICNT = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
+	CARD_CR1 = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
 	
 	//Don't interrupt the card if he's busy.. he gets grumpy.
 	dsxPoll();

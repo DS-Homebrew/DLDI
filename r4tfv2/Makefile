@@ -40,7 +40,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-LIBS	:= -lnds9
+LIBS	:= 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

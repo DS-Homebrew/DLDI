@@ -66,7 +66,6 @@
 
 
 // CARD_CR2 register:
-
 #define CARD_ACTIVATE   (1<<31)  // when writing, get the ball rolling
 // 1<<30
 #define CARD_nRESET     (1<<29)  // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
@@ -86,93 +85,67 @@
 
 #define	sdmode_sdhc		(*(vu32*)0x023FEE60)	//FIXME: DLDI could not alloc global memory ??
 
-/*-----------------------------------------------------------------
-startUp
-Initialize the interface, geting it into an idle, ready state
-returns true if successful, otherwise returns false
------------------------------------------------------------------*/
+u32 sd_command(u8 cmd)
+{
+	CARD_COMMAND[0] = cmd;
+	CARD_CR2 = 0xA7180000;
+	while (!(CARD_CR2 & CARD_DATA_READY));
+	return CARD_DATA_RD;
+}
+
 void sd_readpage(unsigned int addr,unsigned int dst)
 {
-	CARD_COMMAND[0] = 0x53;
-	CARD_COMMAND[1] = (u8)(addr >> 24);
-	CARD_COMMAND[2] = (u8)(addr >> 16);
-	CARD_COMMAND[3] = (u8)(addr >> 8);
+	u32 data;
+	
 	CARD_COMMAND[4] = (u8)(addr);
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	CARD_DATA_RD;
-
-    do{
-        CARD_COMMAND[0] = 0x80;
-        CARD_CR2 = 0xA7180000;
-        while (!(CARD_CR2 & CARD_DATA_READY));
-    }while(CARD_DATA_RD);
-
-    CARD_COMMAND[0] = 0x81;
-    CARD_CR2=0xA1180000;
-    do {
-        if (CARD_CR2 & CARD_DATA_READY) {
-            *(vu32*)dst=CARD_DATA_RD;
-            dst+=4;
-        }
-    } while (CARD_CR2 & CARD_BUSY);
-}
-void sd_setmode(u8 mode,u8 cmd,u32 arg)
-{
-	CARD_COMMAND[0] = 0x51;
-	CARD_COMMAND[1] = (u8)(arg >> 24);
-	CARD_COMMAND[2] = (u8)(arg >> 16);
-	CARD_COMMAND[3] = (u8)(arg >> 8);
-	CARD_COMMAND[4] = (u8)(arg);
-	CARD_COMMAND[5] = cmd;
-	CARD_COMMAND[6] = mode;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	CARD_DATA_RD;
-}
-u32 sd_isbusy()
-{
-	CARD_COMMAND[0] = 0x50;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	return CARD_DATA_RD;
-}
-u32 sd_getresp()
-{
-	CARD_COMMAND[0] = 0x52;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	return CARD_DATA_RD;
-}
-
-u32 sd_cmd_r1(u8 cmd,u32 arg)//4
-{
-	sd_setmode(1,cmd,arg);
-	while(sd_isbusy());
-	return sd_getresp();
+	CARD_COMMAND[3] = (u8)(addr >> 8);
+	CARD_COMMAND[2] = (u8)(addr >> 16);
+	CARD_COMMAND[1] = (u8)(addr >> 24);
+	sd_command(0x53);
+	
+	while(sd_command(0x80));
+	
+	CARD_COMMAND[0] = 0x81;
+	CARD_CR2=0xA1180000;
+	do {
+		if (CARD_CR2 & CARD_DATA_READY) {
+			data=CARD_DATA_RD;
+			((uint8*)dst)[0] = data & 0xff;
+			((uint8*)dst)[1] = (data >> 8) & 0xff;
+			((uint8*)dst)[2] = (data >> 16) & 0xff;
+			((uint8*)dst)[3] = (data >> 24) & 0xff;
+			dst+=4;
+		}
+	} while (CARD_CR2 & CARD_BUSY);
 }
 
 void sd_writepage(unsigned int addr,unsigned int dst)
 {
-    sd_cmd_r1(24,addr);
-    CARD_COMMAND[0] = 0x82;
-    CARD_CR2 = 0xE1180000;
-    do {
-        if (CARD_CR2 & CARD_DATA_READY) {
-                CARD_DATA_RD=*(vu32*)dst;
-                dst+=4;
-            }
-    } while (CARD_CR2 & CARD_BUSY);
-	while(sd_isbusy());
-    CARD_COMMAND[0] = 0x56;
-    CARD_CR2 = 0xA7180000;
-    while (!(CARD_CR2 & CARD_DATA_READY));
-    CARD_DATA_RD;
-	while(sd_isbusy());
-
+	CARD_COMMAND[7] = 0;
+	CARD_COMMAND[6] = 1;
+	CARD_COMMAND[5] = 24;
+	CARD_COMMAND[4] = (u8)(addr);
+	CARD_COMMAND[3] = (u8)(addr>> 8);
+	CARD_COMMAND[2] = (u8)(addr >> 16);
+	CARD_COMMAND[1] = (u8)(addr >> 24);
+	sd_command(0x51);
+	
+	while(sd_command(0x50));
+	sd_command(0x52);
+	
+	CARD_COMMAND[0] = 0x82;
+	CARD_CR2 = 0xE1180000;
+	do {
+		if (CARD_CR2 & CARD_DATA_READY) {
+			CARD_DATA_RD= ((uint8*)dst)[0] | (((uint8*)dst)[1] << 8) | (((uint8*)dst)[2] << 16) | (((uint8*)dst)[3] << 24);
+			dst+=4;
+		}
+	} while (CARD_CR2 & CARD_BUSY);
+	
+	while(sd_command(0x50));
+	sd_command(0x56);
+	while(sd_command(0x50));
 }
-
 
 /*-----------------------------------------------------------------
 readSectors
@@ -200,8 +173,6 @@ bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	return true;
 }
 
-
-
 /*-----------------------------------------------------------------
 writeSectors
 Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
@@ -227,26 +198,25 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
     }
 	return true;
 }
-u32 cardcommand_r4(u8 cmd,u32 address) 
+
+/*-----------------------------------------------------------------
+startUp
+Initialize the interface, geting it into an idle, ready state
+returns true if successful, otherwise returns false
+-----------------------------------------------------------------*/
+bool startup(void)
 {
-	CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-
-	CARD_COMMAND[0] = cmd;
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8) & 0xff;
-	CARD_COMMAND[4] = address & 0xff;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
+	u32 address=0x7fa00-0x20;
+	
 	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	return CARD_DATA_RD;
-}
-
-
-bool startup(void) {
-    sdmode_sdhc=cardcommand_r4(0x70,(0x7fa00-0x20));
+	CARD_COMMAND[6] = 0;
+	CARD_COMMAND[5] = 0;
+	CARD_COMMAND[4] = address & 0xff;
+	CARD_COMMAND[3] = (address >> 8) & 0xff;
+	CARD_COMMAND[2] = (address >> 16) & 0xff;
+	CARD_COMMAND[1] = (address >> 24) & 0xff;
+	
+	sdmode_sdhc=sd_command(0x70);
 	return true;
 }
 
@@ -258,7 +228,6 @@ return true if a card is inserted and usable
 bool isInserted (void) {
 	return true;
 }
-
 
 /*-----------------------------------------------------------------
 clearStatus

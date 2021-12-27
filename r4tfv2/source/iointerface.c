@@ -1,6 +1,57 @@
-#include "common.h"
 
-#include <nds/card.h>
+#include <nds/jtypes.h>
+#define BYTES_PER_READ 512
+#ifndef NULL
+ #define NULL 0
+#endif
+
+// Card bus
+#define CARD_CR1       (*(vuint16*)0x040001A0)
+#define CARD_CR1H      (*(vuint8*)0x040001A1)
+#define CARD_EEPDATA   (*(vuint8*)0x040001A2)
+#define CARD_CR2       (*(vuint32*)0x040001A4)
+#define CARD_COMMAND   ((vuint8*)0x040001A8)
+
+#define CARD_DATA_RD   (*(vuint32*)0x04100010)
+
+#define CARD_1B0       (*(vuint32*)0x040001B0)
+#define CARD_1B4       (*(vuint32*)0x040001B4)
+#define CARD_1B8       (*(vuint16*)0x040001B8)
+#define CARD_1BA       (*(vuint16*)0x040001BA)
+
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+
+// CARD_CR2 register:
+
+#define CARD_ACTIVATE   (1<<31)  // when writing, get the ball rolling
+// 1<<30
+#define CARD_nRESET     (1<<29)  // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
+#define CARD_28         (1<<28)  // when writing
+#define CARD_27         (1<<27)  // when writing
+#define CARD_26         (1<<26)
+#define CARD_22         (1<<22)
+#define CARD_19         (1<<19)
+#define CARD_ENCRYPTED  (1<<14)  // when writing, this command should be encrypted
+#define CARD_13         (1<<13)  // when writing
+#define CARD_4          (1<<4)   // when writing
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
+#define CARD_DATA_READY (1<<23)  // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+void cardWriteCommand(const uint8 * command) {
+	int index;
+
+	CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+
+	for (index = 0; index < 8; index++) {
+		CARD_COMMAND[7-index] = command[index];
+	}
+}
 
 void cardWaitReady(u32 flags, u8 *command)
 {
@@ -14,6 +65,22 @@ void cardWaitReady(u32 flags, u8 *command)
 				if (!CARD_DATA_RD) ready = true;
 		} while (CARD_CR2 & CARD_BUSY);
 	} while (!ready);
+}
+
+void cardPolledTransfer(uint32 flags, uint32 * destination, uint32 length, const uint8 * command) {
+	u32 data;;
+	cardWriteCommand(command);
+	CARD_CR2 = flags;
+	uint32 * target = destination + length;
+	do {
+		// Read data if available
+		if (CARD_CR2 & CARD_DATA_READY) {
+			data=CARD_DATA_RD;
+			if (destination < target)
+				*destination = data;
+			destination++;
+		}
+	} while (CARD_CR2 & CARD_BUSY);
 }
 
 void bytecardPolledTransfer(uint32 flags, uint32 * destination, uint32 length, uint8 * command) {

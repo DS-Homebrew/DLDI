@@ -1,5 +1,6 @@
 #include <nds/ndstypes.h>
-#include <nds/card.h>
+
+#include "common.h"
 
 #include <stdio.h> //NULL
 
@@ -15,7 +16,7 @@ static inline void cardWriteCommand(){
 	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
 
 	//for(index = 0; index < 8; index++){
-	//	CARD_COMMAND[7-index] = command[index];
+	//	REG_CARD_COMMAND[7-index] = command[index];
 	//}
 }
 #endif
@@ -30,7 +31,7 @@ static inline void IPLY_cardWaitReady(u32 flags, u32 bit){
 		REG_ROMCTRL = flags;
 		do{
 			if(REG_ROMCTRL & CARD_DATA_READY)
-				if((CARD_DATA_RD>>bit)&1)ready = true;
+				if((REG_CARD_DATA_RD>>bit)&1)ready = true;
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}while(!ready);
 }
@@ -42,7 +43,7 @@ static inline void cardWaitReady(u32 flags){
 		REG_ROMCTRL = flags;
 		do{
 			if(REG_ROMCTRL & CARD_DATA_READY)
-				if(!CARD_DATA_RD)ready = true;
+				if(!REG_CARD_DATA_RD)ready = true;
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}while(!ready);
 }
@@ -56,7 +57,7 @@ static inline void _cardPolledTransfer(u32 flags, u32 *destination, u32 length){
 	do{
 		// Read data if available
 		if(REG_ROMCTRL & CARD_DATA_READY){
-			data=CARD_DATA_RD;
+			data=REG_CARD_DATA_RD;
 			if(destination < target)
 				*destination++ = data;
 		}
@@ -71,7 +72,7 @@ static inline void bytecardPolledTransfer(u32 flags, u32 *destination, u32 lengt
 	do{
 		// Read data if available
 		if(REG_ROMCTRL & CARD_DATA_READY){
-			data=CARD_DATA_RD;
+			data=REG_CARD_DATA_RD;
 			if(destination < target){
 				((u8*)destination)[0] = data & 0xff;
 				((u8*)destination)[1] = (data >> 8) & 0xff;
@@ -86,39 +87,39 @@ static inline void bytecardPolledTransfer(u32 flags, u32 *destination, u32 lengt
 #if defined(IPLY)
 /*
 static inline void IPLY_clearcmd(u32 cmd){
-	CARD_COMMAND[0]=cmd;
-	CARD_COMMAND[1]=CARD_COMMAND[2]=CARD_COMMAND[3]=CARD_COMMAND[4]=CARD_COMMAND[5]=CARD_COMMAND[6]=CARD_COMMAND[7]=0;
+	REG_CARD_COMMAND[0]=cmd;
+	REG_CARD_COMMAND[1]=REG_CARD_COMMAND[2]=REG_CARD_COMMAND[3]=REG_CARD_COMMAND[4]=REG_CARD_COMMAND[5]=REG_CARD_COMMAND[6]=REG_CARD_COMMAND[7]=0;
 }
 */
-#define IPLY_clearcmd(cmd) (CARD_COMMAND[0]=(cmd),CARD_COMMAND[1]=CARD_COMMAND[2]=CARD_COMMAND[3]=CARD_COMMAND[4]=CARD_COMMAND[5]=CARD_COMMAND[6]=CARD_COMMAND[7]=0)
+#define IPLY_clearcmd(cmd) (REG_CARD_COMMAND[0]=(cmd),REG_CARD_COMMAND[1]=REG_CARD_COMMAND[2]=REG_CARD_COMMAND[3]=REG_CARD_COMMAND[4]=REG_CARD_COMMAND[5]=REG_CARD_COMMAND[6]=REG_CARD_COMMAND[7]=0)
 #endif
 
 static inline void LogicCardRead(u32 address, u32 *destination, u32 length){
 #if defined(G003)
 	address<<=1;
-	CARD_COMMAND[0] = 0xc9;
+	REG_CARD_COMMAND[0] = 0xc9;
 #elif defined(IPLY)
 	IPLY_clearcmd(0xe1);
 	_cardPolledTransfer(0xa7180010, NULL, 0);
-	CARD_COMMAND[0] = 0x50;
+	REG_CARD_COMMAND[0] = 0x50;
 #elif defined(M3DS)
-	CARD_COMMAND[0] = 0xbd;
+	REG_CARD_COMMAND[0] = 0xbd;
 #elif defined(SCDS)
-	CARD_COMMAND[0] = 0x53;
+	REG_CARD_COMMAND[0] = 0x53;
 #else
-	CARD_COMMAND[0] = 0xb9;
+	REG_CARD_COMMAND[0] = 0xb9;
 #endif
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8)  & 0xff;
-	CARD_COMMAND[4] =  address        & 0xff;
-	CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8)  & 0xff;
+	REG_CARD_COMMAND[4] =  address        & 0xff;
+	REG_CARD_COMMAND[5] = 0;
 #if defined(IPLY)
-	CARD_COMMAND[6] = 2;
+	REG_CARD_COMMAND[6] = 2;
 #else
-	CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[6] = 0;
 #endif
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[7] = 0;
 
 #if defined(IPLY)
 	_cardPolledTransfer(0xa0180010, NULL, 0);
@@ -131,9 +132,9 @@ static inline void LogicCardRead(u32 address, u32 *destination, u32 length){
 		_cardPolledTransfer(0xa1180010, destination, length);
 #elif defined(SCDS)
 	_cardPolledTransfer(0xa7180000, NULL, 0);
-	CARD_COMMAND[0] = 0x80;
+	REG_CARD_COMMAND[0] = 0x80;
 	cardWaitReady(0xa7180000);
-	CARD_COMMAND[0] = 0x81;
+	REG_CARD_COMMAND[0] = 0x81;
 	if((u32)destination & 0x03)
 		bytecardPolledTransfer(0xa1180000, destination, length);
 	else
@@ -141,9 +142,9 @@ static inline void LogicCardRead(u32 address, u32 *destination, u32 length){
 #else
 	cardWaitReady(0xa7586000);
 #if defined(G003)
-	CARD_COMMAND[0] = 0xca;
+	REG_CARD_COMMAND[0] = 0xca;
 #else
-	CARD_COMMAND[0] = 0xba;
+	REG_CARD_COMMAND[0] = 0xba;
 #endif
 	if((u32)destination & 0x03)
 		bytecardPolledTransfer(0xa1586000, destination, length);
@@ -156,14 +157,14 @@ static inline void LogicCardRead(u32 address, u32 *destination, u32 length){
 static inline u32 ReadCardInfo(){
 	u32 ret;
 
-	CARD_COMMAND[0] = 0xb0;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[0] = 0xb0;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
 	_cardPolledTransfer(0xa7586000, &ret, 1);
 	return ret;
 }
@@ -188,7 +189,7 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 					data = ((u8*)source)[0] | (((u8*)source)[1] << 8) | (((u8*)source)[2] << 16) | (((u8*)source)[3] << 24);
 					source++;
 				}
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}else{
@@ -196,48 +197,48 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 			if(REG_ROMCTRL & CARD_DATA_READY){
 				if(source < target)
 					data = *source++;
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}
 
-	CARD_COMMAND[0] = 0x51;
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8)  & 0xff;
-	CARD_COMMAND[4] =  address        & 0xff;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 2;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[0] = 0x51;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8)  & 0xff;
+	REG_CARD_COMMAND[4] =  address        & 0xff;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 2;
+	REG_CARD_COMMAND[7] = 0;
 	_cardPolledTransfer(0xa0180010, NULL, 0);
 	IPLY_clearcmd(0xe0);
 	IPLY_cardWaitReady(0xa7180010, 21);
 #else //not IPLY
 #if defined(G003)
 	address<<=1;
-	CARD_COMMAND[0] = 0xc5;
+	REG_CARD_COMMAND[0] = 0xc5;
 #elif defined(M3DS)
-	CARD_COMMAND[0] = 0xbe;
+	REG_CARD_COMMAND[0] = 0xbe;
 #elif defined(SCDS)
-	CARD_COMMAND[0] = 0x51;
+	REG_CARD_COMMAND[0] = 0x51;
 #else
-	CARD_COMMAND[0] = 0xbb;
+	REG_CARD_COMMAND[0] = 0xbb;
 #endif
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8)  & 0xff;
-	CARD_COMMAND[4] =  address        & 0xff;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8)  & 0xff;
+	REG_CARD_COMMAND[4] =  address        & 0xff;
 
 #if defined(SCDS)
-	CARD_COMMAND[5] = 24;
-	CARD_COMMAND[6] = 1;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[5] = 24;
+	REG_CARD_COMMAND[6] = 1;
+	REG_CARD_COMMAND[7] = 0;
 	_cardPolledTransfer(0xa7180000, NULL, 0);
-	CARD_COMMAND[0] = 0x50;
+	REG_CARD_COMMAND[0] = 0x50;
 	cardWaitReady(0xa7180000);
-	CARD_COMMAND[0] = 0x52;
+	REG_CARD_COMMAND[0] = 0x52;
 	_cardPolledTransfer(0xa7180000, NULL, 0);
-	CARD_COMMAND[0] = 0x82;
+	REG_CARD_COMMAND[0] = 0x82;
 	cardWriteCommand();
 	REG_ROMCTRL = 0xe1180000;
 
@@ -250,7 +251,7 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 					data = ((u8*)source)[0] | (((u8*)source)[1] << 8) | (((u8*)source)[2] << 16) | (((u8*)source)[3] << 24);
 					source++;
 				}
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}else{
@@ -258,20 +259,20 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 			if(REG_ROMCTRL & CARD_DATA_READY){
 				if(source < target)
 					data = *source++;
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}
-	CARD_COMMAND[0] = 0x50;
+	REG_CARD_COMMAND[0] = 0x50;
 	cardWaitReady(0xa7180000);
-	CARD_COMMAND[0] = 0x56;
+	REG_CARD_COMMAND[0] = 0x56;
 	_cardPolledTransfer(0xa7180000, NULL, 0);
-	CARD_COMMAND[0] = 0x50;
+	REG_CARD_COMMAND[0] = 0x50;
 	cardWaitReady(0xa7180000);
 #else //not SCDS
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
 	cardWriteCommand();
 #if defined(M3DS)
 	REG_ROMCTRL = 0xe1586100;
@@ -287,7 +288,7 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 					data = ((u8*)source)[0] | (((u8*)source)[1] << 8) | (((u8*)source)[2] << 16) | (((u8*)source)[3] << 24);
 					source++;
 				}
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}else{
@@ -295,14 +296,14 @@ static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
 			if(REG_ROMCTRL & CARD_DATA_READY){
 				if(source < target)
 					data = *source++;
-				CARD_DATA_RD = data;
+				REG_CARD_DATA_RD = data;
 			}
 		}while(REG_ROMCTRL & CARD_BUSY);
 	}
 #if defined(G003)
-	CARD_COMMAND[0] = 0xc6;
+	REG_CARD_COMMAND[0] = 0xc6;
 #else
-	CARD_COMMAND[0] = 0xbc;
+	REG_CARD_COMMAND[0] = 0xbc;
 #endif
 	cardWaitReady(0xa7586000);
 #endif //not SCDS
@@ -315,19 +316,19 @@ bool startup(){
 	return true;
 #elif defined(SCDS)
 	u32 addr=0x7f9e0,ret;
-	CARD_COMMAND[0] = 0xb9;
-	CARD_COMMAND[1] = (addr >> 24) & 0xff;
-	CARD_COMMAND[2] = (addr >> 16) & 0xff;
-	CARD_COMMAND[3] = (addr >> 8)  & 0xff;
-	CARD_COMMAND[4] =  addr        & 0xff;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[0] = 0xb9;
+	REG_CARD_COMMAND[1] = (addr >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (addr >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (addr >> 8)  & 0xff;
+	REG_CARD_COMMAND[4] =  addr        & 0xff;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
 	_cardPolledTransfer(0xa7180000, &ret, 1);
 	if(ret!=0x32564353)return false; //SCV2
 
 	if(_io_dldi==0x53444353){ //SCDS
-		CARD_COMMAND[0] = 0x70;
+		REG_CARD_COMMAND[0] = 0x70;
 		_cardPolledTransfer(0xa7180000, &ret, 1); //it seems DSTT always return true...
 		sdhc_shift=ret?0:9;
 		*(u32*)0x023ffc24=ret?1:0;

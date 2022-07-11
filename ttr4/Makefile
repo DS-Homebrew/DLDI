@@ -16,13 +16,16 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-TARGET		:=	scds
+SCDS		?=	0
+TARGET		:=	ttr4
+ifeq ($(SCDS),1)
+	TARGET		:=	scr4
+endif
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 
-SCDS		?=	0
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -108,7 +111,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).dldi $(TARGET).elf
+	@rm -fr $(BUILD) scr4.dldi scr4.elf ttr4.dldi ttr4.elf
  
  
 #---------------------------------------------------------------------------------

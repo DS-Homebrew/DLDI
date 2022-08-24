@@ -1,11 +1,27 @@
-#include <nds/card.h>
+
 #include <nds/ndstypes.h>
 #define BYTES_PER_READ 512
 #ifndef NULL
  #define NULL 0
 #endif
 
-void cardWriteCommand(const u8 *command) {
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+void cardWriteCommand(const uint8 * command) {
 	int index;
 
 	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;

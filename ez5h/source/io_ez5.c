@@ -27,7 +27,7 @@ extern void startshow(void);
 
 //static bool  bSDHC =false;
 static bool  bSDHC =false;
-static uint32 SDadd ;//´ËÈ«¾Ö±äÁ¿Îª¹µÍ¨µÄSDµØÖ·
+static uint32 SDadd ;//æ­¤å…¨å±€å˜é‡ä¸ºæ²Ÿé€šçš„SDåœ°å€
 unsigned int ss;
 
 static unsigned short CRC16Table[ 256 ] = {
@@ -78,8 +78,8 @@ unsigned short cal_crc_CCITT(unsigned char *buff,unsigned char size){
 
 static inline void* __memcpy(void* as1, const void* as2, unsigned int n)
 {
-	u8* s1 = (u8*)as1;
-	const u8* s2 = (u8*)as2;
+	volatile u8* s1 = (u8*)as1;
+	const volatile u8* s2 = (u8*)as2;
 
 	while (n-- > 0)
 		*s1++ = *s2++;
@@ -141,7 +141,7 @@ uint32      dsCardi_Read4ByteMode(uint8 * command)
     Enable_Arm9DS();
     dsCardi_SetRomOP(command);
 
-//ÉèÖÃ¿ØÖÆ¼Ä´æÆEx40001A4
+//è®¾ç½®æ§åˆ¶å¯„å­˜å™¨0x40001A4
     CARD_CR2 = 0xA7586000 ;
 
     do{
@@ -176,7 +176,7 @@ bool SD_ReadResponse(unsigned char *ppbuf,int len)
     int counterFA01=0;
     uint8 *p = (uint8 *)(&status);
     
-    //µÈ´ıÆğÊ¼±E¾Î»ÖÃ
+    //ç­‰å¾…èµ·å§‹æ ‡å¿—ä½ç½®
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -284,7 +284,7 @@ bool SD_R16Response(unsigned char *ppbuf)
 //------------------------------------------
 bool SD_WaitOK()
 {
-    //Õâ¶Î´úÂE­¡­Ã²ËÆÎŞÓÃ
+    //ç­‰å¾…èµ·å§‹æ ‡å¿—ä½ç½®
     uint32 status ;
     WAIT_CR &= ~0x0800;
     uint8 command[8];
@@ -349,7 +349,7 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
         status = dsCardi_Read4ByteMode(command);
     }while(status & 0x00000001);
 
-//¶ÁCRC×´Ì¬
+//è¯»CRCçŠ¶æ€
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -435,7 +435,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     SD_SendCommand(24,address); 
     SD_R16Response(pres); 
 
-    //ÕâÀEÇËæ±ã¼ÓÒ»¸ö¶Á£¬½â¾öÊ±¼äÎÊÌE
+    //è¿™é‡Œæ˜¯éšä¾¿åŠ ä¸€ä¸ªè¯»ï¼Œè§£å†³æ—¶é—´é—®é¢˜
     uint8 command[8];   
     command[0]= 0x00;
     command[1]= 0x00;
@@ -461,7 +461,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
     uint32 target = 512;
     uint32 status ;
  
-    //µÈ´ıÆğÊ¼±E¾Î»ÖÃ
+    //ç­‰å¾…èµ·å§‹æ ‡å¿—ä½ç½®
     
     command[0]= 0x00;
     command[1]= 0x00;
@@ -480,7 +480,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
             return  false;
         }
     }while(status & 0x000000FF);
-    //¶Á512 ByteÊı¾İ
+    //è¯»512 Byteæ•°æ®
     WAIT_CR &= ~0x0800;
   
     command[0]= 0x00;
@@ -585,7 +585,7 @@ bool  WaitCmd_return00()
 	  uint32 temp=0;
     uint32 loop= 8;
     uint8 command[8];
-    //µÈ´ıÆğÊ¼±E¾Î»ÖÃ
+    //ç­‰å¾…èµ·å§‹æ ‡å¿—ä½ç½®
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;

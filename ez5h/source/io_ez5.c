@@ -1,11 +1,7 @@
 /* EZ5 DLDI driver */
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-
 #include "io_ez5.h"
-//#include <nds.h>
+#include "tonccpy.h"
 
 #define CARD_DATA CARD_CR2
 #define WAIT_CR  (*(vuint16*)0x4000204)
@@ -74,16 +70,6 @@ unsigned short cal_crc_CCITT(unsigned char *buff,unsigned char size){
 		crc16 = CRC16Table[ (crc16 >> 8) ^ *buff++ ] ^ (crc16 << 8);
 	}
 	return crc16;
-}
-
-static inline void* __memcpy(void* as1, const void* as2, unsigned int n)
-{
-	volatile u8* s1 = (u8*)as1;
-	const volatile u8* s2 = (u8*)as2;
-
-	while (n-- > 0)
-		*s1++ = *s2++;
-	return(as1);
 }
 
 void delay(int times)
@@ -382,7 +368,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     unsigned char pres[40] ;
 
     u8  pbuf[520] __attribute__ ((aligned (4)));
-    __memcpy(pbuf, ppbuf, 512);
+    tonccpy(pbuf, ppbuf, 512);
 	{
 		unsigned char w1,w2,w3,w4 ;
 		unsigned short b1,b2,b3,b4 ;

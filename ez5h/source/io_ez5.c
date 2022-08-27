@@ -1,7 +1,24 @@
 /* EZ5 DLDI driver */
 
-#include "io_ez5.h"
 #include "tonccpy.h"
+
+#ifndef NDS
+ #if defined ARM9 || defined ARM7
+  #define NDS
+ #endif
+#endif
+
+#ifdef NDS
+ #include <nds/ndstypes.h>
+#else
+ #include "gba_types.h"
+#endif
+
+#define BYTES_PER_READ 512
+
+#ifndef NULL
+ #define NULL 0
+#endif
 
 #define CARD_DATA CARD_CR2
 #define WAIT_CR  (*(vuint16*)0x4000204)
@@ -16,10 +33,6 @@
 #define CARD_DATA_READY (1<<23)  // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
 
 uint32 status=0,flags = 0x00586000;
-extern void SD_cal_crc16(unsigned char*p1,unsigned int s,unsigned char*p2);
-extern unsigned char cal_crc_730(unsigned char *ptr,unsigned char len);
-extern void startshow(void);
-
 
 //static bool  bSDHC =false;
 static bool  bSDHC =false;
@@ -83,12 +96,12 @@ void delay(int times)
 }
 
 //------------------------------------------------------
-void inline Enable_Arm9DS()
+void Enable_Arm9DS()
 {
     WAIT_CR &= ~0x0880;
 }
 
-void inline Enable_Arm7DS()
+void Enable_Arm7DS()
 {
     WAIT_CR |= 0x0880;
 }
@@ -538,107 +551,7 @@ bool SD_ReadMultiBlock(uint32 address , unsigned char *ppbuf, int len)
     }
     return true;    
 }
-////////////////////////////////////////////////////////////////
-/*uint32 dsCardi_SetModifyMode()
-{
-    uint8 command[8];
-    command[0]= 0x00;
-    command[1]= 0x00;
-    command[2]= 0x00;
-    command[3]= 0x00;
-    command[4]= 0x5a;
-    command[5]= 0xa5;
-    command[6]= 0xff;
-    command[7]= 0xB9;
-    return dsCardi_Read4ByteMode(command);
-}
 
-uint32 dsCardi_ModifyReturn()
-{
-    uint8 command[8];
-    command[0]= 0x00;
-    command[1]= 0x00;
-    command[2]= 0x00;
-    command[3]= 0x00;
-    command[4]= 0xaa;
-    command[5]= 0x55;
-    command[6]= 0xff;
-    command[7]= 0xB9;
-    return dsCardi_Read4ByteMode(command);
-}
-bool  WaitCmd_return00()
-{
-	  uint32 temp=0;
-    uint32 loop= 8;
-    uint8 command[8];
-    //等待起始标志位置
-    WAIT_CR &= ~0x0800;
-    command[0]= 0x00;
-    command[1]= 0x00;
-    command[2]= 0x00;
-    command[3]= 0x00;
-    command[4]= 0x00;
-    command[5]= 0x01;
-    command[6]= 0xFA;
-    command[7]= 0xB8;
-    do
-    {
-        temp = dsCardi_Read4ByteMode(command);
-        loop --;
-    }while(loop);   
-    return true;
-}
-bool SD_R2Response(unsigned char *ppbuf)
-{
-    return SD_ReadResponse(ppbuf,17);
-}
-bool SD_R3Response(unsigned char *ppbuf)
-{
-    bool ret ;
-    ret = SD_ReadResponse(ppbuf,6);
-    if(ret)
-    {
-        if((ppbuf[0]!=0x3F)&&(ppbuf[5]!=0xFF))
-            return false ;
-        return true ;
-    }
-    else
-    {
-        dsCardi_SetModifyMode();
-        dsCardi_ModifyReturn();
-    }
-    return false ;
-}
-void SD_ReadLoop()
-{
-	  uint32 temp;
-    uint32 i;
-    uint32 target = 0x80;
-    WAIT_CR &= ~0x0800;
-    uint8 command[8];
-    command[0]= 0x00;
-    command[1]= 0x00;
-    command[2]= 0x00;
-    command[3]= 0x00;
-    command[4]= 0x00;
-    command[5]= 0x00;
-    command[6]= 0xF8;
-    command[7]= 0xB8;
-    cardWriteCommand(command);
-    CARD_CR2 = 0xA1586000 ;
-    i=0;
-    do {
-        // Read data if available
-        if (CARD_CR2 & CARD_DATA_READY) {
-            if (i< target) 
-            {
-                temp = CARD_DATA_RD;
-            }
-            i++;
-        }
-    } while (CARD_CR2 & 0x80000000);
-}
-*/
 uint32 dsCardi_ReadSram(uint32 address) 
 {
 	address += 0x80000;
@@ -677,7 +590,6 @@ bool EZ5_IsInserted (void)
 //-----------------------------------------------------------------
 bool EZ5_ReadSectors (u32 sector, u8 numSecs, void* buffer)
 {
-	      //startshow();
     SD_ReadMultiBlock(sector,(u8*)buffer,numSecs);
     return true;
 }

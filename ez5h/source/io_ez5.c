@@ -20,17 +20,16 @@
  #define NULL 0
 #endif
 
-#define CARD_DATA CARD_CR2
 #define WAIT_CR  (*(vuint16*)0x4000204)
-#define CARD_CR1H      (*(vuint8*)0x040001A1)
-#define CARD_CR2       (*(vuint32*)0x040001A4)
-#define CARD_COMMAND   ((vuint8*)0x040001A8)
-#define CARD_DATA_RD   (*(vuint32*)0x04100010)
+#define REG_AUXSPICNTH      (*(vuint8*)0x040001A1)
+#define REG_ROMCTRL       (*(vuint32*)0x040001A4)
+#define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
+#define REG_CARD_DATA_RD   (*(vuint32*)0x04100010)
 
 #define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
 #define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
 #define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
-#define CARD_DATA_READY (1<<23)  // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+#define CARD_DATA_READY (1<<23)  // when reading, REG_CARD_DATA_RD has another word of data and is good to go
 
 uint32 status=0,flags = 0x00586000;
 
@@ -112,14 +111,14 @@ void dsCardi_SetRomOP(uint8 * command)
     uint32 status ,index;
     do
     {
-        status = CARD_CR2 ;
+        status = REG_ROMCTRL ;
     }while(status&0x80000000);
        
     
-    CARD_CR1H = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
+    REG_AUXSPICNTH = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
 
     for (index = 0; index < 8; index++) {
-        CARD_COMMAND[7-index] = command[index];
+        REG_CARD_COMMAND[7-index] = command[index];
     }
 }
 //---------------------------------------------------------
@@ -127,10 +126,10 @@ void    cardWriteCommand(uint8 * command)
 {
     int index;
 
-    CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
 
     for (index = 0; index < 8; index++) {
-        CARD_COMMAND[7-index] = command[index];
+        REG_CARD_COMMAND[7-index] = command[index];
     }
 }
 //------------------------------------------------------------------
@@ -141,13 +140,13 @@ uint32      dsCardi_Read4ByteMode(uint8 * command)
     dsCardi_SetRomOP(command);
 
 //设置控制寄存器0x40001A4
-    CARD_CR2 = 0xA7586000 ;
+    REG_ROMCTRL = 0xA7586000 ;
 
     do{
-        status = CARD_CR2; //0x40001a4
+        status = REG_ROMCTRL; //0x40001a4
     }while(!(status & 0x800000));
 
-    uint32 DD = CARD_DATA_RD ;
+    uint32 DD = REG_CARD_DATA_RD ;
     Enable_Arm7DS();
     return DD ;
 
@@ -331,8 +330,8 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
         command[6]= 0xF6; 
         command[7]= 0xB8;
         cardWriteCommand(command);
-        CARD_CR2 = 0xA0586000 ;
-        status = CARD_CR2; //0x40001a4
+        REG_ROMCTRL = 0xA0586000 ;
+        status = REG_ROMCTRL; //0x40001a4
     }
     do
     {
@@ -491,7 +490,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
     command[6]= 0xF7;
     command[7]= 0xB8;
     dsCardi_SetRomOP(command);
-    CARD_CR2 = 0xA1586000 ;
+    REG_ROMCTRL = 0xA1586000 ;
     if((uint32)ppbuf&0x3)
     {
         uint32 temp ;
@@ -499,10 +498,10 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
         i = 0;
         do {
         // Read data if available
-            if (CARD_CR2 & CARD_DATA_READY) {
+            if (REG_ROMCTRL & CARD_DATA_READY) {
                 if (i< target) 
                 {
-                    temp = CARD_DATA_RD;
+                    temp = REG_CARD_DATA_RD;
                     ppbuf[i] = *p;
                     ppbuf[i+1] = *(p+1);
                     ppbuf[i+2] = *(p+2);
@@ -510,21 +509,21 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
                 }
                 i+=4;
             }
-        } while (CARD_CR2 & 0x80000000);
+        } while (REG_ROMCTRL & 0x80000000);
     }
     else
     {
         i = 0;
         do {
         // Read data if available
-            if (CARD_CR2 & CARD_DATA_READY) {
+            if (REG_ROMCTRL & CARD_DATA_READY) {
                 if (i< target) 
                 {
-                    *((uint32 *)(&ppbuf[i])) = CARD_DATA_RD;
+                    *((uint32 *)(&ppbuf[i])) = REG_CARD_DATA_RD;
                 }
                 i+=4;
             }
-        } while(CARD_CR2 & 0x80000000);
+        } while(REG_ROMCTRL & 0x80000000);
     }
     
     return true ;

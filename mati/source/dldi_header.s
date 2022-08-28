@@ -1,49 +1,26 @@
+#include <nds/arm9/dldi_asm.h>
+
 @---------------------------------------------------------------------------------
-	.section ".init"
+	.section ".crt0","ax"
 @---------------------------------------------------------------------------------
+	.global _start
 	.align	4
 	.arm
-	.global _start
-#ifdef SCDS
-	.global _io_dldi
-#endif
-@---------------------------------------------------------------------------------
-.equ FEATURE_MEDIUM_CANREAD,		0x00000001
-.equ FEATURE_MEDIUM_CANWRITE,		0x00000002
-.equ FEATURE_SLOT_GBA,				0x00000010
-.equ FEATURE_SLOT_NDS,				0x00000020
-
-.equ FIX_ALL,						0x01
-.equ FIX_GLUE,						0x02
-.equ FIX_GOT,						0x04
-.equ FIX_BSS,						0x08
-
 
 @---------------------------------------------------------------------------------
 @ Driver patch file standard header -- 16 bytes
 	.word	0xBF8DA5ED		@ Magic number to identify this region
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
-	.byte	0x0B			@ 2KiB	@ Log [base:2] of the maximum size of this driver in bytes.
+	.byte	DLDI_SIZE_8KB
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
 	.byte 	0x00			@ Space allocated in the application, not important here.
 	
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
-#if defined(M3DS)
-	.asciz "M3DS DLDI based on r4tf_v2"
-#elif defined(EX4TF)
-	.asciz "EX4TF DLDI based on r4tf_v2"
-#elif defined(SCDS)
-	.asciz "SCDS SD/SDHC DLDI based on r4tf_v2"
-#elif defined(IPLY)
-	.asciz "iPlayer DLDI based on r4tf_v2"
-#elif defined(G003)
-	.asciz "GMP-Z003 DLDI based on r4tf_v2"
-#else
 	.asciz "Mati DLDI based on CCITT table"
-#endif
+	
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -58,18 +35,7 @@
 
 @---------------------------------------------------------------------------------
 @ IO_INTERFACE data -- 32 bytes
-#if defined(M3DS)
-	.ascii	"M3DS"			@ ioType
-#elif defined(EX4TF)
-	.ascii "R4TF"
-#elif defined(SCDS)
-_io_dldi:
-	.ascii "SCDS"
-#elif defined(IPLY)
-	.ascii "IPLY"
-#else
 	.ascii	"Mati"			@ ioType
-#endif
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_NDS
 	.word	MartSD_StartUp			@ 
 	.word	MartSD_IsInserted		@ 

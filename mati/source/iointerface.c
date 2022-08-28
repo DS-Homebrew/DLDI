@@ -1,12 +1,11 @@
+#include <nds/ndstypes.h>
+
 #include "io_MartSD.h"
 #include "MartCartop.h"
-#include "stdlib.h"
-#include "string.h"
 #include "tonccpy.h"
-//#include "_console.h"
 
 static bool  bSDHC =false;
-static uint32 SDadd ;
+static u32 SDadd ;
 
 void Mart_Arm9Access()
 {
@@ -18,50 +17,50 @@ void Mart_Arm7Access()
     WAIT_CR |= 0x0880;
 }
 
-void Mart_SetRomOP(uint8 * command) 
+void Mart_SetRomOP(u8 * command) 
 {
-    uint32 status ,index;
+    u32 status ,index;
     do
     {
-        status = CARD_CR2 ;
+        status = REG_ROMCTRL ;
     }while(status&0x80000000);  
     // 0-4  Not used            (always zero)
     //5    SPI Enable          (Both Bit13 and Bit15 must be set for SPI)
     //6    Transfer Ready IRQ  (0=Disable, 1=Enable) (for ROM, not for AUXSPI)
     //7    NDS Slot Enable     (0=Disable, 1=Enable) (for both ROM and AUXSPI)   
-    CARD_CR1H = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
+    REG_AUXSPICNTH = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
 
     for (index = 0; index < 8; index++) {
-        CARD_COMMAND[7-index] = command[index];
+        REG_CARD_COMMAND[7-index] = command[index];
     }
 }
 
-uint32      Mart_Read4BYTE(uint8 * command)//,uint16 wait)
+u32      Mart_Read4BYTE(u8 * command)//,u16 wait)
 {
-    uint32 status=0;
+    u32 status=0;
     Mart_Arm9Access();
     Mart_SetRomOP(command);
 
-    CARD_CR2 = 0xA7586000;// + wait ;
+    REG_ROMCTRL = 0xA7586000;// + wait ;
 
     do{
-        status = CARD_CR2;
+        status = REG_ROMCTRL;
     }while(!(status & 0x800000));
 
-    uint32 data = CARD_DATA_RD ;
+    u32 data = REG_CARD_DATA_RD ;
     Mart_Arm7Access();
     return data ;
 
 }
 
-void    cardWriteCommand(const uint8 * command)
+void    cardWriteCommand(const u8 * command)
 {
     int index;
 
-    CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
 
     for (index = 0; index < 8; index++) {
-        CARD_COMMAND[7-index] = command[index];
+        REG_CARD_COMMAND[7-index] = command[index];
     }
 }
 
@@ -73,8 +72,8 @@ bool IsSDHC()
 
 void presskey()
 {
-   // while(*(vuint16*)0x4000130 == 0x3FF);
-   // while(*(vuint16*)0x4000130 != 0x3FF);
+   // while(*(vu16*)0x4000130 == 0x3FF);
+   // while(*(vu16*)0x4000130 != 0x3FF);
 }
 /*
 //Function: CRC:X^16+X^12+X^5+1
@@ -249,9 +248,9 @@ _crc16_write_data
     bx      r14
 }
 */
-uint32  SD_SendCommand (int type , unsigned int param )
+u32  SD_SendCommand (int type , unsigned int param )
 {
-    uint8 command[8];
+    u8 command[8];
     command[0]= (param)&0xFF;
     command[1]= (param>>8)&0xFF;
     command[2]= (param>>16)&0xFF;
@@ -265,10 +264,10 @@ uint32  SD_SendCommand (int type , unsigned int param )
 
 bool SD_ReadResponse(unsigned char *ppbuf,int len)
 {
-    uint8 command[8];
-    uint32 status ;
+    u8 command[8];
+    u32 status ;
     int counterFA01=0;
-    uint8 *p = (uint8 *)(&status);
+    u8 *p = (u8 *)(&status);
     
     //�g�����������
     WAIT_CR &= ~0x0800;
@@ -382,10 +381,10 @@ bool SD_R2Response(unsigned char *ppbuf)
 
 void SD_ReadLoop()
 {//�t��
-    uint32 i;
-    uint32 target = 0x80;
+    u32 i;
+    u32 target = 0x80;
     WAIT_CR &= ~0x0800;
-    uint8 command[8];
+    u8 command[8];
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -395,25 +394,25 @@ void SD_ReadLoop()
     command[6]= 0xAA;
     command[7]= 0xB9;
     cardWriteCommand(command);
-    CARD_CR2 = 0xA1586000 ;
+    REG_ROMCTRL = 0xA1586000 ;
     i=0;
     do {
         // Read data if available
-        if (CARD_CR2 & CARD_DATA_READY) {
+        if (REG_ROMCTRL & CARD_DATA_READY) {
             if (i< target) 
             {
-                uint32 temp = CARD_DATA_RD;
+                u32 temp = REG_CARD_DATA_RD;
             }
             i++;
         }
-    } while (CARD_CR2 & 0x80000000);
+    } while (REG_ROMCTRL & 0x80000000);
 }
 
 bool wait_SD()
 {
-    uint32 status ;
+    u32 status ;
     WAIT_CR &= ~0x0800;
-    uint8 command[8];
+    u8 command[8];
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -432,9 +431,9 @@ bool wait_SD()
 bool SD_WaitOK()
 {
     //���̊���L�L�Q�e�ܚb
-    uint32 status ;
+    u32 status ;
     WAIT_CR &= ~0x0800;
-    uint8 command[8];
+    u8 command[8];
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -449,13 +448,13 @@ bool SD_WaitOK()
     return true;
 }
 
-static uint32 ss = 0 ;
+static u32 ss = 0 ;
 bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
 {
-    uint32 i=0;
-    uint8 command[8];
-    uint32 target = 512;
-    uint32 status ;
+    u32 i=0;
+    u8 command[8];
+    u32 target = 512;
+    u32 status ;
  
     //�g�����������
     
@@ -489,19 +488,19 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
     command[6]= 0xAA;
     command[7]= 0xB9;
     Mart_SetRomOP(command);
-    CARD_CR2 = 0xA1586000 ;
-    if((uint32)ppbuf&0x3)
+    REG_ROMCTRL = 0xA1586000 ;
+    if((u32)ppbuf&0x3)
     {
-        uint32 temp ;
-        uint8* p = (uint8*)&temp ;
+        u32 temp ;
+        u8* p = (u8*)&temp ;
         target = target>>2;
         i = 0;
         do {
         // Read data if available
-            if (CARD_CR2 & CARD_DATA_READY) {
+            if (REG_ROMCTRL & CARD_DATA_READY) {
                 if (i< target) 
                 {
-                    temp = CARD_DATA_RD;
+                    temp = REG_CARD_DATA_RD;
                     ppbuf[i*4] = *p;
                     ppbuf[i*4+1] = *(p+1);
                     ppbuf[i*4+2] = *(p+2);
@@ -509,21 +508,21 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
                 }
                 i+=1;
             }
-        } while (CARD_CR2 & 0x80000000);
+        } while (REG_ROMCTRL & 0x80000000);
     }
     else
     {
         i = 0;
         do {
         // Read data if available
-            if (CARD_CR2 & CARD_DATA_READY) {
+            if (REG_ROMCTRL & CARD_DATA_READY) {
                 if (i< target) 
                 {
-                    *((uint32 *)(&ppbuf[i])) = CARD_DATA_RD;
+                    *((u32 *)(&ppbuf[i])) = REG_CARD_DATA_RD;
                 }
                 i+=4;
             }
-        } while(CARD_CR2 & 0x80000000);
+        } while(REG_ROMCTRL & 0x80000000);
     }
     
     return true ;
@@ -541,10 +540,10 @@ bool SD_ReadSingleBlock(unsigned int address , unsigned char *ppbuf, int len)
 
 void SD_WriteData(unsigned char *ppbuf, int len,int wait)
 {
-    uint32 status;
+    u32 status;
     //BYTE ii;
     WAIT_CR &= ~0x0800;
-    uint8 command[8];
+    u8 command[8];
     int i=0;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -568,8 +567,8 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
         command[6]= ppbuf[i]; 
         command[7]= 0xBC;
         cardWriteCommand(command);
-        CARD_CR2 = 0xA0586000 ;
-        status = CARD_CR2; //0x40001a4
+        REG_ROMCTRL = 0xA0586000 ;
+        status = REG_ROMCTRL; //0x40001a4
     }
     do
     {
@@ -614,10 +613,10 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
 
 void SD_WriteData_slow(unsigned char *ppbuf, int len,int wait)
 {
-    uint32 status;
+    u32 status;
     //BYTE ii;
     WAIT_CR &= ~0x0800;
-    uint8 command[8];
+    u8 command[8];
     int i=0;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -641,8 +640,8 @@ void SD_WriteData_slow(unsigned char *ppbuf, int len,int wait)
          command[6]= 0xA6; 
          command[7]= 0xB9;
         cardWriteCommand(command);
-        CARD_CR2 = 0xA0586000 ;
-        status = CARD_CR2; //0x40001a4
+        REG_ROMCTRL = 0xA0586000 ;
+        status = REG_ROMCTRL; //0x40001a4
     }
     do
     {
@@ -744,7 +743,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     SD_R16Response(pres); 
 
     //����Ŗ����љ��􋿁E��������Ȗ�
-    uint8 command[8];   
+    u8 command[8];   
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -763,8 +762,8 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
 
 bool  WaitCmd_return00()
 {
-    uint32 loop= 8;
-    uint8 command[8];
+    u32 loop= 8;
+    u8 command[8];
     //�g�����������
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
@@ -777,7 +776,7 @@ bool  WaitCmd_return00()
     command[7]= 0xB9;
     do
     {
-        uint32 temp = Mart_Read4BYTE(command);
+        u32 temp = Mart_Read4BYTE(command);
         loop --;
     }while(loop);  
     return true;
@@ -985,7 +984,7 @@ bool SD_initial()
     return ret ;
 }
 
-bool SD_ReadMultiBlock(uint32 address , unsigned char *ppbuf, int len)
+bool SD_ReadMultiBlock(u32 address , unsigned char *ppbuf, int len)
 {
     int i;
     for(i=0;i<len;i++)
@@ -1090,24 +1089,3 @@ bool MartSD_StartUp(void) {
     //init sd 
     return SD_initial();
 } ;
-/*
-
-IO_INTERFACE io_martsd = {
-
-        'MA_I', 
-    FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE|FEATURE_SLOT_GBA,
-    (FN_MEDIUM_STARTUP)&MartSD_StartUp,
-    (FN_MEDIUM_ISINSERTED)&MartSD_IsInserted,
-    (FN_MEDIUM_READSECTORS)&MartSD_ReadSectors,
-    (FN_MEDIUM_WRITESECTORS)&MartSD_WriteSectors,
-    (FN_MEDIUM_CLEARSTATUS)&MartSD_ClearStatus,
-    (FN_MEDIUM_SHUTDOWN)&MartSD_Shutdown
-} ;
-
-
-LPIO_INTERFACE MartSD_GetInterface(void) 
-{
-    return &io_martsd ;
-} 
-//---------------------------------------
-*/

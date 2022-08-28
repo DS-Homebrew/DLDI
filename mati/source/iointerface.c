@@ -2,6 +2,7 @@
 #include "MartCartop.h"
 #include "stdlib.h"
 #include "string.h"
+#include "tonccpy.h"
 //#include "_console.h"
 
 static bool  bSDHC =false;
@@ -63,18 +64,6 @@ void    cardWriteCommand(const uint8 * command)
         CARD_COMMAND[7-index] = command[index];
     }
 }
-
-static inline void* __memcpy(void* as1, const void* as2, unsigned int n)
-{
-	u8* s1 = (u8*)as1;
-	const u8* s2 = (u8*)as2;
-
-	while (n-- > 0)
-		*s1++ = *s2++;
-	return(as1);
-}
-
-#define memcpy __memcpy
 
 /////
 bool IsSDHC()
@@ -281,7 +270,7 @@ bool SD_ReadResponse(unsigned char *ppbuf,int len)
     int counterFA01=0;
     uint8 *p = (uint8 *)(&status);
     
-    //‹gŠû“î•º‰Š›¼—¹›Á
+    //ï¿½gï¿½ï¿½ï¿½î•ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -392,7 +381,7 @@ bool SD_R2Response(unsigned char *ppbuf)
 }
 
 void SD_ReadLoop()
-{//t‹¿
+{//ï¿½tï¿½ï¿½
     uint32 i;
     uint32 target = 0x80;
     WAIT_CR &= ~0x0800;
@@ -442,7 +431,7 @@ bool wait_SD()
 
 bool SD_WaitOK()
 {
-    //›‚‹ÌŠø‘éLL’Q–e—Üšb
+    //ï¿½ï¿½ï¿½ÌŠï¿½ï¿½ï¿½Lï¿½Lï¿½Qï¿½eï¿½Üšb
     uint32 status ;
     WAIT_CR &= ~0x0800;
     uint8 command[8];
@@ -468,7 +457,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
     uint32 target = 512;
     uint32 status ;
  
-    //‹gŠû“î•º‰Š›¼—¹›Á
+    //ï¿½gï¿½ï¿½ï¿½î•ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     
     command[0]= 0x00;
     command[1]= 0x00;
@@ -488,7 +477,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
             return  false;
         }
     }while(status & 0x000000FF);
-    //‹¿512 Byte•ûÛ
+    //ï¿½ï¿½512 Byteï¿½ï¿½ï¿½ï¿½
     WAIT_CR &= ~0x0800;
   
     command[0]= 0x00;
@@ -596,7 +585,7 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
         status = Mart_Read4BYTE(command);
     }while(status & 0x00000001);
 
-//‹¿CRCœS–ª
+//ï¿½ï¿½CRCï¿½Sï¿½ï¿½
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -669,7 +658,7 @@ void SD_WriteData_slow(unsigned char *ppbuf, int len,int wait)
         status = Mart_Read4BYTE(command);
     }while(status & 0x00000001);
 
-//‹¿CRCœS–ª
+//ï¿½ï¿½CRCï¿½Sï¿½ï¿½
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -701,7 +690,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     unsigned char pres[40] ;
 
     u8  pbuf[520] __attribute__ ((aligned (4)));
-    memcpy(pbuf, ppbuf, 512);
+    tonccpy(pbuf, ppbuf, 512);
 	{
 		unsigned char w1,w2,w3,w4 ;
 		unsigned short b1,b2,b3,b4 ;
@@ -754,7 +743,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     SD_SendCommand(24,address); 
     SD_R16Response(pres); 
 
-    //›‚í•Å–†‰ƒÑ™¹Œô‹¿E‚ô•¯â—È–à
+    //ï¿½ï¿½ï¿½ï¿½Å–ï¿½ï¿½ï¿½ï¿½Ñ™ï¿½ï¿½ô‹¿Eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È–ï¿½
     uint8 command[8];   
     command[0]= 0x00;
     command[1]= 0x00;
@@ -776,7 +765,7 @@ bool  WaitCmd_return00()
 {
     uint32 loop= 8;
     uint8 command[8];
-    //‹gŠû“î•º‰Š›¼—¹›Á
+    //ï¿½gï¿½ï¿½ï¿½î•ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -837,7 +826,7 @@ bool SD_initial()
  
          //_consolePrintf("before cmd8 , press to continue \n");
          presskey();
-         //ŒA–lCMD8Eê‰àSDHC
+         //ï¿½Aï¿½lCMD8ï¿½Eï¿½ï¿½ï¿½SDHC
         SD_SendCommand(8,0x1AA);
         SD_R16Response(pres);
         //_consolePrintf("responde 0[%x] 1[%x] 5[%x] \n",pres[0],pres[1],pres[5]);
@@ -854,7 +843,7 @@ bool SD_initial()
         //SD_SendCommand(0,0);
         //WaitCmd_return00();//add 2008-12-16
 
-        //SDG
+        //SDï¿½G
         SD_SendCommand(55,0);   
         ret = SD_R16Response(pres);   
         if(pres[0]!=55)
@@ -919,7 +908,7 @@ bool SD_initial()
     else
     {
         //_consolePrintf("enter SDHC process \n");
-        //SDHCG
+        //SDHCï¿½G
         u32 retry = 0;
          delay(0x1000);
         SD_SendCommand(55,0);

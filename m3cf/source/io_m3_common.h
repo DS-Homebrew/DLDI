@@ -36,7 +36,7 @@
 #ifndef IO_M3_COMMON_H
 #define IO_M3_COMMON_H
 
-#include <nds/jtypes.h>
+#include <nds/ndstypes.h>
 
 // Values for changing mode
 #define M3_MODE_ROM 0x00400004

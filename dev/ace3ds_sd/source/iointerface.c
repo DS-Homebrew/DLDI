@@ -100,23 +100,6 @@ void LogicCardRead(u32 address, u32 *destination, u32 length)
 		cardPolledTransfer(0xa1586000, destination, length, command);
 }
 
-u32 ReadCardInfo()
-{
-	u8 command[8];
-	u32 ret;
-
-	command[7] = 0xb0;
-	command[6] = 0;
-	command[5] = 0;
-	command[4] = 0;
-	command[3] = 0;
-	command[2] = 0;
-	command[1] = 0;
-	command[0] = 0;
-	cardPolledTransfer(0xa7586000, &ret, 1, command);
-	return ret;
-}
-
 void LogicCardWrite(u32 address, u32 *source, u32 length)
 {
 	u8 command[8];
@@ -159,7 +142,7 @@ bool startup(void)
 
 bool isInserted(void)
 {
-	return startup();
+	return true;
 }
 
 bool readSectors(u32 sector, u32 numSectors, void* buffer)

@@ -1,171 +1,172 @@
-/*
-	EX4DS DLDI based on r4tf_v2
-
-	Copyright (c) 2010-2014 Taiju Yamada
-
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:
-
-	1. Redistributions of source code must retain the above copyright notice, this
-	list of conditions and the following disclaimer.
-
-	2. Redistributions in binary form must reproduce the above copyright notice,
-	this list of conditions and the following disclaimer in the documentation
-	and/or other materials provided with the distribution.
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-	FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-	DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-	SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-	CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-	OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 
 #include <nds/ndstypes.h>
+#define BYTES_PER_READ 512
+#ifndef NULL
+ #define NULL 0
+#endif
 
-#include "common.h"
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
 
-#define cardWriteCommand() (REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
 
-static inline void cardWaitReady(u32 flags){
-	bool ready = false;
-	do{
-		cardWriteCommand();
-		REG_ROMCTRL = flags;
-		do{
-			if(REG_ROMCTRL & CARD_DATA_READY)
-				if(!REG_CARD_DATA_RD)ready = true;
-		}while(REG_ROMCTRL & CARD_BUSY);
-	}while(!ready);
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+void cardWriteCommand(const uint8 * command) {
+	int index;
+
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+
+	for (index = 0; index < 8; index++) {
+		REG_CARD_COMMAND[7-index] = command[index];
+	}
 }
 
-static inline void _cardPolledTransfer(u32 flags, u32 *destination, u32 length){
+void cardWaitReady(u32 flags, u8 *command)
+{
+	bool ready = false;
+
+	do {
+		cardWriteCommand(command);
+		REG_ROMCTRL = flags;
+		do {
+			if (REG_ROMCTRL & CARD_DATA_READY)
+				if (!REG_CARD_DATA_RD) ready = true;
+		} while (REG_ROMCTRL & CARD_BUSY);
+	} while (!ready);
+}
+
+void cardPolledTransfer(u32 flags, u32 *destination, u32 length, const u8 *command) {
 	u32 data;
-	cardWriteCommand();
+	cardWriteCommand(command);
 	REG_ROMCTRL = flags;
-	u32 *target = destination + length;
-	do{
+	u32 * target = destination + length;
+	do {
 		// Read data if available
-		if(REG_ROMCTRL & CARD_DATA_READY){
+		if (REG_ROMCTRL & CARD_DATA_READY) {
 			data=REG_CARD_DATA_RD;
-			if(destination < target)
+			if (NULL != destination && destination < target)
 				*destination++ = data;
 		}
-	}while(REG_ROMCTRL & CARD_BUSY);
+	} while (REG_ROMCTRL & CARD_BUSY);
 }
 
-static inline void bytecardPolledTransfer(u32 flags, u32 *destination, u32 length){
-	u32 data;
-	cardWriteCommand();
+void bytecardPolledTransfer(uint32 flags, uint32 * destination, uint32 length, uint8 * command) {
+	u32 data;;
+	cardWriteCommand(command);
 	REG_ROMCTRL = flags;
-	u32 *target = destination + length;
-	do{
+	uint32 * target = destination + length;
+	do {
 		// Read data if available
-		if(REG_ROMCTRL & CARD_DATA_READY){
+		if (REG_ROMCTRL & CARD_DATA_READY) {
 			data=REG_CARD_DATA_RD;
-			if(destination < target){
-				((u8*)destination)[0] = data & 0xff;
-				((u8*)destination)[1] = (data >> 8) & 0xff;
-				((u8*)destination)[2] = (data >> 16) & 0xff;
-				((u8*)destination)[3] = (data >> 24) & 0xff;
-				destination++;
+			if (destination < target) {
+				((uint8*)destination)[0] = data & 0xff;
+				((uint8*)destination)[1] = (data >> 8) & 0xff;
+				((uint8*)destination)[2] = (data >> 16) & 0xff;
+				((uint8*)destination)[3] = (data >> 24) & 0xff;
 			}
+			destination++;
 		}
-	}while(REG_ROMCTRL & CARD_BUSY);
+	} while (REG_ROMCTRL & CARD_BUSY);
 }
 
-static inline void LogicCardRead(u32 address, u32 *destination, u32 length){
-	REG_CARD_COMMAND[0] = 0xb9;
-	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
-	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
-	REG_CARD_COMMAND[3] = (address >> 8)  & 0xff;
-	REG_CARD_COMMAND[4] =  address        & 0xff;
-	REG_CARD_COMMAND[5] = 0;
-	REG_CARD_COMMAND[7] = 0;
-	cardWaitReady(0xa7586000);
-	REG_CARD_COMMAND[0] = 0xba;
-	if((u32)destination & 0x03)
-		bytecardPolledTransfer(0xa1586000, destination, length);
+void LogicCardRead(u32 address, u32 *destination, u32 length)
+{
+	u8 command[8];
+
+	command[7] = 0xb9;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	cardWaitReady(0xa7586000, command);
+	command[7] = 0xba;
+	if ((u32)destination & 0x03)
+		bytecardPolledTransfer(0xa1586000, destination, length, command);
 	else
-		_cardPolledTransfer(0xa1586000, destination, length);
+		cardPolledTransfer(0xa1586000, destination, length, command);
 }
 
-/* unused for now, as function doesn't work on non-EX4DS
-static inline u32 ReadCardInfo(){
+u32 ReadCardInfo()
+{
+	u8 command[8];
 	u32 ret;
 
-	REG_CARD_COMMAND[0] = 0xb0;
-	REG_CARD_COMMAND[1] = 0;
-	REG_CARD_COMMAND[2] = 0;
-	REG_CARD_COMMAND[3] = 0;
-	REG_CARD_COMMAND[4] = 0;
-	REG_CARD_COMMAND[5] = 0;
-	REG_CARD_COMMAND[6] = 0;
-	REG_CARD_COMMAND[7] = 0;
-	_cardPolledTransfer(0xa7586000, &ret, 1);
+	command[7] = 0xb0;
+	command[6] = 0;
+	command[5] = 0;
+	command[4] = 0;
+	command[3] = 0;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	cardPolledTransfer(0xa7586000, &ret, 1, command);
 	return ret;
 }
-*/
 
-static inline void LogicCardWrite(u32 address, u32 *source, u32 length){
+void LogicCardWrite(u32 address, u32 *source, u32 length)
+{
+	u8 command[8];
 	u32 data = 0;
-	REG_CARD_COMMAND[0] = 0xbb;
-	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
-	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
-	REG_CARD_COMMAND[3] = (address >> 8)  & 0xff;
-	REG_CARD_COMMAND[4] =  address        & 0xff;
-	REG_CARD_COMMAND[5] = 0;
-	REG_CARD_COMMAND[6] = 0;
-	REG_CARD_COMMAND[7] = 0;
-	cardWriteCommand();
+
+	command[7] = 0xbb;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	cardWriteCommand(command);
 	REG_ROMCTRL = 0xe1586000;
-	// Write data if ready
-	u32 *target = source + length;
-	if((u32)source & 0x03){
-		do{
-			if(REG_ROMCTRL & CARD_DATA_READY){
-				if(source < target){
-					data = ((u8*)source)[0] | (((u8*)source)[1] << 8) | (((u8*)source)[2] << 16) | (((u8*)source)[3] << 24);
-					source++;
-				}
-				REG_CARD_DATA_RD = data;
+	u32 * target = source + length;
+	do {
+		// Write data if ready
+		if (REG_ROMCTRL & CARD_DATA_READY) {
+			if (source < target) {
+				if ((u32)source & 0x03)
+					data = ((uint8*)source)[0] | (((uint8*)source)[1] << 8) | (((uint8*)source)[2] << 16) | (((uint8*)source)[3] << 24);
+				else
+					data = *source;
 			}
-		}while(REG_ROMCTRL & CARD_BUSY);
-	}else{
-		do{
-			if(REG_ROMCTRL & CARD_DATA_READY){
-				if(source < target)
-					data = *source++;
-				REG_CARD_DATA_RD = data;
-			}
-		}while(REG_ROMCTRL & CARD_BUSY);
-	}
-	REG_CARD_COMMAND[0] = 0xbc;
-	cardWaitReady(0xa7586000);
+			source++;
+			REG_CARD_DATA_RD = data;
+		}
+	} while (REG_ROMCTRL & CARD_BUSY);
+	command[7] = 0xbc;
+	// some Ace3DS+ BS protection going on?
+	command[0] = command[7] ^ command[6] ^ command[5] ^ command[4] ^ command[3];
+	cardWaitReady(0xa7586000, command);
 }
 
-// DLDI frontend
-bool startup() {
-	// only works on EX4DS, which isn't what we want
-	// return ((ReadCardInfo() & 0x04) == 0x04); //lol
+bool startup(void)
+{
 	return true;
 }
 
-bool isInserted() {
-	// only works on EX4DS, which isn't what we want
-	// return ((ReadCardInfo() & 0x04) == 0x04); //lol
-	return true;
+bool isInserted(void)
+{
+	return startup();
 }
 
-// Actual disk access
-bool readSectors(u32 sector, u32 numSecs, void* buffer){
+bool readSectors(u32 sector, u32 numSectors, void* buffer)
+{
 	u32 *u32_buffer = (u32*)buffer, i;
 
-	for (i = 0; i < numSecs; i++) {
+	for (i = 0; i < numSectors; i++) {
 		LogicCardRead(sector, u32_buffer, 128);
 		sector++;
 		u32_buffer += 128;
@@ -173,10 +174,11 @@ bool readSectors(u32 sector, u32 numSecs, void* buffer){
 	return true;
 }
 
-bool writeSectors(u32 sector, u32 numSecs, void* buffer){
+bool writeSectors(u32 sector, u32 numSectors, void* buffer)
+{
 	u32 *u32_buffer = (u32*)buffer, i;
 
-	for (i = 0; i < numSecs; i++) {
+	for (i = 0; i < numSectors; i++) {
 		LogicCardWrite(sector, u32_buffer, 128);
 		sector++;
 		u32_buffer += 128;
@@ -184,10 +186,12 @@ bool writeSectors(u32 sector, u32 numSecs, void* buffer){
 	return true;
 }
 
-bool clearStatus() {
+bool clearStatus(void)
+{
 	return true;
 }
 
-bool shutdown() {
+bool shutdown(void)
+{
 	return true;
 }

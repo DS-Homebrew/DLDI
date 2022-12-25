@@ -4,6 +4,8 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 
 
 ### List of recommended DLDI drivers:
+- `ace3ds_sd`: Ace3DS+ based on r4tfv2
+    - By R4DS team, Chishm and lifehackerhansol, maintained by DS-Homebrew
 - `acek`: Acekard+
 - `ak2_sd`: Acekard 2/2.1/2i and related clones
     - By R4iDSN team, Yellow Wood Goblin and lifehackerhansol, maintained by DS-Homebrew
@@ -212,9 +214,6 @@ These drivers have working updated versions in the above list. Consider those in
 	- `ninjapassx9` is an updated version of this driver
 
 ### List of drivers being tested (in `dev`):
-- `ace3ds_sd`: Ace3DS+ based on r4tfv2
-    - By R4DS team, Chishm and Taiju Yamada
-	- Writing to the SD card is completely broken
 - `scr4`/`ttr4`: SuperCard DSONE SDHC / DSTT based on r4tfv2
     - By R4DS team, Chishm, cluny and Taiju Yamada
 	- split from `m3r4` branch

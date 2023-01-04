@@ -214,6 +214,8 @@ These drivers have working updated versions in the above list. Consider those in
 	- `ninjapassx9` is an updated version of this driver
 
 ### List of drivers being tested (in `dev`):
+- `g003`: M3i Zero GMP-Z003
+    - By R4DS team, Chishm and lifehackerhansol
 - `scr4`/`ttr4`: SuperCard DSONE SDHC / DSTT based on r4tfv2
     - By R4DS team, Chishm, cluny and Taiju Yamada
 	- split from `m3r4` branch

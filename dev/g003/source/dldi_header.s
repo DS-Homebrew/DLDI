@@ -19,7 +19,7 @@
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
-	.asciz "GMP-Z003 (lifehackerhansol)"
+	.asciz "G003DS (lifehackerhansol)"
 	
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
@@ -35,7 +35,7 @@
 
 @---------------------------------------------------------------------------------
 @ IO_INTERFACE data -- 32 bytes
-	.ascii	"R4TF"			@ ioType
+	.ascii	"G003"			@ ioType
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_NDS
 	.word	startup			@ 
 	.word	isInserted		@ 

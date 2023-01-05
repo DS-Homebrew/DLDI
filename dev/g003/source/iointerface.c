@@ -97,8 +97,28 @@ void LogicCardRead(u32 address, u32 *destination, u32 length)
 	command[7] = 0xca;
 	if ((u32)destination & 0x03)
 		bytecardPolledTransfer(0xa1586000, destination, length, command);
-	else
-		cardPolledTransfer(0xa1586000, destination, length, command);
+	else {
+		//if ((u32)destination < 0x02400000 && (u32)destination >= 0x02000000)
+			cardPolledTransfer(0xa1586000, destination, length, command);
+		/*
+		else {
+			// it's literally cardPolledTransfer but not cardPolledTransfer,
+			// and only happens if DLDI is not within EWRAM
+			cardWriteCommand(command);
+			REG_ROMCTRL = 0xa1586000;
+			u32 data;
+			u32 * target = destination + length;
+			do {
+				// Read data if available
+				if (REG_ROMCTRL & CARD_DATA_READY) {
+					data=REG_CARD_DATA_RD;
+					if (destination < target)
+						*destination++ = data;
+				}
+			} while (REG_ROMCTRL & CARD_BUSY);
+		}
+		*/
+	}
 }
 
 u32 ReadCardInfo()

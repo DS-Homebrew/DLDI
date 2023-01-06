@@ -1,53 +1,29 @@
-/*
-	iointerface.c
-	
- Copyright (c) 2006 Michael "Chishm" Chisholm
-	
- Redistribution and use in source and binary forms, with or without modification,
- are permitted provided that the following conditions are met:
 
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation and/or
-     other materials provided with the distribution.
-  3. The name of the author may not be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE
- LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-
-// When compiling for NDS, make sure NDS is defined
-#ifndef NDS
- #if defined ARM9 || defined ARM7
-  #define NDS
- #endif
-#endif
-
-#ifdef NDS
- #include <nds/ndstypes.h>
-#else
- #include "gba_types.h"
-#endif
-
+#include <nds/ndstypes.h>
 #define BYTES_PER_READ 512
-
 #ifndef NULL
  #define NULL 0
 #endif
 
-#include "common.h"
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
 
-void cardWriteCommand(const u8 *command) {
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+int is_sdhc = 0;
+
+void cardWriteCommand(const uint8 * command) {
 	int index;
 
 	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
@@ -71,168 +47,179 @@ void cardPolledTransfer(u32 flags, u32 *destination, u32 length, const u8 *comma
 		}
 	} while (REG_ROMCTRL & CARD_BUSY);
 }
-/*
+
+void bytecardPolledTransfer(uint32 flags, uint32 * destination, uint32 length, uint8 * command) {
+	u32 data;;
+	cardWriteCommand(command);
+	REG_ROMCTRL = flags;
+	uint32 * target = destination + length;
+	do {
+		// Read data if available
+		if (REG_ROMCTRL & CARD_DATA_READY) {
+			data=REG_CARD_DATA_RD;
+			if (destination < target) {
+				((uint8*)destination)[0] = data & 0xff;
+				((uint8*)destination)[1] = (data >> 8) & 0xff;
+				((uint8*)destination)[2] = (data >> 16) & 0xff;
+				((uint8*)destination)[3] = (data >> 24) & 0xff;
+			}
+			destination++;
+		}
+	} while (REG_ROMCTRL & CARD_BUSY);
+}
+
+#if defined(SCDS)
 u32 sdmode_sdhc(void) {
 	u8 command[8];
 	u32 ret;
 	u32 address=0x7fa00-0x20;
-	command[0] = 0xb0;
-	command[1] = 0;
-	command[2] = 0;
-	command[3] = address & 0xff;
-	command[4] = (address >> 8) & 0xff;
-	command[5] = (address >> 16) & 0xff;
-	command[6] = (address >> 24) & 0xff;
-	command[7] = 0x70;
+	command[7] = 0xb0;
+	command[6] = 0;
+	command[5] = 0;
+	command[4] = address & 0xff;
+	command[3] = (address >> 8) & 0xff;
+	command[2] = (address >> 16) & 0xff;
+	command[1] = (address >> 24) & 0xff;
+	command[0] = 0x70;
 	cardPolledTransfer(0xa7180000, &ret, 1, command);
 	return ret;
 }
-*/
-u32 sd_command(u8 cmd)
+#else // TTIO
+#define	sdmode_sdhc()		(*(vu32*)0x023FFC24)
+#endif
+
+void LogicCardRead(u32 address, u32 *destination, u32 length)
 {
-	REG_CARD_COMMAND[0] = cmd;
-	REG_ROMCTRL = 0xA7180000;
-	while (!(REG_ROMCTRL & CARD_DATA_READY));
-	return REG_CARD_DATA_RD;
+	u8 command[8];
+	u32 ret = 0;
+
+	command[7] = 0x53;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	cardPolledTransfer(0xa7180000, NULL, 0, command);
+	command[7] = 0x80;
+	do {
+		cardPolledTransfer(0xa7180000, &ret, 1, command);
+	} while(ret);
+	command[7] = 0x81;
+	if ((u32)destination & 0x03)
+		bytecardPolledTransfer(0xa1180000, destination, length, command);
+	else
+		cardPolledTransfer(0xa1180000, destination, length, command);
 }
 
-void sd_readpage(unsigned int addr,unsigned int dst)
+void LogicCardWrite(u32 address, u32 *source, u32 length)
 {
-	u32 data;
-	
-	REG_CARD_COMMAND[4] = (u8)(addr);
-	REG_CARD_COMMAND[3] = (u8)(addr >> 8);
-	REG_CARD_COMMAND[2] = (u8)(addr >> 16);
-	REG_CARD_COMMAND[1] = (u8)(addr >> 24);
-	sd_command(0x53);
-	
-	while(sd_command(0x80));
-	
-	REG_CARD_COMMAND[0] = 0x81;
-	REG_ROMCTRL=0xA1180000;
+	u8 command[8];
+	u32 data = 0;
+	u32 ret= 0;
+
+	command[7] = 0x51;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 24;
+	command[1] = 1;
+	command[0] = 0;
+	cardPolledTransfer(0xa7180000, NULL, 0, command);
+	command[7] = 0x50;
 	do {
+		cardPolledTransfer(0xa7180000, &ret, 1, command);
+	} while(ret);
+	command[7] = 0x52;
+	cardPolledTransfer(0xa7180000, NULL, 0, command);
+	command[7] = 0x82;
+	cardWriteCommand(command);
+	REG_ROMCTRL = 0xe1180000;
+	u32 * target = source + length;
+	do {
+		// Write data if ready
 		if (REG_ROMCTRL & CARD_DATA_READY) {
-			data=REG_CARD_DATA_RD;
-			((uint8*)dst)[0] = data & 0xff;
-			((uint8*)dst)[1] = (data >> 8) & 0xff;
-			((uint8*)dst)[2] = (data >> 16) & 0xff;
-			((uint8*)dst)[3] = (data >> 24) & 0xff;
-			dst+=4;
+			if (source < target) {
+				if ((u32)source & 0x03)
+					data = ((uint8*)source)[0] | (((uint8*)source)[1] << 8) | (((uint8*)source)[2] << 16) | (((uint8*)source)[3] << 24);
+				else
+					data = *source;
+			}
+			source++;
+			REG_CARD_DATA_RD = data;
 		}
 	} while (REG_ROMCTRL & CARD_BUSY);
-}
-
-void sd_writepage(unsigned int addr,unsigned int dst)
-{
-	REG_CARD_COMMAND[7] = 0;
-	REG_CARD_COMMAND[6] = 1;
-	REG_CARD_COMMAND[5] = 24;
-	REG_CARD_COMMAND[4] = (u8)(addr);
-	REG_CARD_COMMAND[3] = (u8)(addr>> 8);
-	REG_CARD_COMMAND[2] = (u8)(addr >> 16);
-	REG_CARD_COMMAND[1] = (u8)(addr >> 24);
-	sd_command(0x51);
-	
-	while(sd_command(0x50));
-	sd_command(0x52);
-	
-	REG_CARD_COMMAND[0] = 0x82;
-	REG_ROMCTRL = 0xE1180000;
+	command[7] = 0x50;
 	do {
-		if (REG_ROMCTRL & CARD_DATA_READY) {
-			REG_CARD_DATA_RD= ((uint8*)dst)[0] | (((uint8*)dst)[1] << 8) | (((uint8*)dst)[2] << 16) | (((uint8*)dst)[3] << 24);
-			dst+=4;
+		cardPolledTransfer(0xa7180000, &ret, 1, command);
+	} while(ret);
+	command[7] = 0x56;
+	cardPolledTransfer(0xa7180000, NULL, 0, command);
+	command[7] = 0x50;
+	do {
+		cardPolledTransfer(0xa7180000, &ret, 1, command);
+	} while(ret);
+}
+
+bool startup(void)
+{
+	if(!is_sdhc) is_sdhc = sdmode_sdhc() ? 1 : -1;
+	return true;
+}
+
+bool isInserted(void)
+{
+	return true;
+}
+
+bool readSectors(u32 sector, u32 numSectors, void* buffer)
+{
+	u32 *u32_buffer = (u32*)buffer, i;
+
+	if (is_sdhc > 0) {
+		for (i = 0; i < numSectors; i++) {
+			LogicCardRead(sector, u32_buffer, 128);
+			sector++;
+			u32_buffer += 128;
 		}
-	} while (REG_ROMCTRL & CARD_BUSY);
-	
-	while(sd_command(0x50));
-	sd_command(0x56);
-	while(sd_command(0x50));
-}
-
-/*-----------------------------------------------------------------
-readSectors
-Read "numSectors" 512-byte sized sectors from the card into "buffer", 
-starting at "sector".
-return true if it was successful, false if it failed for any reason
------------------------------------------------------------------*/
-bool readSectors (u32 sector, u32 numSectors, void* buffer) {
-	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-    int i;
-	if(sdmode_sdhc)
-    {
-		for (i=0;i<numSectors ;i++ )
-		{
-            sd_readpage(sector+i,((u32)buffer)+(i<<9));
+	} else {
+		for (i = 0; i < numSectors; i++) {
+			LogicCardRead(sector << 9, u32_buffer, 128);
+			sector++;
+			u32_buffer += 128;
 		}
-    }
-	else
-    {
-		for (i=0;i<numSectors ;i++ )
-		{
-		    sd_readpage((sector+i)<<9,((u32)buffer)+(i<<9));
+	}
+	return true;
+}
+
+bool writeSectors(u32 sector, u32 numSectors, void* buffer)
+{
+	u32 *u32_buffer = (u32*)buffer, i;
+
+	if (is_sdhc > 0) {
+		for (i = 0; i < numSectors; i++) {
+			LogicCardWrite(sector, u32_buffer, 128);
+			sector++;
+			u32_buffer += 128;
 		}
-    }
+	} else {
+		for (i = 0; i < numSectors; i++) {
+			LogicCardWrite(sector << 9, u32_buffer, 128);
+			sector++;
+			u32_buffer += 128;
+		}
+	}
 	return true;
 }
 
-/*-----------------------------------------------------------------
-writeSectors
-Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
-starting at "sector".
-return true if it was successful, false if it failed for any reason
------------------------------------------------------------------*/
-bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
-	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-    int i;
-	if(sdmode_sdhc)
-    {
-		for (i=0;i<numSectors ;i++ )
-		{
-		    sd_writepage(sector+i,((u32)buffer)+(i<<9));
-        }
-    }
-	else
-    {
-		for (i=0;i<numSectors ;i++ )
-		{
-		    sd_writepage((sector+i)<<9,((u32)buffer)+(i<<9));
-        }
-    }
+bool clearStatus(void)
+{
 	return true;
 }
 
-/*-----------------------------------------------------------------
-startUp
-Initialize the interface, geting it into an idle, ready state
-returns true if successful, otherwise returns false
------------------------------------------------------------------*/
-bool startup(void) {
-	return true;
-}
-
-/*-----------------------------------------------------------------
-isInserted
-Is a card inserted?
-return true if a card is inserted and usable
------------------------------------------------------------------*/
-bool isInserted (void) {
-	return true;
-}
-
-/*-----------------------------------------------------------------
-clearStatus
-Reset the card, clearing any status errors
-return  true if the card is idle and ready
------------------------------------------------------------------*/
-bool clearStatus (void) {
-	return true;
-}
-
-/*-----------------------------------------------------------------
-shutdown
-shutdown the card, performing any needed cleanup operations
------------------------------------------------------------------*/
-bool shutdown(void) {
+bool shutdown(void)
+{
 	return true;
 }

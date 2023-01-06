@@ -129,8 +129,6 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 - `scdssdhc1`: SuperCard DSONE SDHC v1
     - By SuperCard and cluny
 	- Source code was cleaned up
-- `scr4`: SuperCard DSONE SDHC based on r4tfv2
-    - By R4DS team and Taiju Yamada
 - `scsd`: SuperCard SD card v1
     - By Chishm
 	- Try this DLDI first before using the Moonshell version
@@ -203,7 +201,7 @@ These drivers have working updated versions in the above list. Consider those in
 	- Use `ak2_sd` instead
 - `TTCARDIOLibrary`: DSTT v1
     - Taken from TTMenu 1.18
-	- Only known DSTT DLDI to support non-SDHC drivers
+	- Only known DSTT DLDI to support non-SDHC cards
 	- Due to how DSTT functions, using this as an autoboot will break SDHC support
 	- `DSTTDLDIboyakkeyver` is recommended, but that driver has the opposite problem
 - `ttio_fwdump`: DSTT firmware dump
@@ -216,11 +214,7 @@ These drivers have working updated versions in the above list. Consider those in
 ### List of drivers being tested (in `dev`):
 - `g003`: M3i Zero GMP-Z003
     - By R4DS team, Chishm and lifehackerhansol
-- `scr4`/`ttr4`: SuperCard DSONE SDHC / DSTT based on r4tfv2
-    - By R4DS team, Chishm, cluny and Taiju Yamada
-	- split from `m3r4` branch
-	- SD/SDHC detection is flaky (outright doesn't work in DSTT's case)
-- `ttio`: DSTT decompilation
-    - By cluny and lifehackerhansol
+- `ttio`: DSTT reimplementation
+    - By R4DS team, Chishm, cluny and lifehackerhansol
     - Has the exact same issue as TTCARDIOLibrary`
 	

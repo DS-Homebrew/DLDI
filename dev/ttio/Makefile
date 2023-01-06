@@ -16,7 +16,11 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET		:=	$(shell basename $(CURDIR))
+SCDS		?=	0
+TARGET		:=	ttio
+ifeq ($(SCDS),1)
+	TARGET		:=	scds
+endif
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
@@ -27,6 +31,10 @@ INCLUDES	:=	include
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork
+
+ifeq ($(SCDS),1)
+	ARCH	+= -DSCDS
+endif
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
@@ -103,7 +111,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).dldi $(TARGET).elf
+	@rm -fr $(BUILD) *.dldi *.elf
  
  
 #---------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ include $(DEVKITARM)/ds_rules
 SCDS		?=	0
 TARGET		:=	ttio
 ifeq ($(SCDS),1)
-	TARGET		:=	scds
+	TARGET		:=	scdssdhc2
 endif
 BUILD		:=	build
 SOURCES		:=	source

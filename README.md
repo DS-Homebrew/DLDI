@@ -216,5 +216,4 @@ These drivers have working updated versions in the above list. Consider those in
     - By R4DS team, Chishm and lifehackerhansol
 - `ttio`: DSTT reimplementation
     - By R4DS team, Chishm, cluny and lifehackerhansol
-    - Has the exact same issue as TTCARDIOLibrary`
-	
+    - Hotpatching DLDI from memory is not exactly stable as there are many different implementations of DLDI patchers and it will fix BSS even when doing so is unwanted

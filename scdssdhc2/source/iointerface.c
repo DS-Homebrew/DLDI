@@ -165,6 +165,18 @@ void LogicCardWrite(u32 address, u32 *source, u32 length)
 
 bool startup(void)
 {
+	/*	
+		If is_sdhc is 0, then the BSS has been reset
+		and we need to check for SDHC again.
+		On the DSTT, if the BSS has been reset, then 
+		this is undefined behaviour, as 0x023FFC24 is 
+		volatile memory, so the only time we get reliable
+		SD/SDHC check is on boot, from the DSTT bootloader
+		So DSTT must have FIX_BSS unset in the header. 
+		That said, not all DLDI patchers care about what 
+		is shown in header, but we get there when we get 
+		there...
+	*/
 	if(!is_sdhc) is_sdhc = sdmode_sdhc() ? 1 : -1;
 	return true;
 }

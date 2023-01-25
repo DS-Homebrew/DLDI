@@ -215,7 +215,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 	cardPolledTransfer(0xa7180000, NULL, 0, command);
 
 	do {
-		// read
+		// write
 		LogicCardWrite(u32_buffer, 128);
 		u32_buffer += 128;
 		// if this is the last chunk, let card know

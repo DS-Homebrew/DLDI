@@ -88,20 +88,12 @@ u32 sdmode_sdhc(void) {
 #define	sdmode_sdhc()		(*(vu32*)0x023FFC24)
 #endif
 
-void LogicCardRead(u32 address, u32 *destination, u32 length)
+void LogicCardRead(u32 *destination, u32 length)
 {
 	u8 command[8];
+	for(int i=0;i<8;i++) command[i] = 0;
 	u32 ret = 0;
 
-	command[7] = 0x53;
-	command[6] = (address >> 24) & 0xff;
-	command[5] = (address >> 16) & 0xff;
-	command[4] = (address >> 8)  & 0xff;
-	command[3] =  address        & 0xff;
-	command[2] = 0;
-	command[1] = 0;
-	command[0] = 0;
-	cardPolledTransfer(0xa7180000, NULL, 0, command);
 	command[7] = 0x80;
 	do {
 		cardPolledTransfer(0xa7180000, &ret, 1, command);
@@ -169,21 +161,59 @@ bool isInserted(void)
 
 bool readSectors(u32 sector, u32 numSectors, void* buffer)
 {
-	u32 *u32_buffer = (u32*)buffer, i;
+	u32 *u32_buffer = (u32*)buffer;
 
-	if (is_sdhc > 0) {
-		for (i = 0; i < numSectors; i++) {
-			LogicCardRead(sector, u32_buffer, 128);
-			sector++;
-			u32_buffer += 128;
+	u8 command[8];
+	u32 ret = 0;
+
+	u32 address = is_sdhc == 1 ? sector : sector << 9;
+	bool batchread = numSectors > 1;
+
+	// init
+	command[7] = batchread ? 0x54 : 0x53;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	cardPolledTransfer(0xa7180000, NULL, 0, command);
+
+	do {
+		LogicCardRead(u32_buffer, 128);
+		u32_buffer += 128;
+		if (--numSectors && batchread) {
+			command[7] = 0x51;
+			command[6] = 0;
+			command[5] = 0;
+			command[4] = 0;
+			command[3] = 0;
+			command[2] = 0;
+			command[1] = 7;
+			command[0] = 0;
+			cardPolledTransfer(0xa7180000, NULL, 1, command);
 		}
-	} else {
-		for (i = 0; i < numSectors; i++) {
-			LogicCardRead(sector << 9, u32_buffer, 128);
-			sector++;
-			u32_buffer += 128;
-		}
+	} while (numSectors);
+
+	if (batchread) {
+		command[7] = 0x51;
+		command[6] = 0;
+		command[5] = 0;
+		command[4] = 0;
+		command[3] = 0;
+		command[2] = 12;
+		command[1] = 1;
+		command[0] = 0;
+		cardPolledTransfer(0xa7180000, NULL, 1, command);
+		command[7] = 0x50;
+		do {
+			cardPolledTransfer(0xa7180000, &ret, 1, command);
+		} while(ret);
+		command[7] = 0x52;
+		cardPolledTransfer(0xa7180000, NULL, 0, command);
 	}
+
 	return true;
 }
 
@@ -192,10 +222,10 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 	u32 *u32_buffer = (u32*)buffer;
 
 	u8 command[8];
-	u32 ret= 0;
+	u32 ret = 0;
 
 	u32 address = is_sdhc == 1 ? sector : sector << 9;
-	bool batchwrite = numSectors > 1 ? true : false;
+	bool batchwrite = numSectors > 1;
 
 	// init
 	command[7] = 0x51;

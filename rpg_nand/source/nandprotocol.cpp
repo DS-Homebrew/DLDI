@@ -39,7 +39,7 @@ void npRead2KRedundant( u32 addr, void * buffer )
 void npWritePage512( u32 addr, const void * data, u16 logicBlk, u8 * subPageCache )
 {
   addr &= ~0x1ff;
-  // Êı¾İ
+  // æ•°æ®
   static ALIGN(4) u8 writeData[528];
 
   u8 * redundatData = NULL;
@@ -51,13 +51,13 @@ void npWritePage512( u32 addr, const void * data, u16 logicBlk, u8 * subPageCach
     ioRpgMemCopy( subPageCache, data, 512 );
   }
 
-  // ¼ÆËãECC
+  // è®¡ç®—ECC
   u32 ecc1 = npMakeECC256( (u16 *)(data) );        // first 256 byte ecc
   u32 ecc2 = npMakeECC256( (u16 *)(((u8 *)data) + 256) );  // second 256 byte ecc
   u8 * pecc1 = (u8 *)&ecc1;
   u8 * pecc2 = (u8 *)&ecc2;
 
-  // redundant Êı¾İ
+  // redundant æ•°æ®
   redundatData[0] = 0xFF;
   redundatData[1] = 0xFF;
   redundatData[2] = pecc1[0];
@@ -66,8 +66,8 @@ void npWritePage512( u32 addr, const void * data, u16 logicBlk, u8 * subPageCach
   redundatData[5] = pecc2[0];
   redundatData[6] = pecc2[1];
   redundatData[7] = pecc2[2];
-  redundatData[8] = redundatData[10] = (logicBlk >> 8) & 0xFF;     // logic block µÄ¸ß8Î»
-  redundatData[9] = redundatData[11] = logicBlk & 0xFF;            // µÍ8Î»
+  redundatData[8] = redundatData[10] = (logicBlk >> 8) & 0xFF;     // logic block çš„é«˜8ä½
+  redundatData[9] = redundatData[11] = logicBlk & 0xFF;            // ä½8ä½
   redundatData[12] = redundatData[13] = redundatData[14] = redundatData[15] = 0xFF;
 
   if( NULL == subPageCache ) {
@@ -78,11 +78,11 @@ void npWritePage512( u32 addr, const void * data, u16 logicBlk, u8 * subPageCach
 void npWritePage528( u32 addr, const void * data, u16 logicBlk )
 {
   addr &= ~0x1ff;
-  // Ö±½Ó¿½±´£¬²»¼ÆËã ecc (Êµ¼ÊÓĞÁíÍâµÄÄ£¿éÒÑ¾­¼ÆËã¹ıÁË)£¬µ«ÊÇÒª¼ÆËãÂß¼­¿é
+  // ç›´æ¥æ‹·è´ï¼Œä¸è®¡ç®— ecc (å®é™…æœ‰å¦å¤–çš„æ¨¡å—å·²ç»è®¡ç®—è¿‡äº†)ï¼Œä½†æ˜¯è¦è®¡ç®—é€»è¾‘å—
   u8 * redundatData = ((u8 *)data) + 512;
 
-  redundatData[8] = redundatData[10] = (logicBlk >> 8) & 0xFF;     // logic block µÄ¸ß8Î»
-  redundatData[9] = redundatData[11] = logicBlk & 0xFF;            // µÍ8Î»
+  redundatData[8] = redundatData[10] = (logicBlk >> 8) & 0xFF;     // logic block çš„é«˜8ä½
+  redundatData[9] = redundatData[11] = logicBlk & 0xFF;            // ä½8ä½
   redundatData[12] = redundatData[13] = redundatData[14] = redundatData[15] = 0xFF;
   ioRpgWriteNand( addr, data, 528 );
 }

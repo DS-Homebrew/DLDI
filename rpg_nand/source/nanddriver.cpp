@@ -79,7 +79,7 @@ static u8 TOTAL_ZONES   = 8;
 //    BYTE   Reserved[4] = 0xff
 
 
-static ALIGN(4) u16 rpgNANDLUTable[8192];//[TOTAL_BLOCKS]; // Õâ¸ö±í¿ÉÒÔÈÃ 1G byte µÄNand²éÕÒ¶ø²»ĞèÒªÇĞ»»Çø¿é
+static ALIGN(4) u16 rpgNANDLUTable[8192];//[TOTAL_BLOCKS]; // è¿™ä¸ªè¡¨å¯ä»¥è®© 1G byte çš„NandæŸ¥æ‰¾è€Œä¸éœ€è¦åˆ‡æ¢åŒºå—
 static u16 rpgNANDLUTableBlocks = 0;
 static u16 lastFreeBlock = 0;
 static u8 lastZone = 0xff;
@@ -90,9 +90,9 @@ static bool ecc2bitError = false;
 static ALIGN(4) u8 ndGlobalRWBuffer[2112];
 
 // 2k page nand sub page address: 0=0x000  1=0x210, 2=0x420, 3=0x630, 4=0x830
-// 4 ¾ÍÊÇ 2k page µÄ redundant data
+// 4 å°±æ˜¯ 2k page çš„ redundant data
 //static const u16 subPageAddr[5] = { 0x000, 0x210, 0x420, 0x630, 0x830 };
-// µ«ÊÇ£¬·¢ËÍÖ¸ÁîµÄÊ±ºò£¬Ö»·¢ 200h ¶ÔÆëµÄµØÖ·£¬ioRpg»á×Ô¶¯´¦Àíµ½ 210h ¶ÔÆë
+// ä½†æ˜¯ï¼Œå‘é€æŒ‡ä»¤çš„æ—¶å€™ï¼Œåªå‘ 200h å¯¹é½çš„åœ°å€ï¼ŒioRpgä¼šè‡ªåŠ¨å¤„ç†åˆ° 210h å¯¹é½
 
 bool ndInitNAND()
 {
@@ -139,55 +139,55 @@ void ndBuildLUT()
   for( u16 i = 0; i < TOTAL_BLOCKS; ++i )
     rpgNANDLUTable[i] = cBLK_INIT;
 
-  ALIGN(4) u8 redundData[16];            // redundant Êı¾İµÄ´óĞ¡ÊÇ16£¬È¡Ç°12£¬×îºó4¸ö×Ö½ÚÊÇff
+  ALIGN(4) u8 redundData[16];            // redundant æ•°æ®çš„å¤§å°æ˜¯16ï¼Œå–å‰12ï¼Œæœ€å4ä¸ªå­—èŠ‚æ˜¯ff
   //memset( redundData, 0, 16 );
-  for( u16 z = 0; z < TOTAL_ZONES; ++z ) { // ±éÀú8¸özone
+  for( u16 z = 0; z < TOTAL_ZONES; ++z ) { // éå†8ä¸ªzone
     dbg_printf("zz %d ", z );
-    for( u16 b = 0; b < BLOCKS_PER_ZONE; ++b ) { // Ã¿¸özone 128 ¸öblock
+    for( u16 b = 0; b < BLOCKS_PER_ZONE; ++b ) { // æ¯ä¸ªzone 128 ä¸ªblock
 
       u16 * pTable = &rpgNANDLUTable[z*BLOCKS_PER_ZONE+b];
-      // Õâ¸öpage¾ÍÊÇÃ¿¸öblockµÄµÚÒ»¸öpage(2112) µÄµØÖ·
+      // è¿™ä¸ªpageå°±æ˜¯æ¯ä¸ªblockçš„ç¬¬ä¸€ä¸ªpage(2112) çš„åœ°å€
       u32 pageAddr = (z * BLOCKS_PER_ZONE + b) * 64 * 2048;
 
-      // ¶ÁÈ¡¸Ã2KpageµÄredundant data
+      // è¯»å–è¯¥2Kpageçš„redundant data
       npRead2KRedundant( pageAddr, redundData );
 
-      // È¡µÚÒ»¸öÉÈÇøµÄredundantÊı¾İ£¬(byte 0-15)
-      // ¼ì²é¸Ã¿éÊÇ·ñÊÇ good block
+      // å–ç¬¬ä¸€ä¸ªæ‰‡åŒºçš„redundantæ•°æ®ï¼Œ(byte 0-15)
+      // æ£€æŸ¥è¯¥å—æ˜¯å¦æ˜¯ good block
       bool isGoodBlock = (0xff == redundData[0]) && (0xff == redundData[1]);
-      if( !isGoodBlock ) { // Èç¹ûÍ·Á½¸ö×Ö½Ú²»È«ÊÇ FF
-        *pTable |= cBLK_CFG;  // ÄÇÃ´¾ÍÊÇ special block or bad block£¬ÔÚ±íÀï×öÉÏ±ê¼Ç
+      if( !isGoodBlock ) { // å¦‚æœå¤´ä¸¤ä¸ªå­—èŠ‚ä¸å…¨æ˜¯ FF
+        *pTable |= cBLK_CFG;  // é‚£ä¹ˆå°±æ˜¯ special block or bad blockï¼Œåœ¨è¡¨é‡Œåšä¸Šæ ‡è®°
       }
-      else { // ÊÇgood block
+      else { // æ˜¯good block
         u16 logicBlock = 0;
-        ((u8 *)&logicBlock)[1] = redundData[8]; // 8ÊÇ¶ÔÓ¦µÄÂß¼­¿é±àºÅµÄµÄµÚ1¸ö×Ö½Ú£¨¸ß8Î»£©
+        ((u8 *)&logicBlock)[1] = redundData[8]; // 8æ˜¯å¯¹åº”çš„é€»è¾‘å—ç¼–å·çš„çš„ç¬¬1ä¸ªå­—èŠ‚ï¼ˆé«˜8ä½ï¼‰
 
-        // ÔÙ¼ì²é¸Ã¿éÊÇ·ñÊÇ free block
-        if( 0xff != ((u8 *)&logicBlock)[1] ) { // µÚ8×Ö½Ú²»ÎªFFËµÃ÷¸Ã¿é±»Ê¹ÓÃ¹ı(¸Õ²Á³ıÍêµÄ¿éÈ«ÊÇFF)
-          ((u8 *)&logicBlock)[0] = redundData[9]; // 9ÊÇ¶ÔÓ¦µÄÂß¼­¿é±àºÅµÄµÄµÚ2¸ö×Ö½Ú(µÍ8Î»)
+        // å†æ£€æŸ¥è¯¥å—æ˜¯å¦æ˜¯ free block
+        if( 0xff != ((u8 *)&logicBlock)[1] ) { // ç¬¬8å­—èŠ‚ä¸ä¸ºFFè¯´æ˜è¯¥å—è¢«ä½¿ç”¨è¿‡(åˆšæ“¦é™¤å®Œçš„å—å…¨æ˜¯FF)
+          ((u8 *)&logicBlock)[0] = redundData[9]; // 9æ˜¯å¯¹åº”çš„é€»è¾‘å—ç¼–å·çš„çš„ç¬¬2ä¸ªå­—èŠ‚(ä½8ä½)
           if( (((u8 *)&logicBlock)[1] == redundData[10]) // check if both addresses are matched
-            && (((u8 *)&logicBlock)[0] == redundData[11]) ) { // 10/11 ÊÇ8/9 µÄ copy
-              // °Ñ logicBlock ´ú±íµÄÂß¼­¿éÔÚ±íÀïµÄ×´Ì¬È¡³öÀ´(¼Ç×¡¼ÓÉÏ z Õâ¸özoneÆ«ÒÆ)
+            && (((u8 *)&logicBlock)[0] == redundData[11]) ) { // 10/11 æ˜¯8/9 çš„ copy
+              // æŠŠ logicBlock ä»£è¡¨çš„é€»è¾‘å—åœ¨è¡¨é‡Œçš„çŠ¶æ€å–å‡ºæ¥(è®°ä½åŠ ä¸Š z è¿™ä¸ªzoneåç§»)
               u16 * pLogicBlock = &rpgNANDLUTable[z*BLOCKS_PER_ZONE+logicBlock];
               u16 blockStatus = *pLogicBlock;
-              if( blockStatus & cBLK_INIT ) {         // Èç¹û¸ÃÂß¼­¿éÔÚÓ³Éä±íÀï»¹ÊÇ³õÊ¼×´Ì¬£¨Ã»ÓĞ±»·ÖÅäÒ»¸öÎïÀí¿é£©
-                *pLogicBlock = ( blockStatus & cBLK_uMSK ) | b; // ÄÇÃ´¾Í°Ñ¸ÃÎïÀí¿éµÄÖµ b ´æÈë±íÀï£¬µ«ÊÇÒ²Òª±£Áô»µ¿éĞÅÏ¢
-                *pTable |= cBLK_USE;            // ±ê¼Ç[z*BLOCKS_PER_ZONE+b]Õâ¸öÎïÀí¿éÒÑ¾­±»Ó³Éäµ½Ä³¸öÂß¼­¿éÁË
-                                      // µ«ÊÇÕâ¸ö b ÊÇ0-1023µÄÖµ£¬²é±íÖ®ºó²»ÄÜÖ±½ÓÓÃ
-                                      // ÒªÏÈºÍ zone ×öÔËËã²ÅÄÜÓÃ
+              if( blockStatus & cBLK_INIT ) {         // å¦‚æœè¯¥é€»è¾‘å—åœ¨æ˜ å°„è¡¨é‡Œè¿˜æ˜¯åˆå§‹çŠ¶æ€ï¼ˆæ²¡æœ‰è¢«åˆ†é…ä¸€ä¸ªç‰©ç†å—ï¼‰
+                *pLogicBlock = ( blockStatus & cBLK_uMSK ) | b; // é‚£ä¹ˆå°±æŠŠè¯¥ç‰©ç†å—çš„å€¼ b å­˜å…¥è¡¨é‡Œï¼Œä½†æ˜¯ä¹Ÿè¦ä¿ç•™åå—ä¿¡æ¯
+                *pTable |= cBLK_USE;            // æ ‡è®°[z*BLOCKS_PER_ZONE+b]è¿™ä¸ªç‰©ç†å—å·²ç»è¢«æ˜ å°„åˆ°æŸä¸ªé€»è¾‘å—äº†
+                                      // ä½†æ˜¯è¿™ä¸ª b æ˜¯0-1023çš„å€¼ï¼ŒæŸ¥è¡¨ä¹‹åä¸èƒ½ç›´æ¥ç”¨
+                                      // è¦å…ˆå’Œ zone åšè¿ç®—æ‰èƒ½ç”¨
               }
               else {
-                // Èç¹û¸ÃÂß¼­¿éÒÑ¾­±»·ÖÅä¹ıÎïÀí¿é£¬
-                // ÕâËµÃ÷ÓĞÁ½¸öÎïÀí¿éµÄredundantĞÅÏ¢º¬ÓĞÍ¬ÑùµÄÂß¼­¿é£¬
-                // ÕâÊÇÓĞÎÊÌâµÄ£¬ÒªÉ¾³ı£¬µ«ÊÇÔÚÕâÀïÎÒÃÇ²»´¦Àí£¬Áô¸øpcÀ´´¦Àí
+                // å¦‚æœè¯¥é€»è¾‘å—å·²ç»è¢«åˆ†é…è¿‡ç‰©ç†å—ï¼Œ
+                // è¿™è¯´æ˜æœ‰ä¸¤ä¸ªç‰©ç†å—çš„redundantä¿¡æ¯å«æœ‰åŒæ ·çš„é€»è¾‘å—ï¼Œ
+                // è¿™æ˜¯æœ‰é—®é¢˜çš„ï¼Œè¦åˆ é™¤ï¼Œä½†æ˜¯åœ¨è¿™é‡Œæˆ‘ä»¬ä¸å¤„ç†ï¼Œç•™ç»™pcæ¥å¤„ç†
                 //nand_blk_erase(gPhyAdd);
                 //*(xbyte*)0xe100 = 0xee;
               }
-          } //else Èç¹û 8,9 ºÍ 10,11 Ïà±È£¬²»Ò»ÑùµÄ»°
+          } //else å¦‚æœ 8,9 å’Œ 10,11 ç›¸æ¯”ï¼Œä¸ä¸€æ ·çš„è¯
         }
-        //else Èç¹ûµÚ8×Ö½ÚÊÇFF£¬Ö±½ÓËµÃ÷¸ÃÎïÀí¿éÊÇ Free Block
-        //Ê²Ã´Ò²²»¹Ü£¬±£³Ö *pTable == cBLK_INIT(0x0400) Õâ¸ö×´Ì¬£¬Ö®ºósearchµÄÊ±ºò
-        //ºÍcBLK_uMSK×öÓëÔËËã±ØÈ»ÊÇ0£¬ËµÃ÷ÊÇfreeµÄ
+        //else å¦‚æœç¬¬8å­—èŠ‚æ˜¯FFï¼Œç›´æ¥è¯´æ˜è¯¥ç‰©ç†å—æ˜¯ Free Block
+        //ä»€ä¹ˆä¹Ÿä¸ç®¡ï¼Œä¿æŒ *pTable == cBLK_INIT(0x0400) è¿™ä¸ªçŠ¶æ€ï¼Œä¹‹åsearchçš„æ—¶å€™
+        //å’ŒcBLK_uMSKåšä¸è¿ç®—å¿…ç„¶æ˜¯0ï¼Œè¯´æ˜æ˜¯freeçš„
       }
     }
   }
@@ -210,61 +210,61 @@ namespace ndwr {
 
 u32 ndLog2Phy( u32 logicAddress, u32 * oldPhyAddress )
 {
-  // Âß¼­µØÖ·µÍ9Î»È¡Õû£¬È»ºóºÍ TOTAL_ZONES * 128 * 1024 * LOGIC_BLKS_PER_ZONE ×öÄ£ÔËËã
+  // é€»è¾‘åœ°å€ä½9ä½å–æ•´ï¼Œç„¶åå’Œ TOTAL_ZONES * 128 * 1024 * LOGIC_BLKS_PER_ZONE åšæ¨¡è¿ç®—
   logicAddress &= 0xFFFFFE00;
   logicAddress %= TOTAL_ZONES * 128 * 1024 * LOGIC_BLKS_PER_ZONE;
 
-  // Ëã³ö logic µØÖ·ËùÔÚµÄ zone
+  // ç®—å‡º logic åœ°å€æ‰€åœ¨çš„ zone
   u32 zone = (logicAddress / BYTES_PER_BLOCK) / LOGIC_BLKS_PER_ZONE;
-  // Ëã³ö logic µØÖ·ËùÔÚ zone µÄlogic block
+  // ç®—å‡º logic åœ°å€æ‰€åœ¨ zone çš„logic block
   u16 logicBlock = (logicAddress / BYTES_PER_BLOCK) % LOGIC_BLKS_PER_ZONE;
   ndwr::logicBlkForPageWrite = logicBlock;
-  // Ëã³ö logic µØÖ·Î²°ÍÉÏµÄÒ³µØÖ·
+  // ç®—å‡º logic åœ°å€å°¾å·´ä¸Šçš„é¡µåœ°å€
   u32 pageAddress = logicAddress & (BYTES_PER_BLOCK - 1);
-  // Ëã³ö logic block ¶ÔÓ¦µÄÎïÀíblock
+  // ç®—å‡º logic block å¯¹åº”çš„ç‰©ç†block
   u16 * pPhyBlock = &rpgNANDLUTable[zone * BLOCKS_PER_ZONE + logicBlock];
   u16 phyBlock = (*pPhyBlock) & cBLK_aMSK;
 
-  u32 phyAddress = 0xFFFFFE00;  // Õâ¸öµØÖ·ÓÃÓÚ´æ·Å¾­¹ı×ª»»ºóµÄÎïÀíµØÖ·
-  //oldPhyAddress = 0xFFFFFE00; // Õâ¸öµØÖ·ÊÇĞ´²Ù×÷Ê±£¬×ª»»ºóµÄ¾ÉÎïÀíµØÖ·£¬
-  //                                // Òª°ÑËüËùÔÚ¿éµÄÄÚÈİ¿½±´µ½ĞÂµÄÎïÀíµØÖ·ËùÔÚ¿éÖĞ£¬
-  //                                // È»ºó°ÑËüËùÔÚ¿é²Á³ı
+  u32 phyAddress = 0xFFFFFE00;  // è¿™ä¸ªåœ°å€ç”¨äºå­˜æ”¾ç»è¿‡è½¬æ¢åçš„ç‰©ç†åœ°å€
+  //oldPhyAddress = 0xFFFFFE00; // è¿™ä¸ªåœ°å€æ˜¯å†™æ“ä½œæ—¶ï¼Œè½¬æ¢åçš„æ—§ç‰©ç†åœ°å€ï¼Œ
+  //                                // è¦æŠŠå®ƒæ‰€åœ¨å—çš„å†…å®¹æ‹·è´åˆ°æ–°çš„ç‰©ç†åœ°å€æ‰€åœ¨å—ä¸­ï¼Œ
+  //                                // ç„¶åæŠŠå®ƒæ‰€åœ¨å—æ“¦é™¤
 
-  bool isRead = (NULL == oldPhyAddress); // Èô´«ÈëÁËoldPhyAddress²ÎÊı£¬ÔòËµÃ÷ÊÇĞ´²Ù×÷
-  if( isRead ) { // ¶ÁÈ¡²Ù×÷Ö»ĞèÒª¼òµ¥µÄ»»Ëã³ö¿éµØÖ·
+  bool isRead = (NULL == oldPhyAddress); // è‹¥ä¼ å…¥äº†oldPhyAddresså‚æ•°ï¼Œåˆ™è¯´æ˜æ˜¯å†™æ“ä½œ
+  if( isRead ) { // è¯»å–æ“ä½œåªéœ€è¦ç®€å•çš„æ¢ç®—å‡ºå—åœ°å€
     phyAddress = (zone * BLOCKS_PER_ZONE + phyBlock) * BYTES_PER_BLOCK + pageAddress;
-  } else { // Ğ´Èë²Ù×÷Òª²éÕÒfree block£¬È»ºóĞ´ÈëĞÂµÄ¿é£¬ÒÔÊµÏÖ×Ô¶¯Ğ´Æ½ºâ
+  } else { // å†™å…¥æ“ä½œè¦æŸ¥æ‰¾free blockï¼Œç„¶åå†™å…¥æ–°çš„å—ï¼Œä»¥å®ç°è‡ªåŠ¨å†™å¹³è¡¡
     //
     u16 freeBlock = ndSearchFreeBlock( zone, false );
-    if( phyBlock & cBLK_INIT )  // Èç¹û logicBlock »¹Ã»ÓĞ±»·ÖÅäÒ»¸ö¶ÔÓ¦µÄÎïÀí¿é(phyBlock & cBLK_INIT)
-      phyBlock = freeBlock; // ÄÇÃ´¾Í°ÑÎïÀí¿éÖ¸Ïò¸Õ²ÅÕÒµ½µÄÄÇ¸öfreeBlock
+    if( phyBlock & cBLK_INIT )  // å¦‚æœ logicBlock è¿˜æ²¡æœ‰è¢«åˆ†é…ä¸€ä¸ªå¯¹åº”çš„ç‰©ç†å—(phyBlock & cBLK_INIT)
+      phyBlock = freeBlock; // é‚£ä¹ˆå°±æŠŠç‰©ç†å—æŒ‡å‘åˆšæ‰æ‰¾åˆ°çš„é‚£ä¸ªfreeBlock
 
-    /* ÒÔÏÂ´úÂë±» ndWritePages() ÖĞµÄ²¿·Ö´úÂëÌæ´ú
-    //bNeedErase = (freeBlock != phyBlock);  // Èç¹ûÕÒ³öÀ´µÄfreeBlockºÍËã³öÀ´µÄphyBlockÊÇÍ¬Ò»¸ö£¬
-                        // ÄÇĞ´ÍêÒÔºó¾Í²»Òª²Á³ı£¬Õâ¸ö¡°Ò»Ñù¡±·¢ÉúµÄ»úÂÊ»ú»áÓ¦¸Ã±È½ÏĞ¡£¬µ«ÊÇ·¢ÉúÁË¾ÍÊÇ´óBUG
+    /* ä»¥ä¸‹ä»£ç è¢« ndWritePages() ä¸­çš„éƒ¨åˆ†ä»£ç æ›¿ä»£
+    //bNeedErase = (freeBlock != phyBlock);  // å¦‚æœæ‰¾å‡ºæ¥çš„freeBlockå’Œç®—å‡ºæ¥çš„phyBlockæ˜¯åŒä¸€ä¸ªï¼Œ
+                        // é‚£å†™å®Œä»¥åå°±ä¸è¦æ“¦é™¤ï¼Œè¿™ä¸ªâ€œä¸€æ ·â€å‘ç”Ÿçš„æœºç‡æœºä¼šåº”è¯¥æ¯”è¾ƒå°ï¼Œä½†æ˜¯å‘ç”Ÿäº†å°±æ˜¯å¤§BUG
 
     */
     u16 * p = &rpgNANDLUTable[zone*BLOCKS_PER_ZONE+phyBlock];
-    srcIsFree = !(*p & cBLK_uMSK);  // Èç¹ûphyBlock»¹Ã»ÓĞ±»·ÖÅä¹ı±àºÅ£¬ËµÃ÷src¿é±¾Éí¾ÍÊÇÒ»¸öĞÂ¿é
-                    // ¼ÇÂ¼ÔÚlogicBlkForPageWriteÖĞµÄ±àºÅ
-                    // ÉÔºò×÷¿½±´²Ù×÷µÄÊ±ºò¾Í±»»áÓÃµ½
+    srcIsFree = !(*p & cBLK_uMSK);  // å¦‚æœphyBlockè¿˜æ²¡æœ‰è¢«åˆ†é…è¿‡ç¼–å·ï¼Œè¯´æ˜srcå—æœ¬èº«å°±æ˜¯ä¸€ä¸ªæ–°å—
+                    // è®°å½•åœ¨logicBlkForPageWriteä¸­çš„ç¼–å·
+                    // ç¨å€™ä½œæ‹·è´æ“ä½œçš„æ—¶å€™å°±è¢«ä¼šç”¨åˆ°
 
-    *p &= (~cBLK_USE);      // °Ñ phyBlock ¶ÔÓ¦µÄ±íÄÚÊı¾İ¸Ä³É¡°Î´±»Ó³Éäµ½Âß¼­¿é¡±
+    *p &= (~cBLK_USE);      // æŠŠ phyBlock å¯¹åº”çš„è¡¨å†…æ•°æ®æ”¹æˆâ€œæœªè¢«æ˜ å°„åˆ°é€»è¾‘å—â€
 
-    // ¸Õ²ÅÕÒ³öÀ´µÄfreeBlock±ê¼ÇÎª USED£¬
-    // Èç¹ûphyBlockÒÑ¾­µÈÓÚfreeBlock£¬ÄÇÃ´ÉÏÃæÈıĞĞ´úÂëµÄ½á¹û£¬ÔÚÕâÀïÓÖ±ä»ØÀ´ÁË
+    // åˆšæ‰æ‰¾å‡ºæ¥çš„freeBlockæ ‡è®°ä¸º USEDï¼Œ
+    // å¦‚æœphyBlockå·²ç»ç­‰äºfreeBlockï¼Œé‚£ä¹ˆä¸Šé¢ä¸‰è¡Œä»£ç çš„ç»“æœï¼Œåœ¨è¿™é‡Œåˆå˜å›æ¥äº†
         rpgNANDLUTable[zone*BLOCKS_PER_ZONE+freeBlock] |= cBLK_USE;
-    // ¸üĞÂ LBA ±í£¬°Ñ×îÔçÄÇ¸öphyBlockµÄÖµÌæ»»ÎªĞÂµÄfreeBLock´ú±íµÄÖµ
+    // æ›´æ–° LBA è¡¨ï¼ŒæŠŠæœ€æ—©é‚£ä¸ªphyBlockçš„å€¼æ›¿æ¢ä¸ºæ–°çš„freeBLockä»£è¡¨çš„å€¼
         *pPhyBlock = (*pPhyBlock & cBLK_uMSK) | freeBlock;
 
-    // ×îÖÕÎïÀíµØÖ·ÊÇ£ºÒÔĞÂµÄfreeBlockÎª»ù´¡µÄµØÖ·
+    // æœ€ç»ˆç‰©ç†åœ°å€æ˜¯ï¼šä»¥æ–°çš„freeBlockä¸ºåŸºç¡€çš„åœ°å€
     phyAddress = (zone * BLOCKS_PER_ZONE + freeBlock) * BYTES_PER_BLOCK + pageAddress;
 
-    // Ö®Ç°µÄÎïÀíµØÖ·ÊÇ£ºÒÔ±»freeblockÌæ»»µôµÄÄÇ¸öÔ­À´µÄblockÎª»ù´¡µÄµØÖ·
+    // ä¹‹å‰çš„ç‰©ç†åœ°å€æ˜¯ï¼šä»¥è¢«freeblockæ›¿æ¢æ‰çš„é‚£ä¸ªåŸæ¥çš„blockä¸ºåŸºç¡€çš„åœ°å€
     *oldPhyAddress = (zone * BLOCKS_PER_ZONE + phyBlock) * BYTES_PER_BLOCK + pageAddress;
 
-    // ndLog2Phy µÄµ÷ÓÃÕß¸ºÔğ½« oldPhyAddress ËùÔÚµÄ¿éÖĞÆäËûÉÈÇø¿½±´µ½ phyAddress ËùÔÚ¿éÖĞ£¬
-    // ²¢²Á³ı oldPhyAddress ËùÔÚÉÈÇø
+    // ndLog2Phy çš„è°ƒç”¨è€…è´Ÿè´£å°† oldPhyAddress æ‰€åœ¨çš„å—ä¸­å…¶ä»–æ‰‡åŒºæ‹·è´åˆ° phyAddress æ‰€åœ¨å—ä¸­ï¼Œ
+    // å¹¶æ“¦é™¤ oldPhyAddress æ‰€åœ¨æ‰‡åŒº
   }
   return phyAddress;
 }
@@ -276,7 +276,7 @@ u16 ndSearchFreeBlock( u8 zone, bool markFreeBlkToCfg )
     lastZone = zone;
   }
 
-  u16 i = lastFreeBlock + 1; // i ±íÊ¾ÎïÀíblock£¬Õâ¸öºÜÖØÒª
+  u16 i = lastFreeBlock + 1; // i è¡¨ç¤ºç‰©ç†blockï¼Œè¿™ä¸ªå¾ˆé‡è¦
   if( i >= 1024 )
     i = 0;
   while( true )
@@ -390,7 +390,7 @@ void ndWritePages( u32 addr, u32 pageCount, const u8 * data )
     ndwr::blockAddr = ndwr::phyAddr & (~0x1FFFF);
     //////
 
-    // Èç¹ûpage²»ÊÇ´Ó0¿ªÊ¼£¬¿½±´ oldPhyAddr µÄÇ°°ë¿é£¨0 to page-1£©µ½ĞÂ¿é
+    // å¦‚æœpageä¸æ˜¯ä»0å¼€å§‹ï¼Œæ‹·è´ oldPhyAddr çš„å‰åŠå—ï¼ˆ0 to page-1ï¼‰åˆ°æ–°å—
     if( ndwr::page > 0 )
       ndNandMove( ndwr::oldBlockAddr, ndwr::blockAddr, ndwr::page );
 
@@ -408,7 +408,7 @@ void ndWritePages( u32 addr, u32 pageCount, const u8 * data )
   u8 writeSubPages = subPageCount;
 
   u8 * pWriteBuffer = ndGlobalRWBuffer + 528 * (4 - subPageCount);
-  // Ğ´Èë addr Ö¸¶¨µÄÉÈÇø
+  // å†™å…¥ addr æŒ‡å®šçš„æ‰‡åŒº
   for( u32 i = 0; i < pageCount; ++i ) {
     //dbg_printf("subPageCount %d\n", subPageCount );
     npWritePage512( ndwr::phyAddr, data, ndwr::logicBlkForPageWrite, pWriteBuffer );
@@ -434,16 +434,16 @@ void ndWritePages( u32 addr, u32 pageCount, const u8 * data )
       if( !(ndwr::phyAddr & 0x1FFFF) ) { // cross block, at here remainPageCount should be 0
         if( ndwr::oldBlockAddr != ndwr::blockAddr )
           npEraseBlock( ndwr::oldBlockAddr );
-        ndwr::phyAddr = ndLog2Phy( addr, &ndwr::oldPhyAddr ); // ÖØĞÂ¼ÆËãÎïÀíµØÖ·
+        ndwr::phyAddr = ndLog2Phy( addr, &ndwr::oldPhyAddr ); // é‡æ–°è®¡ç®—ç‰©ç†åœ°å€
         ndwr::page = (ndwr::oldPhyAddr & 0x1FFFF) / 512;
         ndwr::oldBlockAddr = ndwr::oldPhyAddr & (~0x1FFFF);
         ndwr::blockAddr = ndwr::phyAddr & (~0x1FFFF);
-        ndwr::remainPageCount = (u8)(64 * 4);                 // Èç¹û¸ÕºÃ»»Ò³¾Í½áÊøÁË£¬ÏÂÃæ¾Í²»Òª¿½±´
+        ndwr::remainPageCount = (u8)(64 * 4);                 // å¦‚æœåˆšå¥½æ¢é¡µå°±ç»“æŸäº†ï¼Œä¸‹é¢å°±ä¸è¦æ‹·è´
       }
     }
   }
 
-  // bug ¾ÍÔÚÓÚ´ËºÍÔÚÓÚ nds ÆÁÄ»ÉÏ£¬Èç¹û 1520000 µ½ 1539000 Ò²¶¼ÊÇ°×µÄ»°£¬È·Êµ¾ÍÓĞÎÊÌâÁË
+  // bug å°±åœ¨äºæ­¤å’Œåœ¨äº nds å±å¹•ä¸Šï¼Œå¦‚æœ 1520000 åˆ° 1539000 ä¹Ÿéƒ½æ˜¯ç™½çš„è¯ï¼Œç¡®å®å°±æœ‰é—®é¢˜äº†
   if( 0 == ndwr::remainPageCount ) {
     dbg_printf("ndWritePages() remain 0, ERASE old block ");
     dbg_printf("new%08x old%08x\n", ndwr::phyAddr, ndwr::oldPhyAddr );
@@ -456,7 +456,7 @@ void ndWritePages( u32 addr, u32 pageCount, const u8 * data )
 
 void ndFinishPartialCopy()
 {
-  // ¿½±´ oldPhyAddr + pageCount µÄºó°ë¿éµ½ĞÂ¿é
+  // æ‹·è´ oldPhyAddr + pageCount çš„ååŠå—åˆ°æ–°å—
   if( 0 == ndwr::remainPageCount ) {
     if( ndwr::oldBlockAddr != ndwr::blockAddr )
       dbg_printf("note: dont mistaken erase\n");
@@ -469,9 +469,9 @@ void ndFinishPartialCopy()
       ndwr::blockAddr + (64 * 4 - ndwr::remainPageCount) * 512,
       ndwr::remainPageCount & 0xFF );
 
-  // Èç¹û oldPhyAddr != phyAddr
-  // ÄÇÃ´¾Í²Á³ı oldPhyAddr
-  // ·ñÔò¼ÈÈ»ÊÇÍ¬Ò»¸öblock£¬¾Í²»²Á³ıÁË
+  // å¦‚æœ oldPhyAddr != phyAddr
+  // é‚£ä¹ˆå°±æ“¦é™¤ oldPhyAddr
+  // å¦åˆ™æ—¢ç„¶æ˜¯åŒä¸€ä¸ªblockï¼Œå°±ä¸æ“¦é™¤äº†
   if( ndwr::oldBlockAddr != ndwr::blockAddr )
     npEraseBlock( ndwr::oldBlockAddr );
 
@@ -480,7 +480,7 @@ void ndFinishPartialCopy()
   dbg_printf("FPC: (%08x to %08x)\n", ndwr::oldBlockAddr, ndwr::blockAddr );
 }
 
-// 512 Îªµ¥Î»
+// 512 ä¸ºå•ä½
 void ndCopyPages( u32 srcAddr, u32 destAddr, u8 pageCount )
 {
   ALIGN(4) u8 readEcc[6];
@@ -538,7 +538,7 @@ void ndCopyPages( u32 srcAddr, u32 destAddr, u8 pageCount )
       /*debug*/}
       /*debug*/dbg_printf("\n");
       /*debug*/}
-      // ¿½±´µ½ĞÂ¿é£¬¾É¿éeraseµô£¬ĞÂ¿éÔÚ±íÀïÈ¡´ú¾É¿éµÄid£¬Ä¿Ç°ÔİÊ±Ö»¾À´íÒ»ÏÂ
+      // æ‹·è´åˆ°æ–°å—ï¼Œæ—§å—eraseæ‰ï¼Œæ–°å—åœ¨è¡¨é‡Œå–ä»£æ—§å—çš„idï¼Œç›®å‰æš‚æ—¶åªçº é”™ä¸€ä¸‹
       if( !npEccCorrectData( ndGlobalRWBuffer, nandEcc, readEcc ) ) {
         ecc2bitError = true;
         /*debug*/{
@@ -571,8 +571,8 @@ void ndCopyPages( u32 srcAddr, u32 destAddr, u8 pageCount )
 
 void ndNandMove( u32 srcAddr, u32 destAddr, u8 pageCount )
 {
-  // Èç¹ûµØÖ·²»ÊÇ´Ó block start ¿ªÊ¼
-  // ÄÇÃ´Òª¼ÆËãÏÖÔÚÊÇµÚ¼¸¸ö2k pageµÄµÚ¼¸¸ö512 sub page£¬È»ºóÓÃ ndCopyPages À´Íê³É
+  // å¦‚æœåœ°å€ä¸æ˜¯ä» block start å¼€å§‹
+  // é‚£ä¹ˆè¦è®¡ç®—ç°åœ¨æ˜¯ç¬¬å‡ ä¸ª2k pageçš„ç¬¬å‡ ä¸ª512 sub pageï¼Œç„¶åç”¨ ndCopyPages æ¥å®Œæˆ
   //
 
   u8 subPageCount = (2048 - (srcAddr & 0x7FF)) / 512;
@@ -586,9 +586,9 @@ void ndNandMove( u32 srcAddr, u32 destAddr, u8 pageCount )
   }
 
   u8 _2kPageCount = pageCount / 4;
-  // !(srcAddr & 0x1ffff) ±íÊ¾ block µÄÆğÊ¼µØÖ·
-  // Èç¹û´ÓÆğÊ¼µØÖ·¿ªÊ¼¿½±´£¬ÓĞ¿ÉÄÜsrcÊÇfreeblock£¬Òª¼ì²é
-  // Èç¹ûsrcÕæµÄÊÇ freeblock£¬ÄÇÃ´ÒªÏÈÓÃndCopyPages¿½±´¿ªÍ·µÄ4¸ö512page£¬ÒÔĞ´Èëlogicblk±àºÅ
+  // !(srcAddr & 0x1ffff) è¡¨ç¤º block çš„èµ·å§‹åœ°å€
+  // å¦‚æœä»èµ·å§‹åœ°å€å¼€å§‹æ‹·è´ï¼Œæœ‰å¯èƒ½srcæ˜¯freeblockï¼Œè¦æ£€æŸ¥
+  // å¦‚æœsrcçœŸçš„æ˜¯ freeblockï¼Œé‚£ä¹ˆè¦å…ˆç”¨ndCopyPagesæ‹·è´å¼€å¤´çš„4ä¸ª512pageï¼Œä»¥å†™å…¥logicblkç¼–å·
   if( !(srcAddr & 0x1ffff) && _2kPageCount && srcIsFree ) {
     ndCopyPages( srcAddr, destAddr, 4 );
     pageCount -= 4;
@@ -611,7 +611,7 @@ void ndNandMove( u32 srcAddr, u32 destAddr, u8 pageCount )
     destAddr += 2048;
   }
 
-  // Èç¹ûcopyÁËÕûÊı¸ö 2k page Ö®ºó£¬»¹Ê£ÓĞ 512 page£¬Ò²ÒªÓÃ ndCopyPages À´Íê³É
+  // å¦‚æœcopyäº†æ•´æ•°ä¸ª 2k page ä¹‹åï¼Œè¿˜å‰©æœ‰ 512 pageï¼Œä¹Ÿè¦ç”¨ ndCopyPages æ¥å®Œæˆ
   u8 remainSubPageCount = (pageCount & 3);
   if( remainSubPageCount )
     ndCopyPages( srcAddr, destAddr, remainSubPageCount );
@@ -632,7 +632,7 @@ bool ndCheckError()
 
 void ndReplaceBlock( u32 oldBlockAddress )
 {
-  // Èç¹ûÕâ¸öÎïÀí¿é·´¸´Á½´Î³öÏÖ ecc ´íÎó£¬ÄÇÃ´Ó¦¸Ã±»±ê¼ÇÎª»µ¿é
+  // å¦‚æœè¿™ä¸ªç‰©ç†å—åå¤ä¸¤æ¬¡å‡ºç° ecc é”™è¯¯ï¼Œé‚£ä¹ˆåº”è¯¥è¢«æ ‡è®°ä¸ºåå—
   oldBlockAddress &= (~0x1ffff);
 
   u16 block = (oldBlockAddress >> 17);

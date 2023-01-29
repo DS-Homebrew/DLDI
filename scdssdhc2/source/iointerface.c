@@ -33,6 +33,20 @@ void cardWriteCommand(const uint8 * command) {
 	}
 }
 
+void cardWaitReady(u32 flags, u8 *command)
+{
+	bool ready = false;
+
+	do {
+		cardWriteCommand(command);
+		REG_ROMCTRL = flags;
+		do {
+			if (REG_ROMCTRL & CARD_DATA_READY)
+				if (!REG_CARD_DATA_RD) ready = true;
+		} while (REG_ROMCTRL & CARD_BUSY);
+	} while (!ready);
+}
+
 void cardPolledTransfer(u32 flags, u32 *destination, u32 length, const u8 *command) {
 	u32 data;
 	cardWriteCommand(command);
@@ -110,7 +124,6 @@ void LogicCardWrite(u32 *source, u32 length)
 	u8 command[8];
 	for(int i=0;i<8;i++) command[i] = 0;
 	u32 data = 0;
-	u32 ret = 0;
 
 	REG_CARD_COMMAND[0] = 0x82;
 	REG_ROMCTRL = 0xe1180000;
@@ -131,9 +144,7 @@ void LogicCardWrite(u32 *source, u32 length)
 
 	// wait until complete
 	command[7] = 0x50;
-	do {
-		cardPolledTransfer(0xa7180000, &ret, 1, command);
-	} while(ret);
+	cardWaitReady(0xa7180000, command);
 }
 
 bool startup(void)
@@ -164,7 +175,6 @@ bool readSectors(u32 sector, u32 numSectors, void* buffer)
 	u32 *u32_buffer = (u32*)buffer;
 
 	u8 command[8];
-	u32 ret = 0;
 
 	u32 address = is_sdhc == 1 ? sector : sector << 9;
 	bool batchread = numSectors > 1;
@@ -207,9 +217,7 @@ bool readSectors(u32 sector, u32 numSectors, void* buffer)
 		command[0] = 0;
 		cardPolledTransfer(0xa7180000, NULL, 1, command);
 		command[7] = 0x50;
-		do {
-			cardPolledTransfer(0xa7180000, &ret, 1, command);
-		} while(ret);
+		cardWaitReady(0xa7180000, command);
 		command[7] = 0x52;
 		cardPolledTransfer(0xa7180000, NULL, 0, command);
 	}
@@ -222,7 +230,6 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 	u32 *u32_buffer = (u32*)buffer;
 
 	u8 command[8];
-	u32 ret = 0;
 
 	u32 address = is_sdhc == 1 ? sector : sector << 9;
 	bool batchwrite = numSectors > 1;
@@ -238,9 +245,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 	command[0] = 0;
 	cardPolledTransfer(0xa7180000, NULL, 0, command);
 	command[7] = 0x50;
-	do {
-		cardPolledTransfer(0xa7180000, &ret, 1, command);
-	} while(ret);
+	cardWaitReady(0xa7180000, command);
 	command[7] = 0x52;
 	cardPolledTransfer(0xa7180000, NULL, 0, command);
 
@@ -261,10 +266,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 			command[0] = 0;
 			cardPolledTransfer(0xa7180000, NULL, 0, command);
 			command[7] = 0x50;
-			do {
-				cardPolledTransfer(0xa7180000, &ret, 1, command);
-			} while(ret);
-			ret = 0;
+			cardWaitReady(0xa7180000, command);
 			command[7] = 0x52;
 			cardPolledTransfer(0xa7180000, NULL, 0, command);
 		}
@@ -272,9 +274,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 		command[7] = 0x56;
 		cardPolledTransfer(0xa7180000, NULL, 0, command);
 		command[7] = 0x50;
-		do {
-			cardPolledTransfer(0xa7180000, &ret, 1, command);
-		} while(ret);
+		cardWaitReady(0xa7180000, command);
 	} while (numSectors);
 
 	return true;

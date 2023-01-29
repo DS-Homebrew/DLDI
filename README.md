@@ -221,3 +221,8 @@ These drivers have working updated versions in the above list. Consider those in
 ### List of drivers being tested (in `dev`):
 - `g003`: M3i Zero GMP-Z003
     - By R4DS team, Chishm and lifehackerhansol
+- `scds3`: SuperCard DSONE (non-SDHC) v4
+    - Authors:
+        - R4DS team, Chishm (framework)
+        - SuperCard, cluny: initial DSONE SDHC driver code
+        - lifehackerhansol: port to r4tfv2, batch read

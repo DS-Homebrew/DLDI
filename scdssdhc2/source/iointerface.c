@@ -82,6 +82,16 @@ void bytecardPolledTransfer(uint32 flags, uint32 * destination, uint32 length, u
 	} while (REG_ROMCTRL & CARD_BUSY);
 }
 
+u32 cardWaitReply(u8 *command)
+{
+	u32 ret;
+	command[7] = 0x50;
+	cardWaitReady(0xa7180000, command);
+	command[7] = 0x52;
+	cardPolledTransfer(0xa7180000, &ret, 1, command);
+	return ret;
+}
+
 #if defined(SCDS)
 u32 sdmode_sdhc(void) {
 	u8 command[8];
@@ -216,10 +226,7 @@ bool readSectors(u32 sector, u32 numSectors, void* buffer)
 		command[1] = 1;
 		command[0] = 0;
 		cardPolledTransfer(0xa7180000, NULL, 1, command);
-		command[7] = 0x50;
-		cardWaitReady(0xa7180000, command);
-		command[7] = 0x52;
-		cardPolledTransfer(0xa7180000, NULL, 0, command);
+		cardWaitReply(command);
 	}
 
 	return true;
@@ -244,10 +251,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 	command[1] = 1;
 	command[0] = 0;
 	cardPolledTransfer(0xa7180000, NULL, 0, command);
-	command[7] = 0x50;
-	cardWaitReady(0xa7180000, command);
-	command[7] = 0x52;
-	cardPolledTransfer(0xa7180000, NULL, 0, command);
+	cardWaitReply(command);
 
 	do {
 		// write
@@ -265,10 +269,7 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 			command[1] = 1;
 			command[0] = 0;
 			cardPolledTransfer(0xa7180000, NULL, 0, command);
-			command[7] = 0x50;
-			cardWaitReady(0xa7180000, command);
-			command[7] = 0x52;
-			cardPolledTransfer(0xa7180000, NULL, 0, command);
+			cardWaitReply(command);
 		}
 		// finish
 		command[7] = 0x56;

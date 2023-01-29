@@ -128,7 +128,7 @@ This is both an archive and a development repository for Nintendo DS flash cartr
     - Authors:
         - R4DS team, Chishm (framework)
         - SuperCard, cluny: initial DSONE SDHC driver code
-        - lifehackerhansol: port to r4tfv2, DSTT SDHC check
+        - lifehackerhansol: port to r4tfv2, DSTT SDHC check, batch read/write
     - `ttio` has working SD/SDHC check (needs FIX_BSS unset in DLDI header)
 
 ### List of archived DLDI drivers:

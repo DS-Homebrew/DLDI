@@ -34,7 +34,7 @@
 #endif
 
 #ifdef NDS
- #include <nds/jtypes.h>
+ #include <nds/ndstypes.h>
 #else
  #include "gba_types.h"
 #endif
@@ -47,42 +47,20 @@
 
 
 // Card bus
-#define CARD_CR1       (*(vu16*)0x040001A0)
-#define CARD_CR1H      (*(vu8*)0x040001A1)
-#define CARD_EEPDATA   (*(vu8*)0x040001A2)
-#define CARD_CR2       (*(vu32*)0x040001A4)
-#define CARD_COMMAND   ((vu8*)0x040001A8)
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
 
-#define CARD_DATA_RD   (*(vu32*)0x04100010)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
 
-#define CARD_1B0       (*(vu32*)0x040001B0)  
-#define CARD_1B4       (*(vu32*)0x040001B4)
-#define CARD_1B8       (*(vu16*)0x040001B8)
-#define CARD_1BA       (*(vu16*)0x040001BA)
-
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
 
 #define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
 #define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
 
-
-// CARD_CR2 register:
-
-#define CARD_ACTIVATE   (1<<31)  // when writing, get the ball rolling
-// 1<<30
-#define CARD_nRESET     (1<<29)  // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
-#define CARD_28         (1<<28)  // when writing
-#define CARD_27         (1<<27)  // when writing
-#define CARD_26         (1<<26)
-#define CARD_22         (1<<22)
-#define CARD_19         (1<<19)
-#define CARD_ENCRYPTED  (1<<14)  // when writing, this command should be encrypted
-#define CARD_13         (1<<13)  // when writing
-#define CARD_4          (1<<4)   // when writing
-
 // 3 bits in b10..b8 indicate something
 // read bits
-#define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
-#define CARD_DATA_READY (1<<23)  // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, REG_CARD_DATA_RD or CARD_DATA has another word of data and is good to go
 
 
 #define SECTOR_SIZE		0x200	 // 512-byte sized sectors
@@ -90,80 +68,80 @@
 
 void SCDS_sd_command(u8 cmd,u32 arg)
 {
-	CARD_CR1H = 0xC0;
-	CARD_COMMAND[0] = 0x33;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = cmd|0x40;
-	CARD_COMMAND[3] = (arg>>24)&0xFF;
-	CARD_COMMAND[4] = (arg>>16)&0xFF;
-	CARD_COMMAND[5] = (arg>>8)&0xFF;
-	CARD_COMMAND[6] = (arg>>0)&0xFF;
-	CARD_COMMAND[7] = 0x01;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY));
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0x33;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = cmd|0x40;
+	REG_CARD_COMMAND[3] = (arg>>24)&0xFF;
+	REG_CARD_COMMAND[4] = (arg>>16)&0xFF;
+	REG_CARD_COMMAND[5] = (arg>>8)&0xFF;
+	REG_CARD_COMMAND[6] = (arg>>0)&0xFF;
+	REG_CARD_COMMAND[7] = 0x01;
+	REG_ROMCTRL = 0xA7180000;
+	while (!(REG_ROMCTRL & CARD_DATA_READY));
 	do{
-		CARD_COMMAND[0] = 0x38;
-		CARD_CR2 = 0xA7180000;
-		while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	}while(CARD_DATA_RD);
+		REG_CARD_COMMAND[0] = 0x38;
+		REG_ROMCTRL = 0xA7180000;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) ;
+	}while(REG_CARD_DATA_RD);
 }
 
 void SCDS_get_resp()
 {
-	CARD_CR1H = 0xC0;
-	CARD_COMMAND[0] = 0x30;
-	CARD_COMMAND[1] = (48+16);
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY));
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0x30;
+	REG_CARD_COMMAND[1] = (48+16);
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = 0xA7180000;
+	while (!(REG_ROMCTRL & CARD_DATA_READY));
 	do{
-		CARD_COMMAND[0] = 0x38;
-		CARD_CR2 = 0xA7180000;
-		while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	}while(CARD_DATA_RD);
+		REG_CARD_COMMAND[0] = 0x38;
+		REG_ROMCTRL = 0xA7180000;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) ;
+	}while(REG_CARD_DATA_RD);
 }
 
 void SCDS_readsector(u32 addr,u32 buff)
 {
 	SCDS_sd_command(17,addr); 
-	CARD_CR1H = 0xC0;
-	CARD_COMMAND[0] = 0x34;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY));
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0x34;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = 0xA7180000;
+	while (!(REG_ROMCTRL & CARD_DATA_READY));
 	do{
-		CARD_COMMAND[0] = 0x38;
-		CARD_CR2 = 0xA7180000;
-		while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	}while(CARD_DATA_RD);
+		REG_CARD_COMMAND[0] = 0x38;
+		REG_ROMCTRL = 0xA7180000;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) ;
+	}while(REG_CARD_DATA_RD);
 
-    CARD_CR1H = 0xC0;
-	CARD_COMMAND[0] = 0x36;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA1180000;
+    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0x36;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = 0xA1180000;
 	do {
-		if (CARD_CR2 & CARD_DATA_READY) {
-			*(vu32*)buff=CARD_DATA_RD;
+		if (REG_ROMCTRL & CARD_DATA_READY) {
+			*(vu32*)buff=REG_CARD_DATA_RD;
 			buff+=4;
 		}
-	} while (CARD_CR2 & CARD_BUSY);
+	} while (REG_ROMCTRL & CARD_BUSY);
 }
 
 void SCDS_writesector(u32 addr,u32 buff)
@@ -173,36 +151,36 @@ void SCDS_writesector(u32 addr,u32 buff)
 	u16 i;
 	for(i=0;i<SECTOR_SIZE;i+=4)
 	{
-		CARD_CR1H = 0xC0;
-		CARD_COMMAND[0] = 0x37;
-		CARD_COMMAND[1] = (i >> 8) & 0xff;
-		CARD_COMMAND[2] = i & 0xff;
-		CARD_COMMAND[3] = ((uint8*)buff)[0];
-		CARD_COMMAND[4] = ((uint8*)buff)[1];
-		CARD_COMMAND[5] = ((uint8*)buff)[2];
-		CARD_COMMAND[6] = ((uint8*)buff)[3];
-		CARD_COMMAND[7] = 0;
-		CARD_CR2 = 0xA7180000;
-		while (!(CARD_CR2 & CARD_DATA_READY)) ;
-		CARD_DATA_RD;
+		REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+		REG_CARD_COMMAND[0] = 0x37;
+		REG_CARD_COMMAND[1] = (i >> 8) & 0xff;
+		REG_CARD_COMMAND[2] = i & 0xff;
+		REG_CARD_COMMAND[3] = ((uint8*)buff)[0];
+		REG_CARD_COMMAND[4] = ((uint8*)buff)[1];
+		REG_CARD_COMMAND[5] = ((uint8*)buff)[2];
+		REG_CARD_COMMAND[6] = ((uint8*)buff)[3];
+		REG_CARD_COMMAND[7] = 0;
+		REG_ROMCTRL = 0xA7180000;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) ;
+		REG_CARD_DATA_RD;
 		buff+=4;
 	}
-	CARD_CR1H = 0xC0; 
-	CARD_COMMAND[0] = 0x35;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = 0xA7180000;
-	while (!(CARD_CR2 & CARD_DATA_READY));
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ; 
+	REG_CARD_COMMAND[0] = 0x35;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = 0xA7180000;
+	while (!(REG_ROMCTRL & CARD_DATA_READY));
 	do{
-		CARD_COMMAND[0] = 0x38;
-		CARD_CR2 = 0xA7180000;
-		while (!(CARD_CR2 & CARD_DATA_READY)) ;
-	}while(CARD_DATA_RD);
+		REG_CARD_COMMAND[0] = 0x38;
+		REG_ROMCTRL = 0xA7180000;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) ;
+	}while(REG_CARD_DATA_RD);
 }
 
 

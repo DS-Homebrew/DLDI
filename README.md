@@ -112,9 +112,6 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 	- Unknown if writes work properly
 - `scds1`: SuperCard DSONE (non-SDHC) v2
     - By cluny
-- `scds2`: SuperCard DSONE (non-SDHC) v3
-    - By Barni
-	- Source code is not provided
 - `scsd`: SuperCard SD card v1
     - By Chishm
 	- Try this DLDI first before using the Moonshell version
@@ -189,6 +186,10 @@ These drivers have working updated versions in the above list. Consider those in
 - `DSONESlot-1`: SuperCard DSONE SDHC official
     - Taken from DSONE_SDHC_EOS_sp6_20121206
 	- Source code is not provided, and initial comparison looks different from `scdssdhc`
+- `scds2`: SuperCard DSONE (non-SDHC) v3
+    - By Barni
+    - It seems this code is almost identical to scds1...
+	- Source code is not provided
 - `scdssdhc`: SuperCard DSONE SDHC
     - By SuperCard
 - `scdssdhc1`: SuperCard DSONE SDHC v1

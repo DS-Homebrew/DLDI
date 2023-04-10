@@ -13,13 +13,9 @@
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
 	.byte	DLDI_SIZE_4KB
-#ifdef SCDS
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
-#else
-	.byte	FIX_GOT | FIX_GLUE	@ do not fix BSS, needed for DSTT SDHC check
-#endif
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4

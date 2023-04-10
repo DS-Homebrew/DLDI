@@ -21,7 +21,9 @@
 #define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
 #define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
 
-int is_sdhc = 0;
+#if defined(SCDS)
+bool is_sdhc = false;
+#endif
 
 void cardWriteCommand(const uint8 * command) {
 	int index;
@@ -108,9 +110,7 @@ u32 sdmode_sdhc(void) {
 	cardPolledTransfer(0xa7180000, &ret, 1, command);
 	return ret;
 }
-#else // TTIO
-#define	sdmode_sdhc()		(*(vu32*)0x023FFC24)
-#endif
+#endif // SCDS
 
 void LogicCardRead(u32 *destination, u32 length)
 {
@@ -171,7 +171,9 @@ bool startup(void)
 		is shown in header, but we get there when we get 
 		there...
 	*/
-	if(!is_sdhc) is_sdhc = sdmode_sdhc() ? 1 : -1;
+#if defined(SCDS)
+	is_sdhc = sdmode_sdhc();
+#endif
 	return true;
 }
 
@@ -186,7 +188,12 @@ bool readSectors(u32 sector, u32 numSectors, void* buffer)
 
 	u8 command[8];
 
+#if defined(SCDS)
 	u32 address = is_sdhc == 1 ? sector : sector << 9;
+#else // not SCDS
+	u32 address = sector;
+#endif
+
 	bool batchread = numSectors > 1;
 
 	// init
@@ -238,7 +245,12 @@ bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 
 	u8 command[8];
 
+#if defined(SCDS)
 	u32 address = is_sdhc == 1 ? sector : sector << 9;
+#else // not SCDS
+	u32 address = sector;
+#endif
+
 	bool batchwrite = numSectors > 1;
 
 	// init

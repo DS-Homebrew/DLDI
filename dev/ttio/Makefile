@@ -34,8 +34,6 @@ ARCH	:=	-mthumb-interwork
 
 ifeq ($(SCDS),1)
 	ARCH	+= -DSCDS
-else
-	ARCH 	+= -DDSTTSDHC
 endif
 
 CFLAGS	:=	-g -Wall -O2\

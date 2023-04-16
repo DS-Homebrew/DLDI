@@ -48,7 +48,7 @@ bool SDSendCommand6(uint8* response, uint8 command, uint32 data)
 {
 	uint8 sdResponse[32];
 	SDBroadcastCommand((SDCommand)command, data, sdResponse);
-	armmemcpy(response, sdResponse, 6);
+	tonccpy(response, sdResponse, 6);
 	return true;
 }
 
@@ -56,7 +56,7 @@ bool SDSendCommand17(uint8* response, uint8 command, uint32 data)
 {
 	uint8 sdResponse[32];
 	SDBroadcastCommand((SDCommand)command, data, sdResponse);
-	armmemcpy(response, sdResponse, 17);
+	tonccpy(response, sdResponse, 17);
 	return true;
 }
 */

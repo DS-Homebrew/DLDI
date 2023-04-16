@@ -32,6 +32,8 @@ freely, subject to the following restrictions:
 static uint32 x9Buffer[0x200];
 static uint8  x9Command[8];
 
+void cardPolledTransfer(uint32 flags, uint32* dest,uint32 length, const uint8* command);
+
 static inline __attribute__((always_inline)) void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words)
 {
 	x9Command[7] = cmd;
@@ -86,19 +88,8 @@ static inline __attribute__((always_inline)) void cardIO_4(uint32 address)
 	X9CardIO(0x5C, 0, address, 0xA0586000, x9Buffer, 0);
 }
 
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
 //extern void X9CardPolledWrite(uint32 flags, const uint32* buffer, const uint8* command);
-extern void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words);
-extern void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer);
-extern void cardPolledTransfer(uint32 flags, uint32* dest,uint32 length, const uint8* command);
-
-#ifdef __cplusplus
-}
-#endif
-
+void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words);
+void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer);
 
 #endif // INCLUDED_io_x9_card_h

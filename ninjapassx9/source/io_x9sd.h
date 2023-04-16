@@ -30,14 +30,32 @@ freely, subject to the following restrictions:
 extern "C" {
 #endif
 
+#ifndef NULL
+ #define NULL 0
+#endif
+
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
 extern bool _X9SD_isInserted(void);
 extern bool _X9SD_clearStatus (void);
 extern bool _X9SD_shutdown(void);
 extern bool _X9SD_startup(void);
 extern bool _X9SD_writeSectors(uint32 sector, uint32 sectors, const uint8* buffer);
 extern bool _X9SD_readSectors(uint32 sector, uint32 sectorCount, uint8* buffer);
-
-extern void *armmemcpy(void *dest, const void *src, size_t n);
 
 #ifdef __cplusplus
 } // extern "C"

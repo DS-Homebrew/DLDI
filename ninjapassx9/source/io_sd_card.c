@@ -35,13 +35,13 @@ const unsigned int READY_TIMEOUT   = 1000;
 
 const unsigned int blockSize = 512; // bytes
 
- General-purpose buffer
+// General-purpose buffer
 static uint8 scratch[0x1000];
 
 
 extern void DumpMemory(unsigned char* data, int bytes);
 
-#define DO_DEBUG(statements) do { statements; } while(0)			   
+//#define DO_DEBUG(statements) do { statements; } while(0)			   
 #define DO_DEBUG(statements)
 
 #define min2(a, b) ((a) < (b) ? (a) : (b))

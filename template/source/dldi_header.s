@@ -15,12 +15,12 @@
 	.byte	DLDI_SIZE_16KB
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
 	.asciz "Name of driver goes here"
-	
+
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -43,7 +43,7 @@
 	.word	writeSectors	@ 
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
-	
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------

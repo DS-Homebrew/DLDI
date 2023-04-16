@@ -19,8 +19,6 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 - `cyds`: CycloDS Mini/Micro
 - `default`: Default DLDI in libnds
     - This is based on outdated libnds
-- `dldi`: DLDI template
-    - Use this to create a new DLDI driver
 - `dlms4`: DSLink microSD v4
     - By Amadeus
 	- Fixes issues in v3.
@@ -138,6 +136,8 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 - `scrb`: SuperCard Rumble SD card
     - By Barni
 	- Source code is not provided
+- `template`: DLDI template
+    - Use this to create a new DLDI driver
 - `tt_sd`: DSTT Wood4TT version
     - Taken from Wood4TT 1.25
 	- Unknown how different this driver actually is

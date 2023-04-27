@@ -26,9 +26,9 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
+ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Oz -flto -fno-tree-loop-distribute-patterns\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
@@ -40,22 +40,22 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(LIBNDS)
- 
-  
+
+
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
- 
+
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -92,25 +92,25 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: $(BUILD) clean all
- 
+
 #---------------------------------------------------------------------------------
 all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
- 
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).dldi $(TARGET).elf
- 
- 
+
+
 #---------------------------------------------------------------------------------
 else
- 
+
 DEPENDS	:=	$(OFILES:.o=.d)
- 
+
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
@@ -122,11 +122,11 @@ $(OUTPUT).elf	:	$(OFILES)
 %.dldi: %.elf
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
- 
+
 
 -include $(DEPENDS)
 
- 
+
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

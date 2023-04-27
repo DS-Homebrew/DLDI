@@ -28,12 +28,7 @@
 #define PAGESIZE_2K     (3<<24)
 #define PAGESIZE_4K     (4<<24)
 
-void __attribute__((naked)) ioRpgDelay(u32 us)
-{
-    __asm("subs r0, #1");
-    __asm("bgt ioRpgDelay");
-    __asm("bx lr");
-}
+void __attribute__((naked)) ioRpgDelay(u32 us);
 
 void ioRpgSendCommand( u32 command[2], u32 pageSize, u32 latency, void * buffer )
 {

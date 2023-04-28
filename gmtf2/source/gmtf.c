@@ -33,13 +33,13 @@
  #endif
 #endif
 
-#ifndef NDS
-#error "This is a DS only card"
+#ifdef NDS
+ #include <nds/ndstypes.h>
+#else
+ #include "gba_types.h"
 #endif
- 
-#include <nds/jtypes.h>
 
-#define BYTES_PER_SECTOR 0x200
+#define BYTES_PER_READ 512
 
 #ifndef NULL
  #define NULL 0
@@ -47,16 +47,16 @@
 
 //---------------------------------------------------------------------------------
 // The following were taken from libnds
-#define CARD_CR1       (*(vuint16*)0x040001A0)
-#define CARD_CR1H      (*(vuint8*)0x040001A1)
-#define CARD_EEPDATA   (*(vuint8*)0x040001A2)
-#define CARD_CR2       (*(vuint32*)0x040001A4)
-#define CARD_COMMAND   ((vuint8*)0x040001A8)
-#define CARD_DATA_RD   (*(vuint32*)0x04100010)
+#define REG_AUXSPICNT       (*(vuint16*)0x040001A0)
+#define REG_AUXSPICNTH      (*(vuint8*)0x040001A1)
+#define REG_SPIDATA   (*(vuint8*)0x040001A2)
+#define REG_ROMCTRL       (*(vuint32*)0x040001A4)
+#define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
+#define REG_CARD_DATA_RD   (*(vuint32*)0x04100010)
 #define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
 #define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
 #define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
-#define CARD_SPI_BUSY 0x80
+#define CARD_SPI_BUSY		(1<<7)
 #define CARD_CR1_EN	0x8000
 #define	CARD_CR1_SPI_EN	0x2000
 #define	CARD_CR1_SPI_HOLD	0x40
@@ -74,63 +74,63 @@
 
 static inline u8 transferSpiByte (u8 send)
 {
-	CARD_EEPDATA = send;
-	while (CARD_CR1 & CARD_SPI_BUSY);
-	return CARD_EEPDATA;
+	REG_SPIDATA = send;
+	while (REG_AUXSPICNT & CARD_SPI_BUSY);
+	return REG_SPIDATA;
 }
 
 static inline u8 getSpiByte (void) 
 {
-	CARD_EEPDATA = 0xFF;
-	while (CARD_CR1 & CARD_SPI_BUSY);
-	return CARD_EEPDATA;
+	REG_SPIDATA = 0xFF;
+	while (REG_AUXSPICNT & CARD_SPI_BUSY);
+	return REG_SPIDATA;
 }
 
 void openSpi (void) 
 {
 	volatile u32 temp;
 	
-	CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-	CARD_COMMAND[0] = 0xF2;
-	CARD_COMMAND[1] = 0x00;
-	CARD_COMMAND[2] = 0x00;
-	CARD_COMMAND[3] = 0x00;
-	CARD_COMMAND[4] = 0x00;
-	CARD_COMMAND[5] = 0xCC;			// 0xCC == enable microSD ?
-	CARD_COMMAND[6] = 0x00;
-	CARD_COMMAND[7] = 0x00;
-	CARD_CR2 = CARD_CR2_SETTINGS;
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0xF2;
+	REG_CARD_COMMAND[1] = 0x00;
+	REG_CARD_COMMAND[2] = 0x00;
+	REG_CARD_COMMAND[3] = 0x00;
+	REG_CARD_COMMAND[4] = 0x00;
+	REG_CARD_COMMAND[5] = 0xCC;			// 0xCC == enable microSD ?
+	REG_CARD_COMMAND[6] = 0x00;
+	REG_CARD_COMMAND[7] = 0x00;
+	REG_ROMCTRL = CARD_CR2_SETTINGS;
 
-	while (CARD_CR2 & CARD_BUSY) {
-		temp = CARD_DATA_RD;
+	while (REG_ROMCTRL & CARD_BUSY) {
+		temp = REG_CARD_DATA_RD;
 	}
 
-	CARD_CR1 = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
+	REG_AUXSPICNT = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
 }
 
 void closeSpi (void)
 {
 	volatile u32 temp;
 
-	CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-	CARD_COMMAND[0] = 0xF2;
-	CARD_COMMAND[1] = 0x00;
-	CARD_COMMAND[2] = 0x00;
-	CARD_COMMAND[3] = 0x00;
-	CARD_COMMAND[4] = 0x00;
-	CARD_COMMAND[5] = 0xC8;			// 0xCC == disable microSD ?
-	CARD_COMMAND[6] = 0x00;
-	CARD_COMMAND[7] = 0x00;
-	CARD_CR2 = CARD_CR2_SETTINGS;
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = 0xF2;
+	REG_CARD_COMMAND[1] = 0x00;
+	REG_CARD_COMMAND[2] = 0x00;
+	REG_CARD_COMMAND[3] = 0x00;
+	REG_CARD_COMMAND[4] = 0x00;
+	REG_CARD_COMMAND[5] = 0xC8;			// 0xCC == disable microSD ?
+	REG_CARD_COMMAND[6] = 0x00;
+	REG_CARD_COMMAND[7] = 0x00;
+	REG_ROMCTRL = CARD_CR2_SETTINGS;
 
-	while (CARD_CR2 & CARD_BUSY) {
-		temp = CARD_DATA_RD;
+	while (REG_ROMCTRL & CARD_BUSY) {
+		temp = REG_CARD_DATA_RD;
 	}
 
-	CARD_CR1 = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
-	CARD_EEPDATA = 0xFF;
+	REG_AUXSPICNT = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
+	REG_SPIDATA = 0xFF;
 	
-	while (CARD_CR1 & CARD_SPI_BUSY) {};
+	while (REG_AUXSPICNT & CARD_SPI_BUSY) {};
 }
 	
 u8 sendCommand (u8 command, u32 argument)
@@ -149,8 +149,8 @@ u8 sendCommand (u8 command, u32 argument)
 	
 	// Send read sector command
 	for (i = 0; i < 6; i++) {
-		CARD_EEPDATA = commandData[i];
-		while (CARD_CR1 & CARD_SPI_BUSY);
+		REG_SPIDATA = commandData[i];
+		while (REG_AUXSPICNT & CARD_SPI_BUSY);
 	}
 
 	// Wait for a response
@@ -169,7 +169,7 @@ bool sdRead (u32 sector, u8* dest)
 	int i;
 	volatile u32 temp;
 	
-	if (sendCommand (READ_SINGLE_BLOCK, sector * BYTES_PER_SECTOR) != 0x00) {
+	if (sendCommand (READ_SINGLE_BLOCK, sector * BYTES_PER_READ) != 0x00) {
 		return false;
 	}
 
@@ -183,7 +183,7 @@ bool sdRead (u32 sector, u8* dest)
 		return false;
 	}
 	
-	for (i = BYTES_PER_SECTOR; i > 0; i--) {
+	for (i = BYTES_PER_READ; i > 0; i--) {
 		*dest++ = getSpiByte();
 	}
 
@@ -204,7 +204,7 @@ bool sdReadMultiple (u32 sector, u8* dest, u32 numSectors)
 	int i;
 	volatile u32 temp;
 	
-	if (sendCommand (READ_MULTIPLE_BLOCK, sector * BYTES_PER_SECTOR) != 0x00) {
+	if (sendCommand (READ_MULTIPLE_BLOCK, sector * BYTES_PER_READ) != 0x00) {
 		return false;
 	}
 
@@ -219,7 +219,7 @@ bool sdReadMultiple (u32 sector, u8* dest, u32 numSectors)
 			return false;
 		}
 		
-		for (i = BYTES_PER_SECTOR; i > 0; i--) {
+		for (i = BYTES_PER_READ; i > 0; i--) {
 			*dest++ = getSpiByte();
 		}
 	
@@ -253,7 +253,7 @@ bool sdWrite (u32 sector, u8* src)
 	int i;
 	int timeout;
 	
-	if (sendCommand (WRITE_SINGLE_BLOCK, sector * BYTES_PER_SECTOR) != 0) {
+	if (sendCommand (WRITE_SINGLE_BLOCK, sector * BYTES_PER_READ) != 0) {
 		return false;
 	}
 	
@@ -261,9 +261,9 @@ bool sdWrite (u32 sector, u8* src)
 	transferSpiByte (0xFE);
 	
 	// Send data
-	for (i = BYTES_PER_SECTOR; i > 0; i--) {
-		CARD_EEPDATA = *src++;
-		while (CARD_CR1 & CARD_SPI_BUSY);
+	for (i = BYTES_PER_READ; i > 0; i--) {
+		REG_SPIDATA = *src++;
+		while (REG_AUXSPICNT & CARD_SPI_BUSY);
 	}
 
 	// Send fake CRC
@@ -351,7 +351,7 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 			return false;
 		}
 		sector ++;
-		data += BYTES_PER_SECTOR;
+		data += BYTES_PER_READ;
 		numSectors --;
 	}
 	

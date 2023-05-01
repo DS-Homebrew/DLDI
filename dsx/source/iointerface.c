@@ -34,7 +34,7 @@
 #endif
 
 #ifdef NDS
- #include <nds/jtypes.h>
+ #include <nds/ndstypes.h>
 #else
  #include "gba_types.h"
 #endif
@@ -44,7 +44,6 @@
 #endif
 
 #include <nds/system.h>
-#include <nds/card.h>
 
 #define BYTES_PER_READ 512
 
@@ -55,14 +54,32 @@
 #define PAGESIZE_0			(0<<24)
 #define PAGESIZE_4			(7<<24)
 #define PAGESIZE_512		(1<<24)
-#define CLOCK_4MHz			(0<<0)
-#define SPI_ENABLE			(1<<15)
-#define SPI_ROM				(0<<13)
-#define CARD_START			(1<<31)
-#define CARD_RESET			(1<<29)
-#define CARD_DATAREADY		(1<<23)
 
-/* 
+#define CLOCK_4MHz			(0<<0)
+#define SPI_ROM				(0<<13)
+
+// the following defines are from libnds
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+
+#define REG_AUXSPICNT	(*(vu16*)0x040001A0)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_AUXSPIDATA	(*(vu8*)0x040001A2)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_ACTIVATE     (1<<31)           // when writing, get the ball rolling
+#define CARD_nRESET       (1<<29)           // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
+#define CARD_ENABLE			(1<<15)
+
+/*
 Define last zone that was read or written
 */
 static int dsxLastZone = -1;
@@ -109,16 +126,16 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 	unsigned char *bufend = buf + pageSize;
 	unsigned int ctrl, data;
 	bool useBuf, useBuf32;
-	
+
 	useBuf = (0 != buf);
 	useBuf32 = (useBuf && (0 != (3 & ((unsigned int)buf))));
-	
+
 	for(i=0; i<2; i++)
 	{
-		CARD_COMMAND[i*4+0] = command[i]>>24;
-		CARD_COMMAND[i*4+1] = command[i]>>16;
-		CARD_COMMAND[i*4+2] = command[i]>>8;
-		CARD_COMMAND[i*4+3] = command[i]>>0;
+		REG_CARD_COMMAND[i*4+0] = command[i]>>24;
+		REG_CARD_COMMAND[i*4+1] = command[i]>>16;
+		REG_CARD_COMMAND[i*4+2] = command[i]>>8;
+		REG_CARD_COMMAND[i*4+3] = command[i]>>0;
 	}
 
 
@@ -127,25 +144,25 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 		case 0:
 			pageSize = PAGESIZE_0;
 		break;
-		
+
 		case 4:
 			pageSize = PAGESIZE_4;
 		break;
-		
+
 		case 512:
 			pageSize = PAGESIZE_512;
 		break;	
 	}
-	
-	CARD_CR2 = CARD_START | CARD_RESET | pageSize | ((*(unsigned int*)0x027ffe60) & ~0x07001FFF) | latency;
+
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | pageSize | ((*(unsigned int*)0x027ffe60) & ~0x07001FFF) | latency;
 
 	do
 	{
-		ctrl = CARD_CR2;
+		ctrl = REG_ROMCTRL;
 
-		if (ctrl & CARD_DATAREADY)
+		if (ctrl & CARD_DATA_READY)
 		{
-			data = CARD_DATA_RD;
+			data = REG_CARD_DATA_RD;
 
 			if (useBuf32)
 			{
@@ -164,7 +181,7 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 				}
 			}
 		}
-	} while( ctrl & CARD_START );	
+	} while( ctrl & CARD_ACTIVATE );	
 }
 
 //utility function to poll for write operation finish
@@ -173,8 +190,8 @@ void dsxPoll(void)
 	unsigned int command[2];
 	const unsigned int writeResultSize = 4;
 	unsigned int writeResult;
-	
-	
+
+
 	command[0] = 0x02000000;
 	command[1] = 0;
 	do
@@ -190,7 +207,7 @@ void dsxZoneSwitch(unsigned int lba)
 	unsigned int newZone;
 	unsigned int newZoneTmp;
 	unsigned int command[2];
-	
+
 	newZoneTmp = lba / 256;
 	newZone = 0;
 
@@ -201,7 +218,7 @@ void dsxZoneSwitch(unsigned int lba)
 		newZoneTmp -= 1000;
 		newZone++;
 	}
-	
+
 	// If switching zones
 	if (newZone != dsxLastZone)
 	{
@@ -210,11 +227,11 @@ void dsxZoneSwitch(unsigned int lba)
 
 		// Tell hardware to switch zones, by simply issueing a read
 		dsxSendCommand(command, BYTES_PER_READ, 0xFFF, dsxBuffer);
-		
+
 		// Wait a moment for it to finish
 		dsxPoll();
 	}
-	
+
 	dsxLastZone = newZone;
 }
 
@@ -263,8 +280,8 @@ bool dsxReadSectors (u32 sector, u32 numSectors, void* buffer) {
 	unsigned int command[2];
 	unsigned int lba = sector + 0x6000;
 
-	CARD_CR1 = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
-	
+	REG_AUXSPICNT = CARD_ENABLE | CLOCK_4MHz | SPI_ROM;
+
 	dsxPoll();
 
 	for(j=0; j<numSectors; j++)
@@ -272,12 +289,12 @@ bool dsxReadSectors (u32 sector, u32 numSectors, void* buffer) {
 		//put us in the right zone
 		//NOTE: reads which cross zones are invalid.
 		dsxZoneSwitch(lba);
-		
+
 		command[0] = 0xBF000000 | (lba>>8);
 		command[1] = (lba<<24);
-		
+
 		dsxSendCommand(command, BYTES_PER_READ, 0x8f8, buf8);
-		
+
 		lba++;
 		buf8 += BYTES_PER_READ;
 	}
@@ -301,13 +318,13 @@ bool dsxWriteSectors (u32 sector, u32 numSectors, void* buffer) {
 	const unsigned int writeResultSize = 4;
 	unsigned int writeResult;
 	unsigned int lba = sector + 0x6000;
-	
-	CARD_CR1 = SPI_ENABLE | CLOCK_4MHz | SPI_ROM;
-	
+
+	REG_AUXSPICNT = CARD_ENABLE | CLOCK_4MHz | SPI_ROM;
+
 	//Don't interrupt the card if he's busy.. he gets grumpy.
 	dsxPoll();
-	
-	
+
+
 	for(j=0; j<numSectors; j++)
 	{
 		// Check if we are switching zones
@@ -319,7 +336,7 @@ bool dsxWriteSectors (u32 sector, u32 numSectors, void* buffer) {
 		//Reset fpga ram address
 		command[0] = 0x03000000;
 		command[1] = 0;
-		
+
 		//Go ahead, send it just once, see what happens. ;-)
 		dsxSendCommand(command, 0, 0, (unsigned char*)&writeResult);
 		dsxSendCommand(command, 0, 0, (unsigned char*)&writeResult);
@@ -331,18 +348,18 @@ bool dsxWriteSectors (u32 sector, u32 numSectors, void* buffer) {
 			buf += sizeof (unsigned int);
 			dsxSendCommand(command, 0, 0, (unsigned char*)&writeResult);
 		}
-		
+
 		// Commit page
 		command[0] = 0x05000000 | (lba >> 8);
 		command[1] = (lba << 24);
 		dsxSendCommand(command, writeResultSize, 0xFFF, (unsigned char*)&writeResult);
-		
+
 		//Wait for it to actually write the data.
 		dsxPoll();
 
 		lba++;
 	}
-	
+
 	// Finalize
 	command[0] = 0xBC000000;
 	command[1] = 0;

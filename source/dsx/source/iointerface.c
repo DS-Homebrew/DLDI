@@ -43,7 +43,7 @@
 #error "This is a driver for DS"
 #endif
 
-#include <nds/system.h>
+//#include <nds/system.h>
 
 #define BYTES_PER_READ 512
 
@@ -86,37 +86,7 @@ static int dsxLastZone = -1;
 
 static unsigned char dsxBuffer[BYTES_PER_READ];
 
-/*-----------------------------------------------------------------
-wait_msecs
-Wait for a certain amount of milliseconds, uses vertical scanlines to synchronize.
-A hardware timer may be used aswell, if necessary.
------------------------------------------------------------------*/
-void dsxWaitMs(unsigned int requestTime)
-{
-	unsigned int lastLine = REG_VCOUNT;
-	unsigned int newLine;
-	unsigned int elapsedTime = 0; // in ms
-	unsigned int elapsedLines = 0; // in lines
-
-
-	while(elapsedTime < requestTime)
-	{
-		int diffLine;
-		newLine = REG_VCOUNT;
-
-		diffLine = newLine - lastLine;
-		if (diffLine < 0)
-			diffLine = 263+diffLine;
-
-		elapsedLines += diffLine;
-
-		//does this correctly optimize?
-		elapsedTime = elapsedLines/16; // 16 lines = 1ms
-
-		lastLine = newLine;
-	}
-}
-
+void __attribute__((naked)) ioRpgDelay(u32 us);
 
 void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int latency, unsigned char *buf)
 {
@@ -380,7 +350,7 @@ bool dsxWriteSectors (u32 sector, u32 numSectors, void* buffer) {
 	//Just leave it alone.
 	//
 	//
-	dsxWaitMs(10);
+	ioRpgDelay(10);
 
 	return true;
 }

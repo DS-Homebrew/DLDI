@@ -12,7 +12,7 @@
 	.word	0xBF8DA5ED		@ Magic number to identify this region
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
-	.byte	DLDI_SIZE_8KB
+	.byte	DLDI_SIZE_4KB
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
 	.byte 	0x00			@ Space allocated in the application, not important here.
 

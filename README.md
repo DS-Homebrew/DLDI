@@ -116,14 +116,6 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 	- Unknown if writes work properly
 - `scds1`: SuperCard DSONE (non-SDHC) v2
     - By cluny
-- `DSONESlot-1`: SuperCard DSONE SDHC official
-    - Taken from DSONE_SDHC_EOS_sp6_20121206
-	- Source code is not provided, and initial comparison looks different from `scdssdhc`
-- `scdssdhc`: SuperCard DSONE SDHC
-    - By SuperCard
-- `scdssdhc1`: SuperCard DSONE SDHC v1
-    - By SuperCard and cluny
-	- Source code was cleaned up
 - `scsd`: SuperCard SD card v1
     - By Chishm
 	- Try this DLDI first before using the Moonshell version
@@ -158,6 +150,9 @@ These drivers have working updated versions in the above list. Consider those in
 - `DEMONIOLibrary`: DLDI from timebombed cartridges
     - Dumped from memory. DDMEM is incorrect as a result.
 	- Use `DSTTDLDIboyakkeyver` instead
+- `DSONESlot-1`: SuperCard DSONE SDHC official
+    - Taken from DSONE_SDHC_EOS_sp6_20121206
+	- Source code is not provided, and initial comparison looks different from `scdssdhc`
 - `dlms`: DSLink microSD v1
     - By Rudolph / Lick
     - Doesn't seem to work.
@@ -200,6 +195,11 @@ These drivers have working updated versions in the above list. Consider those in
     - By Barni
     - It seems this code is almost identical to scds1...
 	- Source code is not provided
+- `scdssdhc`: SuperCard DSONE SDHC
+    - By SuperCard
+- `scdssdhc1`: SuperCard DSONE SDHC v1
+    - By SuperCard and cluny
+	- Source code was cleaned up
 - `TTCARDIOLibrary`: DSTT v1
     - Taken from TTMenu 1.18
 	- Only known DSTT DLDI to support non-SDHC cards

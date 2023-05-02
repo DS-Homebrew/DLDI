@@ -15,12 +15,12 @@
 	.byte	DLDI_SIZE_16KB
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
 	.asciz "M3 Adapter (Compact Flash)"
-	
+
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -37,13 +37,13 @@
 @ IO_INTERFACE data -- 32 bytes
 	.ascii	"M3CF"			@ ioType
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA
-	.word	_M3CF_startup	@ 
-	.word	_CF_isInserted	@ 
-	.word	_CF_readSectors	@   Function pointers to standard device driver functions
+	.word	_M3CF_startup			@ 
+	.word	_CF_isInserted		@ 
+	.word	_CF_readSectors		@   Function pointers to standard device driver functions
 	.word	_CF_writeSectors	@ 
-	.word	_CF_clearStatus	@ 
-	.word	_CF_shutdown	@ 
-	
+	.word	_CF_clearStatus		@ 
+	.word	_CF_shutdown		@ 
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------

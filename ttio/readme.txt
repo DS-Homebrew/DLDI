@@ -4,8 +4,8 @@ Reimplementation of DSONE SDHC DLDI using r4tfv2 base
 - Framework by R4DS team and Chishm
 - Reimplemented by lifehackerhansol
 
-To build TTIO:
+To build non-SDHC:
 - `make`
 
-To build SCDS:
-- `make SCDS=1`
+To build SDHC:
+- `make SDHC=1`

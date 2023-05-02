@@ -22,12 +22,6 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 - `dlms4`: DSLink microSD v4
     - By Amadeus
 	- Fixes issues in v3.
-- `DSTTDLDIboyakkeyver`: DSTT v2
-    - By boyakkey
-    - Appears to be based on `scdssdhc`
-    - Source code is not provided
-	- Due to how DSTT functions, using this as an autoboot will break non-SDHC support
-        - `TTCARDIOLibrary` has the opposite problem, but since this driver supports SDHC this is the recommended driver
 - `dstwo`: SuperCard DSTWO
     - Source unknown
 	- Source code is not provided
@@ -130,11 +124,8 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 	- Source code is not provided
 - `template`: DLDI template
     - Use this to create a new DLDI driver
-- `tt_sd`: DSTT Wood4TT version
-    - Taken from Wood4TT 1.25
-	- Unknown how different this driver actually is
-- `tt_sd (fixed name)`: DSTT Wood4TT version with correct DLDI friendlyName
-    - Hex edited to show `TTCARD IO Library` instead of `R4(DS)`
+- `ttio`, `ttio_sdhc`: DSTT reimplementation
+    - By R4DS team, Chishm, cluny and lifehackerhansol
 
 ### List of archived DLDI drivers:
 
@@ -153,6 +144,12 @@ These drivers have working updated versions in the above list. Consider those in
 - `DSONESlot-1`: SuperCard DSONE SDHC official
     - Taken from DSONE_SDHC_EOS_sp6_20121206
 	- Source code is not provided, and initial comparison looks different from `scdssdhc`
+- `DSTTDLDIboyakkeyver`: DSTT v2
+    - By boyakkey
+    - Appears to be based on `scdssdhc`
+    - Source code is not provided
+	- Due to how DSTT functions, using this as an autoboot will break non-SDHC support
+        - `TTCARDIOLibrary` has the opposite problem, but since this driver supports SDHC this is the recommended driver
 - `dlms`: DSLink microSD v1
     - By Rudolph / Lick
     - Doesn't seem to work.
@@ -208,6 +205,11 @@ These drivers have working updated versions in the above list. Consider those in
 - `ttio_fwdump`: DSTT firmware dump
     - Taken from a certain DSTT's flash
 	- Seems to be the same as `TTCARDIOLibrary`, and only here as a reference
+- `tt_sd`: DSTT Wood4TT version
+    - Taken from Wood4TT 1.25
+	- Unknown how different this driver actually is
+- `tt_sd (fixed name)`: DSTT Wood4TT version with correct DLDI friendlyName
+    - Hex edited to show `TTCARD IO Library` instead of `R4(DS)`
 - `x9sd6`: Ninjapass X9 v1
     - By CJ Bell
 	- `ninjapassx9` is an updated version of this driver
@@ -215,6 +217,3 @@ These drivers have working updated versions in the above list. Consider those in
 ### List of drivers being tested (in `dev`):
 - `g003`: M3i Zero GMP-Z003
     - By R4DS team, Chishm and lifehackerhansol
-- `ttio`: DSTT reimplementation
-    - By R4DS team, Chishm, cluny and lifehackerhansol
-    - Hotpatching DLDI from memory is not exactly stable as there are many different implementations of DLDI patchers and it will fix BSS even when doing so is unwanted

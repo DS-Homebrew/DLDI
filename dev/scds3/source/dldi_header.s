@@ -12,15 +12,15 @@
 	.word	0xBF8DA5ED		@ Magic number to identify this region
 	.asciz	" Chishm"		@ Identifying Magic string (8 bytes with null terminator)
 	.byte	0x01			@ Version number
-	.byte	DLDI_SIZE_8KB
+	.byte	DLDI_SIZE_4KB
 	.byte	FIX_GOT | FIX_BSS | FIX_GLUE	@ Sections to fix
 	.byte 	0x00			@ Space allocated in the application, not important here.
-	
+
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
 	.asciz "SuperCard DS (lifehackerhansol)"
-	
+
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes
 	.align	6
@@ -43,7 +43,7 @@
 	.word	writeSectors	@ 
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
-	
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------

@@ -8,3 +8,5 @@
 # Build Directory
 *build/
 
+# dldiscan output
+dldiscan.txt

@@ -21,7 +21,7 @@
 #define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
 #define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
 
-bool is_sdhc = false;
+static bool is_sdhc = false;
 
 void cardWriteCommand(const uint8 * command) {
 	int index;

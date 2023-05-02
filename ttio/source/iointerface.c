@@ -22,9 +22,9 @@
 #define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
 
 #if defined(SDHC)
-bool is_sdhc = true;
+static bool is_sdhc = true;
 #else
-bool is_sdhc = false;
+static bool is_sdhc = false;
 #endif
 
 void cardWriteCommand(const uint8 * command) {

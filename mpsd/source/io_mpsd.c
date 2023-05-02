@@ -99,7 +99,7 @@ extern u8 mpsd_crc7_s(u16* buff,u16 num);
 }	   // extern "C"
 #endif
 
-u8 ppp7[8];
+static u8 ppp7[8];
 
 inline void wait1()
 {

@@ -16,11 +16,14 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-SCDS		?=	0
-TARGET		:=	ttio
-ifeq ($(SCDS),1)
-	TARGET		:=	scds
+SDHC	?= 0
+
+ifeq ($(SDHC),0)
+export TARGET		:=	$(shell basename $(CURDIR))
+else
+export TARGET		:=	$(shell basename $(CURDIR))_sdhc
 endif
+
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
@@ -32,8 +35,8 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork
 
-ifeq ($(SCDS),1)
-	ARCH	+= -DSCDS
+ifneq ($(SDHC),0)
+ARCH	+=	-DSDHC
 endif
 
 CFLAGS	:=	-g -Wall -O2\
@@ -48,22 +51,22 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
 LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
 
-LIBS	:= -lnds7
+LIBS	:=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(LIBNDS)
- 
-  
+
+
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
- 
+
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -100,25 +103,25 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: $(BUILD) clean all
- 
+
 #---------------------------------------------------------------------------------
 all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
- 
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) *.dldi *.elf
- 
- 
+	@rm -fr $(BUILD) $(TARGET).dldi $(TARGET).elf
+
+
 #---------------------------------------------------------------------------------
 else
- 
+
 DEPENDS	:=	$(OFILES:.o=.d)
- 
+
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
@@ -130,11 +133,11 @@ $(OUTPUT).elf	:	$(OFILES)
 %.dldi: %.elf
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
- 
+
 
 -include $(DEPENDS)
 
- 
+
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

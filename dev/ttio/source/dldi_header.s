@@ -19,10 +19,10 @@
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
-#ifdef SCDS
-	.asciz "DSONE SDHC DLDI (lifehackerhansol)"
-#else
+#ifndef SDHC
 	.asciz "DSTT DLDI (lifehackerhansol)"
+#else
+	.asciz "DSTT DLDI SDHC (lifehackerhansol)"
 #endif
 
 @---------------------------------------------------------------------------------
@@ -39,11 +39,7 @@
 
 @---------------------------------------------------------------------------------
 @ IO_INTERFACE data -- 32 bytes
-#ifdef SCDS
-	.ascii "SCDS"
-#else
-	.ascii "TTIO"
-#endif
+	.ascii	"TTIO"			@ ioType
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_NDS
 	.word	startup			@ 
 	.word	isInserted		@ 
@@ -51,7 +47,7 @@
 	.word	writeSectors	@ 
 	.word	clearStatus		@ 
 	.word	shutdown		@ 
-	
+
 @---------------------------------------------------------------------------------
 _start:
 @---------------------------------------------------------------------------------

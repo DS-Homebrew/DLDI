@@ -26,9 +26,9 @@ INCLUDES	:=	include ../../common_source
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
+ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Oz -flto\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
@@ -38,8 +38,8 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
-
+LDFLAGS	=	-nostartfiles -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map
+# -nostdlib
 LIBS	:=
 
 #---------------------------------------------------------------------------------

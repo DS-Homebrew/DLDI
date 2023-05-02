@@ -207,9 +207,10 @@ These drivers have working updated versions in the above list. Consider those in
 	- Seems to be the same as `TTCARDIOLibrary`, and only here as a reference
 - `tt_sd`: DSTT Wood4TT version
     - Taken from Wood4TT 1.25
-	- Unknown how different this driver actually is
+	- This driver is bogus: the code is identical to r4tfv2
 - `tt_sd (fixed name)`: DSTT Wood4TT version with correct DLDI friendlyName
     - Hex edited to show `TTCARD IO Library` instead of `R4(DS)`
+	- This driver is bogus: the code is identical to r4tfv2
 - `x9sd6`: Ninjapass X9 v1
     - By CJ Bell
 	- `ninjapassx9` is an updated version of this driver

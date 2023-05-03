@@ -1,7 +1,7 @@
 # Binary File
-*/*.dldi
-!archived/*.dldi
-!dev/*.dldi
+*.dldi
+!archived/*/*.dldi
+!prebuilts/*.dldi
 *.elf
 *.DS_Store
 

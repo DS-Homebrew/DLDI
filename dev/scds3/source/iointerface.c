@@ -138,7 +138,7 @@ void LogicCardReadMulti(u32 address, u32 *destination, u32 numSectors)
 
 	for(int i = 0; i < numSectors; i++) {
 		command[7] = 0x34;
-		for (int j = 0; i < 7; j++) command[i] = 0;
+		for (int j = 0; j < 7; j++) command[j] = 0;
 		cardPolledTransfer(0xa7180000, NULL, 1, command);
 		command[7] = 0x38;
 		cardWaitReady(0xa7180000, command);
@@ -207,7 +207,7 @@ bool readSectors(u32 sector, u32 numSectors, void* buffer)
 	u32 *u32_buffer = (u32*)buffer;
 
 	if(numSectors == 1) LogicCardRead(sector << 9, u32_buffer, 128);
-	else LogicCardRead(sector << 9, u32_buffer, numSectors);
+	else LogicCardReadMulti(sector << 9, u32_buffer, numSectors);
 
 	return true;
 }

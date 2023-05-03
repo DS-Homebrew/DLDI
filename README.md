@@ -110,6 +110,11 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 	- Unknown if writes work properly
 - `scds1`: SuperCard DSONE (non-SDHC) v2
     - By cluny
+- `scdssdhc2`: SuperCard DSONE SDHC v3
+    - Authors:
+        - R4DS team, Chishm (framework)
+        - SuperCard, cluny: initial DSONE SDHC driver code
+        - lifehackerhansol: port to r4tfv2, batch read/write
 - `scsd`: SuperCard SD card v1
     - By Chishm
 	- Try this DLDI first before using the Moonshell version
@@ -125,7 +130,10 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 - `template`: DLDI template
     - Use this to create a new DLDI driver
 - `ttio`, `ttio_sdhc`: DSTT reimplementation
-    - By R4DS team, Chishm, cluny and lifehackerhansol
+    - Authors:
+        - R4DS team, Chishm (framework)
+        - SuperCard, cluny: initial DSONE SDHC driver code
+        - lifehackerhansol: port to r4tfv2, batch read/write
 
 ### List of archived DLDI drivers:
 
@@ -194,7 +202,7 @@ These drivers have working updated versions in the above list. Consider those in
 	- Source code is not provided
 - `scdssdhc`: SuperCard DSONE SDHC
     - By SuperCard
-- `scdssdhc1`: SuperCard DSONE SDHC v1
+- `scdssdhc1`: SuperCard DSONE SDHC v2
     - By SuperCard and cluny
 	- Source code was cleaned up
 - `TTCARDIOLibrary`: DSTT v1

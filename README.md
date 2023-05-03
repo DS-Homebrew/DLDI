@@ -102,14 +102,11 @@ This is both an archive and a development repository for Nintendo DS flash cartr
 	- GPL 3.0
 - `sccf`: SuperCard Compact Flash
     - By Chishm
-- `DSONESDSC`: SuperCard DSONE (non-SDHC) official
-    - Taken from DSONE_EOS_sp6_20130129
-	- Source code is not provided
-- `scds`: SuperCard DSONE (non-SDHC) v1
-    - By SuperCard team and Lick
-	- Unknown if writes work properly
-- `scds1`: SuperCard DSONE (non-SDHC) v2
-    - By cluny
+- `scds3`: SuperCard DSONE (non-SDHC) v4
+    - Authors:
+        - R4DS team, Chishm (framework)
+        - SuperCard, cluny: initial DSONE driver code
+        - lifehackerhansol: port to r4tfv2, batch read
 - `scdssdhc2`: SuperCard DSONE SDHC v3
     - Authors:
         - R4DS team, Chishm (framework)
@@ -149,6 +146,9 @@ These drivers have working updated versions in the above list. Consider those in
 - `DEMONIOLibrary`: DLDI from timebombed cartridges
     - Dumped from memory. DDMEM is incorrect as a result.
 	- Use `DSTTDLDIboyakkeyver` instead
+- `DSONESDSC`: SuperCard DSONE (non-SDHC) official
+    - Taken from DSONE_EOS_sp6_20130129
+	- Source code is not provided
 - `DSONESlot-1`: SuperCard DSONE SDHC official
     - Taken from DSONE_SDHC_EOS_sp6_20121206
 	- Source code is not provided, and initial comparison looks different from `scdssdhc`
@@ -196,6 +196,11 @@ These drivers have working updated versions in the above list. Consider those in
     - By R4iTT
 	- Source code is not provided
 	- Use `ak2_sd` instead
+- `scds`: SuperCard DSONE (non-SDHC) v1
+    - By SuperCard team and Lick
+	- Unknown if writes work properly
+- `scds1`: SuperCard DSONE (non-SDHC) v2
+    - By cluny
 - `scds2`: SuperCard DSONE (non-SDHC) v3
     - By Barni
     - It seems this code is almost identical to scds1...

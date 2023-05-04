@@ -21,7 +21,7 @@
 #ifndef _NANDDRIVER_H_
 #define _NANDDRIVER_H_
 
-#include <nds.h>
+#include <nds/ndstypes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,64 +29,67 @@ extern "C" {
 
 bool ndInitNAND();
 
-// ½¨Á¢Âß¼­/ÎïÀí¿éÓ³Éä±í
+// å»ºç«‹é€»è¾‘/ç‰©ç†å—æ˜ å°„è¡¨
 void ndBuildLUT();
 
-// ²ÎÊıÊÇÂß¼­µØÖ·£¬·µ»ØÖµÊÇÎïÀíµØÖ·
-// oldPhyAddress Èô²»Îª NULL£¬Ôò±íÊ¾ÊÇĞ´²Ù×÷£¬ĞèÒª·µ»Ø oldPhyAddress ¸øµ÷ÓÃÕß
-// Ê¹µ÷ÓÃÕß¿ÉÒÔ²Á³ı ±»±ê¼ÇÎª FREE µÄ oldPhyAddress ËùÔÚµÄ block
-// logicBlock [out] ²ÎÊı£¬ÔÚ oldPhyAddress ËùÔÚ¿éÆäÊµÊÇfreeblockµÄÊ±ºò£¬´æ·ÅÁË
-// ×ª»»µÃµ½µÄ logicBlock ±àºÅ£¬ÒÔ±ãÉÔºòĞ´ÈëµÄÊ±ºò¿ÉÒÔ¸ø¸Ãfreeblock·ÖÅäÒ»¸ö±àºÅ
+// å‚æ•°æ˜¯é€»è¾‘åœ°å€ï¼Œè¿”å›å€¼æ˜¯ç‰©ç†åœ°å€
+// oldPhyAddress è‹¥ä¸ä¸º NULLï¼Œåˆ™è¡¨ç¤ºæ˜¯å†™æ“ä½œï¼Œéœ€è¦è¿”å› oldPhyAddress ç»™è°ƒç”¨è€…
+// ä½¿è°ƒç”¨è€…å¯ä»¥æ“¦é™¤ è¢«æ ‡è®°ä¸º FREE çš„ oldPhyAddress æ‰€åœ¨çš„ block
+// logicBlock [out] å‚æ•°ï¼Œåœ¨ oldPhyAddress æ‰€åœ¨å—å…¶å®æ˜¯freeblockçš„æ—¶å€™ï¼Œå­˜æ”¾äº†
+// è½¬æ¢å¾—åˆ°çš„ logicBlock ç¼–å·ï¼Œä»¥ä¾¿ç¨å€™å†™å…¥çš„æ—¶å€™å¯ä»¥ç»™è¯¥freeblockåˆ†é…ä¸€ä¸ªç¼–å·
 
 u32 ndLog2Phy( u32 logicAddress, u32 * oldPhyAddress );
 
-// Õâ¸öº¯ÊıÔÚÖ¸¶¨µÄ zone ÄÚÑ°ÕÒ freeblock£¬·µ»ØÖµ·¶Î§ 0 - 1023
-u16 ndSearchFreeBlock( u8 zone );
+// è¿™ä¸ªå‡½æ•°åœ¨æŒ‡å®šçš„ zone å†…å¯»æ‰¾ freeblockï¼Œè¿”å›å€¼èŒƒå›´ 0 - 1023
+u16 ndSearchFreeBlock( u8 zone, bool markFreeBlkToCfg );
 
-// ¶ÁÊı¾İ£¬addr µÄÖµ Ä© 9 Î»¶¼ÊÇ0, addr ÊÇ LBA
+// è¯»æ•°æ®ï¼Œaddr çš„å€¼ æœ« 9 ä½éƒ½æ˜¯0, addr æ˜¯ LBA
 void ndReadPages( u32 addr, u32 pageCount, u8 * buffer );
 
-// Ğ´Êı¾İ£¬addr µÄÖµ Ä© 9 Î»¶¼ÊÇ0, addr ÊÇ LBA
+// å†™æ•°æ®ï¼Œaddr çš„å€¼ æœ« 9 ä½éƒ½æ˜¯0, addr æ˜¯ LBA
 void ndWritePages( u32 addr, u32 pageCount, const u8 * data );
 
-// Ö´ĞĞ nand µÄÄÚ²¿ Page Copy ²Ù×÷£¬Ò»°ãÊÇÓÃÓÚĞ´ÈëµÄÊ±ºò£¬°Ñold blockµÄÄÚÈİ¿½±´µ½free block
-// pageCount ÊÇÖ¸ÓĞ¶àÉÙ¸ö512 page
-// startSubPage ÊÇÖ¸´ÓµÚÒ»¸ö2k pageµÄÄÄ¸ö512k page¿ªÊ¼
-// ÓÉÓÚ¶¼ÊÇÔÚ block Ö®¼ä¿½±´£¬ËùÒÔ×î¶à 64 ¸ö page
-// srcAddr ºÍ destAddr Ó¦¸Ã¶ÔÆë
+// å†™æ•°æ®ï¼Œaddr çš„å€¼ æœ« 9 ä½éƒ½æ˜¯0, addr æ˜¯ LBAï¼Œå†™å®Œç«‹å³æ‹·è´æœªå®Œæˆçš„block
+void ndWritePagesSafe( u32 addr, u32 pageCount, const u8 * data );
+
+// æ‰§è¡Œ nand çš„å†…éƒ¨ Page Copy æ“ä½œï¼Œä¸€èˆ¬æ˜¯ç”¨äºå†™å…¥çš„æ—¶å€™ï¼ŒæŠŠold blockçš„å†…å®¹æ‹·è´åˆ°free block
+// pageCount æ˜¯æŒ‡æœ‰å¤šå°‘ä¸ª512 page
+// startSubPage æ˜¯æŒ‡ä»ç¬¬ä¸€ä¸ª2k pageçš„å“ªä¸ª512k pageå¼€å§‹
+// ç”±äºéƒ½æ˜¯åœ¨ block ä¹‹é—´æ‹·è´ï¼Œæ‰€ä»¥æœ€å¤š 64 ä¸ª page
+// srcAddr å’Œ destAddr åº”è¯¥å¯¹é½
 void ndNandMove( u32 srcAddr, u32 destAddr, u8 pageCount );
 
-// ÔÚ ÄÚ²¿ PageCopy ÎŞ·¨Ê¹ÓÃµÄÊ±ºò£¬ÊÖ¶¯¿½±´srcµØÖ·¿ªÊ¼ 528 Îªµ¥Î»µÄ page µ½destµØÖ·
-// pageCount ÊÇÖ¸ÓĞ¶àÉÙ¸ö512 page
-// startSubPage ÊÇÖ¸´ÓµÚÒ»¸ö2k pageµÄÄÄ¸ö512k page¿ªÊ¼
-// ÓÉÓÚ¶¼ÊÇÔÚ block Ö®¼ä¿½±´£¬ËùÒÔ×î¶à 64 ¸ö2kpage£¬»»Ëã³É512Ò²¸ÕºÃ256¸ö
+// åœ¨ å†…éƒ¨ PageCopy æ— æ³•ä½¿ç”¨çš„æ—¶å€™ï¼Œæ‰‹åŠ¨æ‹·è´srcåœ°å€å¼€å§‹ 528 ä¸ºå•ä½çš„ page åˆ°deståœ°å€
+// pageCount æ˜¯æŒ‡æœ‰å¤šå°‘ä¸ª512 page
+// startSubPage æ˜¯æŒ‡ä»ç¬¬ä¸€ä¸ª2k pageçš„å“ªä¸ª512k pageå¼€å§‹
+// ç”±äºéƒ½æ˜¯åœ¨ block ä¹‹é—´æ‹·è´ï¼Œæ‰€ä»¥æœ€å¤š 64 ä¸ª2kpageï¼Œæ¢ç®—æˆ512ä¹Ÿåˆšå¥½256ä¸ª
 void ndCopyPages( u32 srcAddr, u32 destAddr, u8 pageCount );
 
-// ÔÚ ÄÚ²¿ PageCopy ÎŞ·¨Ê¹ÓÃµÄÊ±ºò£¬ÊÖ¶¯¿½±´srcµØÖ·¿ªÊ¼ 528 Îªµ¥Î»µÄ page µ½destµØÖ·
-// pageCount ÊÇÖ¸ÓĞ¶àÉÙ¸ö512 page
-// startSubPage ÊÇÖ¸´ÓµÚÒ»¸ö2k pageµÄÄÄ¸ö512k page¿ªÊ¼
-// ÓÉÓÚ¶¼ÊÇÔÚ block Ö®¼ä¿½±´£¬ËùÒÔ×î¶à 64 ¸ö2kpage£¬»»Ëã³É512Ò²¸ÕºÃ256¸ö
+// åœ¨ å†…éƒ¨ PageCopy æ— æ³•ä½¿ç”¨çš„æ—¶å€™ï¼Œæ‰‹åŠ¨æ‹·è´srcåœ°å€å¼€å§‹ 528 ä¸ºå•ä½çš„ page åˆ°deståœ°å€
+// pageCount æ˜¯æŒ‡æœ‰å¤šå°‘ä¸ª512 page
+// startSubPage æ˜¯æŒ‡ä»ç¬¬ä¸€ä¸ª2k pageçš„å“ªä¸ª512k pageå¼€å§‹
+// ç”±äºéƒ½æ˜¯åœ¨ block ä¹‹é—´æ‹·è´ï¼Œæ‰€ä»¥æœ€å¤š 64 ä¸ª2kpageï¼Œæ¢ç®—æˆ512ä¹Ÿåˆšå¥½256ä¸ª
 void ndCopyPages2K( u32 srcAddr, u32 destAddr, u8 pageCount );
 
-// Èç¹ûÕâ´Î²Ù×÷²»ÊÇ½ô¸úÔÚÉÏ´ÎµÄÉÈÇøºóÃæµÄWrite²Ù×÷£¬»òÕßÕâ´Î²Ù×÷²»ÊÇWrite²Ù×÷(±ÈÈçRead)£¬
-// ÄÇÃ´¾ÍÖ´ĞĞndFinishPartialCopy£¬À´°Ñ¸Õ²Å°áÒÆµÄÄÇ¸öblockµÄºó°ë²¿·ÖÄÚÈİ¿½±´µ½ĞÂµÄblockÀï
+// å¦‚æœè¿™æ¬¡æ“ä½œä¸æ˜¯ç´§è·Ÿåœ¨ä¸Šæ¬¡çš„æ‰‡åŒºåé¢çš„Writeæ“ä½œï¼Œæˆ–è€…è¿™æ¬¡æ“ä½œä¸æ˜¯Writeæ“ä½œ(æ¯”å¦‚Read)ï¼Œ
+// é‚£ä¹ˆå°±æ‰§è¡ŒndFinishPartialCopyï¼Œæ¥æŠŠåˆšæ‰æ¬ç§»çš„é‚£ä¸ªblockçš„ååŠéƒ¨åˆ†å†…å®¹æ‹·è´åˆ°æ–°çš„blocké‡Œ
 void ndFinishPartialCopy();
 
 /*
-´íÎó´¦Àí
+é”™è¯¯å¤„ç†
 */
 void ndReplaceBlock( u32 oldBlockAddr );
 
-// ¼ì²é¶ÁĞ´¹ı³ÌÖĞÊÇ·ñÓĞ ecc ´íÎó£¬
-// Èç¹û³öÏÖÁË ecc ´íÎó£¬ËµÃ÷¾É¿é¿ÉÄÜ²»ÎÈ¶¨ÁË
-// ÄÇÃ´ÓÃndReplaceBlock()°Ñ¾É¿é¿½±´µ½ĞÂ¿é£¬¾É¿é±ê¼ÇÎª»µ¿é£¬Èç¹û¿½±´¹ı³ÌÖĞ´æÔÚÓĞ 2 bit ecc error
-// ÄÇÃ´°Ñ¸Õ¸Õ¿½±´¹ıÈ¥µÄĞÂ¿éÖ±½Óeraseµô£¨¿ÉÄÜ»á¶ªÊ§128kÊı¾İ£©
-// ·µ»ØÖµ£º 0  no error
+// æ£€æŸ¥è¯»å†™è¿‡ç¨‹ä¸­æ˜¯å¦æœ‰ ecc é”™è¯¯ï¼Œ
+// å¦‚æœå‡ºç°äº† ecc é”™è¯¯ï¼Œè¯´æ˜æ—§å—å¯èƒ½ä¸ç¨³å®šäº†
+// é‚£ä¹ˆç”¨ndReplaceBlock()æŠŠæ—§å—æ‹·è´åˆ°æ–°å—ï¼Œæ—§å—æ ‡è®°ä¸ºåå—ï¼Œå¦‚æœæ‹·è´è¿‡ç¨‹ä¸­å­˜åœ¨æœ‰ 2 bit ecc error
+// é‚£ä¹ˆé‡æ–°è®¡ç®—é‚£ä¸ªpageçš„eccï¼ŒæŠŠå¸¦ç€é”™è¯¯çš„æ•°æ®å†™å…¥æ–°å—ï¼Œé¿å…ä¸¢å¤±æ›´å¤šæ•°æ®
+// è¿”å›å€¼ï¼š 0  no error
 //          1  1 bit ecc error
 //          2  2 bit ecc error
 bool ndCheckError();
 /*
-´íÎó´¦Àí½áÊø
+é”™è¯¯å¤„ç†ç»“æŸ
 */
 
 #ifdef __cplusplus

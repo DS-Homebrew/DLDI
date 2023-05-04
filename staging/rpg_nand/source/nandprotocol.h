@@ -21,7 +21,7 @@
 #ifndef _NANDPROTOCOL_H_
 #define _NANDPROTOCOL_H_
 
-#include <nds.h>
+#include <nds/ndstypes.h>
 
 #ifdef __cplusplus
 extern "C" {

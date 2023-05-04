@@ -18,7 +18,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nds.h>
+#include <nds/ndstypes.h>
 
 
 #ifdef __cplusplus

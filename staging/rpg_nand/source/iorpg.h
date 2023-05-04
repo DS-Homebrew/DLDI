@@ -21,7 +21,7 @@
 #ifndef _IORPG_H_
 #define _IORPG_H_
 
-#include <nds.h>
+#include <nds/ndstypes.h>
 #include "rpgprotocol.h"
 #include "nanddriver.h"
 #include "sddriver.h"

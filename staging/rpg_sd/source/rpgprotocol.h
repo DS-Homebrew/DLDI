@@ -21,7 +21,34 @@
 #ifndef _RPGPROTOCOL_H_
 #define _RPGPROTOCOL_H_
 
-#include <nds.h>
+#include <nds/ndstypes.h>
+
+#ifndef NULL
+ #define NULL 0
+#endif
+
+// the following defines are from libnds
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+
+#define REG_AUXSPICNT	(*(vu16*)0x040001A0)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_AUXSPIDATA	(*(vu8*)0x040001A2)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
+#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+
+#define CARD_ACTIVATE     (1<<31)           // when writing, get the ball rolling
+#define CARD_nRESET       (1<<29)           // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
+
+// 3 bits in b10..b8 indicate something
+// read bits
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
+#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -43,7 +43,7 @@
 #endif
 
 /*-----------------------------------------------------------------
-startUp
+startup
 Initialize the interface, geting it into an idle, ready state
 returns true if successful, otherwise returns false
 -----------------------------------------------------------------*/
@@ -60,17 +60,6 @@ bool isInserted (void) {
 	return false;
 }
 
-
-/*-----------------------------------------------------------------
-clearStatus
-Reset the card, clearing any status errors
-return true if the card is idle and ready
------------------------------------------------------------------*/
-bool clearStatus (void) {
-	return false;
-}
-
-
 /*-----------------------------------------------------------------
 readSectors
 Read "numSectors" 512-byte sized sectors from the card into "buffer", 
@@ -82,8 +71,6 @@ bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 	return false;
 }
 
-
-
 /*-----------------------------------------------------------------
 writeSectors
 Write "numSectors" 512-byte sized sectors from "buffer" to the card, 
@@ -92,6 +79,15 @@ The buffer may be unaligned, and the driver must deal with this correctly.
 return true if it was successful, false if it failed for any reason
 -----------------------------------------------------------------*/
 bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
+	return false;
+}
+
+/*-----------------------------------------------------------------
+clearStatus
+Reset the card, clearing any status errors
+return true if the card is idle and ready
+-----------------------------------------------------------------*/
+bool clearStatus (void) {
 	return false;
 }
 

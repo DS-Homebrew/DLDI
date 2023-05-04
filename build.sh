@@ -12,9 +12,19 @@ mkdir $OUT
 # OSS drivers first
 cd source
 for FILE in *; do
-    make -C $FILE clean
-    make -C $FILE
-    cp $FILE/*.dldi $OUT
+    if [[ $FILE -eq "ttio" ]]; then
+        make -C $FILE clean
+        make -C $FILE SDHC=1 clean
+        make -C $FILE
+        cp $FILE/*.dldi $OUT
+        make -C $FILE clean
+        make -C $FILE SDHC=1
+        cp $FILE/*.dldi $OUT
+    else
+        make -C $FILE clean
+        make -C $FILE
+        cp $FILE/*.dldi $OUT
+    fi
 done
 cd $TOPDIR
 

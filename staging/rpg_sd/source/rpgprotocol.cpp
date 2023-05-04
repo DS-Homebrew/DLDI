@@ -41,10 +41,10 @@ void ioRpgSendCommand( u32 command[2], u32 pageSize, u32 latency, void * buffer 
 
   for( u32 i=0; i<2; ++i )
   {
-    CARD_COMMAND[i*4+0] = command[i]>>24;
-    CARD_COMMAND[i*4+1] = command[i]>>16;
-    CARD_COMMAND[i*4+2] = command[i]>>8;
-    CARD_COMMAND[i*4+3] = command[i]>>0;
+    REG_CARD_COMMAND[i*4+0] = command[i]>>24;
+    REG_CARD_COMMAND[i*4+1] = command[i]>>16;
+    REG_CARD_COMMAND[i*4+2] = command[i]>>8;
+    REG_CARD_COMMAND[i*4+3] = command[i]>>0;
   }
 
   pageSize -= pageSize & 3; // align to 4 byte
@@ -77,7 +77,7 @@ void ioRpgSendCommand( u32 command[2], u32 pageSize, u32 latency, void * buffer 
   {
     cardCtrl = REG_ROMCTRL;
     if( cardCtrl & CARD_DATA_READY  ) {
-      u32 data = CARD_DATA_RD;
+      u32 data = REG_CARD_DATA_RD;
       if( useBuf32 && count < pageSize) {
         *pbuf32++ = data;
       }
@@ -114,7 +114,7 @@ bool ioRpgWaitCmdBusy( bool forceWait )
   while( timeout && forceWait ) {
     REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
     for( u32 i=0; i<8; ++i )
-      CARD_COMMAND[i] = 0xB8;
+      REG_CARD_COMMAND[i] = 0xB8;
     // go
     REG_ROMCTRL = 0;
     REG_ROMCTRL = KEY_PARAM | CARD_ACTIVATE | CARD_nRESET | (6<<24) | 0;
@@ -128,7 +128,7 @@ bool ioRpgWaitCmdBusy( bool forceWait )
     {
       cardCtrl = REG_ROMCTRL;
       if( cardCtrl & CARD_DATA_READY  ) {
-        data = CARD_DATA_RD;
+        data = REG_CARD_DATA_RD;
         count += 4;
         if( 0x00000fc2 == data ) {
           timeout = false;

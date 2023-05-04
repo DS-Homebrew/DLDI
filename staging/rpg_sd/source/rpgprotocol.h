@@ -120,14 +120,14 @@ static inline void ioRpgPushData( const void * data, u16 length )
   } else {
     u8 * pData8 = (u8 *)data;
     while( length ) {
-      CARD_COMMAND[0] = *pData8++;
-      CARD_COMMAND[1] = *pData8++;
-      CARD_COMMAND[2] = *pData8++;
-      CARD_COMMAND[3] = *pData8++;
-      CARD_COMMAND[4] = *pData8++;
-      CARD_COMMAND[5] = *pData8++;
-      CARD_COMMAND[6] = *pData8++;
-      CARD_COMMAND[7] = *pData8++;
+      REG_CARD_COMMAND[0] = *pData8++;
+      REG_CARD_COMMAND[1] = *pData8++;
+      REG_CARD_COMMAND[2] = *pData8++;
+      REG_CARD_COMMAND[3] = *pData8++;
+      REG_CARD_COMMAND[4] = *pData8++;
+      REG_CARD_COMMAND[5] = *pData8++;
+      REG_CARD_COMMAND[6] = *pData8++;
+      REG_CARD_COMMAND[7] = *pData8++;
       length -= 8;
       REG_ROMCTRL = KEY_PARAM | CARD_ACTIVATE | CARD_nRESET;
       while( REG_ROMCTRL & CARD_BUSY ) {}

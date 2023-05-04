@@ -100,6 +100,32 @@ void LogicCardRead(u32 address, u32 *destination, u32 length)
 		cardPolledTransfer(0xa1586000, destination, length, command);
 }
 
+void LogicCardReadMulti(u32 address, u32 *destination, u32 numSectors)
+{
+	u8 command[8];
+
+	command[7] = 0xb1;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	for(int i = 0; i < numSectors; i++) {
+		cardWaitReady(0xa7586000, command);
+		command[7] = 0xba;
+		if ((u32)destination & 0x03)
+			bytecardPolledTransfer(0xa1586000, destination, 128, command);
+		else
+			cardPolledTransfer(0xa1586000, destination, 128, command);
+		command[7] = 0xb2;
+		destination += 128;
+	}
+	command[7] = 0xb3;
+	cardPolledTransfer(0xa0486100, NULL, 1, command);
+}
+
 u32 ReadCardInfo()
 {
 	u8 command[8];
@@ -150,6 +176,47 @@ void LogicCardWrite(u32 address, u32 *source, u32 length)
 	cardWaitReady(0xa7586000, command);
 }
 
+void LogicCardWriteMulti(u32 address, u32 *source, u32 numSectors)
+{
+	u8 command[8];
+	u32 data = 0;
+	u32 length = 128;
+
+	command[7] = 0xb4;
+	command[6] = (address >> 24) & 0xff;
+	command[5] = (address >> 16) & 0xff;
+	command[4] = (address >> 8)  & 0xff;
+	command[3] =  address        & 0xff;
+	command[2] = 0;
+	command[1] = 0;
+	command[0] = 0;
+	for(int i = 0; i < numSectors; i++) {
+		cardWriteCommand(command);
+		REG_ROMCTRL = 0xe1586100;
+		u32 * target = source + length;
+		do {
+			// Write data if ready
+			if (REG_ROMCTRL & CARD_DATA_READY) {
+				if (source < target) {
+					if ((u32)source & 0x03)
+						data = ((uint8*)source)[0] | (((uint8*)source)[1] << 8) | (((uint8*)source)[2] << 16) | (((uint8*)source)[3] << 24);
+					else
+						data = *source;
+				}
+				source++;
+				REG_CARD_DATA_RD = data;
+			}
+		} while (REG_ROMCTRL & CARD_BUSY);
+		command[7] = 0xb6;
+		cardWaitReady(0xa7586000, command);
+		command[7] = 0xb5;
+	}
+	command[7] = 0xb3;
+	cardPolledTransfer(0xa0486100, NULL, 1, command);
+	command[7] = 0xb6;
+	cardWaitReady(0xa7586000, command);
+}
+
 bool startup(void)
 {
 	u32 CardInfo;
@@ -168,25 +235,21 @@ bool isInserted(void)
 
 bool readSectors(u32 sector, u32 numSectors, void* buffer)
 {
-	u32 *u32_buffer = (u32*)buffer, i;
+	u32 *u32_buffer = (u32*)buffer;
 
-	for (i = 0; i < numSectors; i++) {
-		LogicCardRead(sector, u32_buffer, 128);
-		sector++;
-		u32_buffer += 128;
-	}
+	if(numSectors == 1) LogicCardRead(sector, u32_buffer, 128);
+	else LogicCardReadMulti(sector, u32_buffer, numSectors);
+
 	return true;
 }
 
 bool writeSectors(u32 sector, u32 numSectors, void* buffer)
 {
-	u32 *u32_buffer = (u32*)buffer, i;
+	u32 *u32_buffer = (u32*)buffer;
 
-	for (i = 0; i < numSectors; i++) {
-		LogicCardWrite(sector, u32_buffer, 128);
-		sector++;
-		u32_buffer += 128;
-	}
+	if(numSectors == 1) LogicCardWrite(sector, u32_buffer, 128);
+	else LogicCardWriteMulti(sector, u32_buffer, numSectors);
+
 	return true;
 }
 

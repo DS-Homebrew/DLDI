@@ -18,9 +18,9 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../../common_source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../../common_source
 
 
 #---------------------------------------------------------------------------------

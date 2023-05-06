@@ -39,7 +39,7 @@ void ioR4SDReadSector(u32 sector, void *buffer)
     // request should return 0 when ready to access
     do
     {
-        ioR4ReadCardData(IOR4_CMD_SD_READ_REQUEST | ((u64)(sector) << 24), IOR4_CTRL_GENERAL, &ret, 1);
+        ioR4ReadCardData(IOR4_CMD_SD_READ_REQUEST(sector), IOR4_CTRL_GENERAL, &ret, 1);
     } while (ret);
 
     ioR4ReadCardData(IOR4_CMD_SD_READ_DATA, IOR4_CTRL_SD_READ, buffer, 128);
@@ -49,13 +49,13 @@ void ioR4SDWriteSector(u32 sector, const void *buffer)
 {
     u32 ret;
 
-    ioR4WriteCardData(IOR4_CMD_SD_WRITE_START | ((u64)(sector) << 24), IOR4_CTRL_SD_WRITE, buffer, 128);
+    ioR4WriteCardData(IOR4_CMD_SD_WRITE_START(sector), IOR4_CTRL_SD_WRITE, buffer, 128);
 
     // Wait until write finishes
     // status should return 0 when done
     do
     {
-        ioR4ReadCardData(IOR4_CMD_SD_WRITE_STAT | ((u64)(sector) << 24), IOR4_CTRL_GENERAL, &ret, 1);
+        ioR4ReadCardData(IOR4_CMD_SD_WRITE_STAT(sector), IOR4_CTRL_GENERAL, &ret, 1);
     } while (ret);
 }
 
@@ -66,7 +66,7 @@ void ioR4SendFATEntry(u32 address)
     u32 ret;
     do
     {
-        ioR4ReadCardData(IOR4_CMD_FAT_ENTRY_SEND | ((u64)(address) << 24), IOR4_CTRL_GENERAL, &ret, 1);
+        ioR4ReadCardData(IOR4_CMD_FAT_ENTRY_SEND(address), IOR4_CTRL_GENERAL, &ret, 1);
     } while (ret);
 }
 #endif

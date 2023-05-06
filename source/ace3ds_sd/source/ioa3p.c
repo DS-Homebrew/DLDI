@@ -38,7 +38,7 @@ void ioA3PSDReadSector(u32 sector, void *buffer)
     // request should return 0 when ready to access
     do
     {
-        ioA3PReadCardData(IOA3P_CMD_SD_READ_REQUEST | ((u64)(sector) << 24), IOA3P_CTRL_GENERAL, &ret, 1);
+        ioA3PReadCardData(IOA3P_CMD_SD_READ_REQUEST(sector), IOA3P_CTRL_GENERAL, &ret, 1);
     } while (ret);
 
     ioA3PReadCardData(IOA3P_CMD_SD_READ_DATA, IOA3P_CTRL_SD_READ, buffer, 128);
@@ -47,15 +47,12 @@ void ioA3PSDReadSector(u32 sector, void *buffer)
 void ioA3PSDWriteSector(u32 sector, const void *buffer)
 {
     u32 ret;
-    u64 command = IOA3P_CMD_SD_WRITE_START | ((u64)(sector) << 24);
-    ioA3PWriteCardData(command, IOA3P_CTRL_SD_WRITE, buffer, 128);
+    ioA3PWriteCardData(IOA3P_CMD_SD_WRITE_START(sector), IOA3P_CTRL_SD_WRITE, buffer, 128);
 
     // Wait until write finishes
     // status should return 0 when done
     do
     {
-        command = IOA3P_CMD_SD_WRITE_STAT | ((u64)(sector) << 24);
-        command |= ((command >> 56) ^ (command >> 48) ^ (command >> 40) ^ (command >> 32) ^ (command >> 24)) & 0xFF;
-        ioA3PReadCardData(command, IOA3P_CTRL_GENERAL, &ret, 1);
+        ioA3PReadCardData(IOA3P_CMD_SD_WRITE_STAT(sector), IOA3P_CTRL_GENERAL, &ret, 1);
     } while (ret);
 }

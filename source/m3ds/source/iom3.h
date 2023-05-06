@@ -1,5 +1,5 @@
 /*
-    R4(DS) - Revolution for DS (v3)
+    M3 DS Real
     Card IO routines
 
     Copyright (C) 2023 lifehackerhansol

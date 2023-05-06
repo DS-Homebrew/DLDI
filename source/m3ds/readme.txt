@@ -1,13 +1,4 @@
-m3r4.dldi  - M3 DLDI based on r4tf_v2
-
-[m3ds.dldi]
-* Please note m3ds.dldi can be replaced by m3r4.dldi, but it has very slow writing speed. *
-
-Copyright (C)
-Chishm - Original R4TF.dldi
-toro   - Binary patching for M3
-Xenon  - Source patching and rebuild
-lifehackerhansol - Multi-sector read/write
+m3r4.dldi  - M3 DLDI based on r4tf_v3
 
 M3 Command (partial)
 B0xxxxxx xxxxxxxx
@@ -56,3 +47,7 @@ it appears this is also needed after a B3 cmd to end multi-sector writes
 B5aaaaaa aaxxxxxx
 aaaaaaaa: sector address (Don't need to x512) // might not be needed
 write next sector of multi-sectors to SD/TF
+
+
+Credits:
+- toro / Xenon - Single-sector read/write documentation

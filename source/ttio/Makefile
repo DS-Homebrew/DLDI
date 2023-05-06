@@ -25,9 +25,9 @@ export TARGET		:=	$(shell basename $(CURDIR))_sdhc
 endif
 
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../../common_source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include ../../common_source
 
 
 #---------------------------------------------------------------------------------

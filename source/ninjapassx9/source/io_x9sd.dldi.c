@@ -30,34 +30,29 @@ freely, subject to the following restrictions:
 
 //#include <stdio.h>
 //#include <string.h>
-#include <nds.h>
-//#include <nds/jtypes.h>
 #include <nds/ndstypes.h>
-#include "io_sd_card.h"
-#include "io_x9_card.h"
+#include "io_sd_card.dldi.h"
+#include "io_x9_card.dldi.h"
 //#include "io_sd_common.h"
-#include "io_x9sd.h"
+#include "io_x9sd.dldi.h"
 
-
-
-
-
+#include "tonccpy.h"
 
 /*
 bool SDSendCommand6(uint8* response, uint8 command, uint32 data)
 {
-	uint8 sdResponse[32];
-	SDBroadcastCommand((SDCommand)command, data, sdResponse);
-	tonccpy(response, sdResponse, 6);
-	return true;
+    uint8 sdResponse[32];
+    SDBroadcastCommand((SDCommand)command, data, sdResponse);
+    tonccpy(response, sdResponse, 6);
+    return true;
 }
 
 bool SDSendCommand17(uint8* response, uint8 command, uint32 data)
 {
-	uint8 sdResponse[32];
-	SDBroadcastCommand((SDCommand)command, data, sdResponse);
-	tonccpy(response, sdResponse, 17);
-	return true;
+    uint8 sdResponse[32];
+    SDBroadcastCommand((SDCommand)command, data, sdResponse);
+    tonccpy(response, sdResponse, 17);
+    return true;
 }
 */
 
@@ -66,37 +61,39 @@ int Choose();
 
 void Pause()
 {
-	do
-	{
-		scanKeys();
-		swiWaitForVBlank();
-	} while(!(keysDown() & KEY_A));
+    do
+    {
+        scanKeys();        
+        swiWaitForVBlank();        
+    } while(!(keysDown() & KEY_A));
 }
 
 void DumpMemory(unsigned char* data, int bytes)
 {
-	while(bytes > 0)
-	{
-		// Display a screen
-		for(int line = 0; line < 20 && bytes > 0; ++line) {
-			int columns = bytes < 8 ? bytes : 8;
+    while(bytes > 0)
+    {
+        // Display a screen
+        for(int line = 0; line < 20 && bytes > 0; ++line)
+        {
+            int columns = bytes < 8 ? bytes : 8;
 
-			for(int c = 0; c < columns; ++c)
-				printf("%.2x ", data[c]);
+            for(int c = 0; c < columns; ++c)
+                printf("%.2x ", data[c]);
 
-			for(int c = 0; c < columns; ++c) {
-				if(data[c] >= 0x20)
-					printf("%c", data[c]);
-				else
-					printf(".");
-			}
+            for(int c = 0; c < columns; ++c)
+            {
+                if(data[c] >= 0x20)
+                    printf("%c", data[c]);
+                else
+                    printf(".");
+            }
 
-			data+= columns;
-			bytes-= columns;
-		}
+            data+= columns;
+            bytes-= columns;
+        }
 
-		Pause();
-	}
+        Pause();
+    }
 }
 */
 
@@ -114,10 +111,10 @@ bool _X9SD_isInserted(void)
 {
 	//coto: breaks fat initdefault
 	/*
-	static uint8 response[0x20];
-	SDSendCommand(GetStatus, 0, response);
-	// Make sure the card responded correctly
-	return response[0] == GetStatus;
+    static uint8 response[0x20];
+    SDSendCommand(GetStatus, 0, response);
+    // Make sure the card responded correctly
+    return response[0] == GetStatus;
 	*/
 	
 	return true;
@@ -125,66 +122,67 @@ bool _X9SD_isInserted(void)
 
 bool _X9SD_clearStatus(void)
 {
-	return true;
-	//uint8 response[0x20];
-	//return SDInitialize(&relativeCardAddress);
-	//return _SD_InitCard(&SDSendCommand6, SDSendCommand17, true, &relativeCardAddress);
+    return true;
+    //uint8 response[0x20];
+    //return SDInitialize(&relativeCardAddress);
+    //return _SD_InitCard(&SDSendCommand6, SDSendCommand17, true, &relativeCardAddress);
 }
 
 bool _X9SD_shutdown(void)
 {
-	return true;
+    return true;
 }
 
 bool _X9SD_startup(void)
 {
-	//cardIO_1();
-	//cardIO_2(0x1B00);
-	cardIO_3(0);
-	cardIO_4(0);
+    //cardIO_1();
+    //cardIO_2(0x1B00);
+    cardIO_3(0);
+    cardIO_4(0);
 
-	//return SDInitialize(&relativeCardAddress);
-	return true;
+    //return SDInitialize(&relativeCardAddress);
+    return true;
 } 
 
 
 bool _X9SD_writeSectors(uint32 sector, uint32 sectorCount, const uint8* buffer)
 {
-	const uint32 blockLength = 512;
-	while(sectorCount > 0)
-	{
-		if(SDWriteSingleBlock(sector*blockLength, buffer) == true){
+    
+    const uint32 blockLength = 512;
+    while(sectorCount > 0)
+    {
+        if(SDWriteSingleBlock(sector*blockLength, buffer) == true){
 			buffer+= blockLength;
 			--sectorCount;
 			++sector;
 		}
-	}
-	
-	return true;
+    }
+    
+    return true;
 }
 
 bool _X9SD_readSectors(uint32 sector, uint32 sectorCount, uint8* buffer)
 {
-	
-	const uint32 blockLength = 512;
+    
+    const uint32 blockLength = 512;
 
-	/*
-	if(sectorCount == 1)
-	    return SDReadSingleBlock(sector*blockLength, buffer);
-	else
-	    return SDReadMultipleBlocks(sector*blockLength, sectorCount, buffer);
-	*/
+    /*
+    if(sectorCount == 1)
+        return SDReadSingleBlock(sector*blockLength, buffer);
+    else
+        return SDReadMultipleBlocks(sector*blockLength, sectorCount, buffer);
+    */
 
-	while(sectorCount > 0)
+    while(sectorCount > 0)
 	{
-		SDReadSingleBlock(sector*blockLength, buffer);
-
-		buffer+= blockLength;
-		--sectorCount;
-		++sector;
+        SDReadSingleBlock(sector*blockLength, buffer);
+		
+        buffer+= blockLength;
+        --sectorCount;
+        ++sector;
 	}
 
-	return true;
+    return true;
 }
 
 //DLDI.C hook: // Not all compilers like multi-character-constants...

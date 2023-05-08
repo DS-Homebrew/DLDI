@@ -27,12 +27,11 @@ B1aaaaaa aaxxxxxx
 aaaaaaaa: sector address (Don't need to x512)
 preparation to read multiple sectors from SD/TF. wait until reading zero.
 
-B2aaaaaaa aaxxxxxx
-aaaaaaaa: sector address requested in B1 (Don't need to x512)
+B2aaaaaa aaxxxxxx
+aaaaaaaa: sector address requested in B1 (Don't need to x512) // might not be needed
 preparation to read next sector from SD/TF. wait until reading zero.
 
-B3aaaaaaa aaxxxxxx
-aaaaaaaa: sector address (Don't need to x512) // might not be needed
+B3xxxxxx xxxxxxxx
 end multi-sector read or write from SD/TF.
 
 B4aaaaaa aaxxxxxx
@@ -40,12 +39,12 @@ aaaaaaaa: sector address (Don't need to x512)
 write first sector of multi-sectors to SD/TF
 
 B6aaaaaa aaxxxxxx
-aaaaaaaa: sector address (Don't need to x512) // might not be needed
+aaaaaaaa: sector address (Don't need to x512)
 completion to write one sector of multi-sectors to SD/TF. wait until reading zero.
 it appears this is also needed after a B3 cmd to end multi-sector writes
 
 B5aaaaaa aaxxxxxx
-aaaaaaaa: sector address (Don't need to x512) // might not be needed
+aaaaaaaa: sector address (Don't need to x512)
 write next sector of multi-sectors to SD/TF
 
 

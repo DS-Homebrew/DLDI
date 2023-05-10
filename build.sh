@@ -9,6 +9,8 @@ OUT=$TOPDIR/out
 rm -rf $OUT
 mkdir $OUT
 
+set -e
+
 # OSS drivers first
 cd source
 for FILE in *; do

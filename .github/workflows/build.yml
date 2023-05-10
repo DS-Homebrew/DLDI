@@ -35,6 +35,7 @@ jobs:
           path: artifacts
           ref: builds
       - name: Commit artifacts
+        continue-on-error: true
         run: |
           rm -rf artifacts/*.dldi
           cp -r out/*.dldi artifacts/
@@ -45,6 +46,7 @@ jobs:
           git commit -a -m "Build: ${{ github.sha }}"
       - name: Push changes
         uses: ad-m/github-push-action@master
+        continue-on-error: true
         with:
           directory: artifacts
           branch: builds

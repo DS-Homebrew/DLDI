@@ -97,25 +97,8 @@ void LogicCardRead(u32 address, u32 *destination, u32 length)
 	command[7] = 0xca;
 	if ((u32)destination & 0x03)
 		bytecardPolledTransfer(0xa1586000, destination, length, command);
-	else {
-		// check destination location
-		if ((u32)destination - 0x02400000 < 0x400000 // mirror
-		 || (u32)destination < 0x2000000) // ITCM
-		 {
-			cardWriteCommand(command);
-			REG_ROMCTRL = 0xa1586000;
-			do {
-				// Read data if available
-				if (REG_ROMCTRL & CARD_DATA_READY) {
-					*destination = REG_CARD_DATA_RD;
-					destination++;
-				}
-			} while (REG_ROMCTRL & CARD_BUSY);
-		} else {
-			// normal reads
-			cardPolledTransfer(0xa1586000, destination, length, command);
-		}
-	}
+	else
+		cardPolledTransfer(0xa1586000, destination, length, command);
 }
 
 u32 ReadCardInfo()

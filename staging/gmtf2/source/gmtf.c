@@ -47,15 +47,15 @@
 
 //---------------------------------------------------------------------------------
 // The following were taken from libnds
-#define REG_AUXSPICNT       (*(vuint16*)0x040001A0)
-#define REG_AUXSPICNTH      (*(vuint8*)0x040001A1)
-#define REG_SPIDATA   (*(vuint8*)0x040001A2)
-#define REG_ROMCTRL       (*(vuint32*)0x040001A4)
-#define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
-#define REG_CARD_DATA_RD   (*(vuint32*)0x04100010)
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+#define REG_AUXSPICNT	(*(vu16*)0x040001A0)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_AUXSPIDATA	(*(vu8*)0x040001A2)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
 #define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
 #define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
-#define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
+#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
 #define CARD_SPI_BUSY		(1<<7)
 #define CARD_CR1_EN	0x8000
 #define	CARD_CR1_SPI_EN	0x2000

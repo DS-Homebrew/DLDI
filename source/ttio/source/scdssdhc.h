@@ -33,7 +33,8 @@
 #define SCDS_CMD_CARD_RESPONSE   (0x52ull << 56)
 #define SCDS_CMD_SD_WRITE_END    (0x56ull << 56)
 
-#define SCDS_CMD_SD_IS_SDHC      (0x70ull << 56) | (0x7F9E0ull << 0x24)
+// not supported on DSTT
+// #define SCDS_CMD_SD_IS_SDHC      (0x70ull << 56) | (0x7F9E0ull << 0x24)
 
 #define SCDS_CMD_SD_READ_REQUEST (0x80ull << 56)
 #define SCDS_CMD_SD_READ_DATA    (0x81ull << 56)

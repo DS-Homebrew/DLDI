@@ -9,15 +9,16 @@
 #include "card.h"
 
 #if defined(SDHC)
-static bool is_sdhc = true;
+#define is_sdhc 1
 #else
-static bool is_sdhc = false;
+#define is_sdhc 0
 #endif
 
 // Initialize the driver. Returns true on success.
 bool startup(void)
 {
-	is_sdhc = SCDSSendCommand(SCDS_CMD_SD_IS_SDHC);
+	// not supported on DSTT
+	//is_sdhc = SCDSSendCommand(SCDS_CMD_SD_IS_SDHC);
     return true;
 }
 

@@ -18,10 +18,10 @@
 
 // SCDS defines
 // SCDS ROMCTRL flags
-#define SCDS_CTRL_BASE       MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LATENCY2(24) | MCCNT1_LATENCY1(0)
-#define SCDS_CTRL_READ_4B    SCDS_CTRL_BASE | MCCNT1_LEN_4
-#define SCDS_CTRL_READ_512B  SCDS_CTRL_BASE | MCCNT1_LEN_512
-#define SCDS_CTRL_WRITE_512B SCDS_CTRL_BASE | MCCNT1_DIR_WRITE | MCCNT1_LEN_512
+#define SCDS_CTRL_BASE       (MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LATENCY2(24) | MCCNT1_LATENCY1(0))
+#define SCDS_CTRL_READ_4B    (SCDS_CTRL_BASE | MCCNT1_LEN_4)
+#define SCDS_CTRL_READ_512B  (SCDS_CTRL_BASE | MCCNT1_LEN_512)
+#define SCDS_CTRL_WRITE_512B (SCDS_CTRL_BASE | MCCNT1_DIR_WRITE | MCCNT1_LEN_512)
 
 // SCDS CARD_COMMANDs
 
@@ -33,17 +33,17 @@
 #define SCDS_CMD_CARD_RESPONSE   (0x52ull << 56)
 #define SCDS_CMD_SD_WRITE_END    (0x56ull << 56)
 
-#define SCDS_CMD_SD_IS_SDHC      (0x70ull << 56) | (0x7F9E0ull << 0x24)
+#define SCDS_CMD_SD_IS_SDHC      ((0x70ull << 56) | (0x7F9E0ull << 0x24))
 
 #define SCDS_CMD_SD_READ_REQUEST (0x80ull << 56)
 #define SCDS_CMD_SD_READ_DATA    (0x81ull << 56)
 #define SCDS_CMD_SD_WRITE_DATA   (0x82ull << 56)
 
-// 0x33 command has a whole lot of parameters. Will be split as needed
+// 0x51 command has a whole lot of parameters. Will be split as needed
 #define SCDS_CMD_CARD_PARAM             (0x51ull << 56)
-#define SCDS_CMD_CARD_PARAM_R1          SCDS_CMD_CARD_PARAM | 0x100ull
-#define SCDS_CMD_SD_READ_REQUEST_NEXT   SCDS_CMD_CARD_PARAM | (7ull << 8)
-#define SCDS_CMD_SD_RW_MULTI_SECTOR_END SCDS_CMD_CARD_PARAM_R1 | (12ull << 16)
+#define SCDS_CMD_CARD_PARAM_R1          (SCDS_CMD_CARD_PARAM | 0x100ull)
+#define SCDS_CMD_SD_READ_REQUEST_NEXT   (SCDS_CMD_CARD_PARAM | (7ull << 8))
+#define SCDS_CMD_SD_RW_MULTI_SECTOR_END (SCDS_CMD_CARD_PARAM_R1 | (12ull << 16))
 
 static inline u64 SCDS_CMD_SD_READ_SINGLE_SECTOR_SEND(u32 sector)
 {

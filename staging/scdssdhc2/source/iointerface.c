@@ -13,7 +13,7 @@ static bool is_sdhc = false;
 // Initialize the driver. Returns true on success.
 bool startup(void)
 {
-	is_sdhc = SCDSSendCommand(SCDS_CMD_SD_IS_SDHC);
+	is_sdhc = SCDS_SendCommand(SCDS_CMD_SD_IS_SDHC) != 0 ? true : false;
     return true;
 }
 
@@ -28,9 +28,9 @@ bool is_inserted(void)
 bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 {
 	if (num_sectors == 1)
-    	SCDSSDReadSingleSector(is_sdhc ? sector : sector << 9, buffer);
+    	SCDS_SDReadSingleSector(is_sdhc ? sector : sector << 9, buffer);
 	else
-		SCDSSDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+		SCDS_SDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
     return true;
 }
 
@@ -39,9 +39,9 @@ bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 bool write_sectors(uint32_t sector, uint32_t num_sectors, const void *buffer)
 {
 	if (num_sectors == 1)
-    	SCDSSDWriteSingleSector(is_sdhc ? sector : sector << 9, buffer);
+    	SCDS_SDWriteSingleSector(is_sdhc ? sector : sector << 9, buffer);
 	else
-		SCDSSDWriteMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+		SCDS_SDWriteMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
     return true;
 }
 

@@ -18,14 +18,14 @@
 bool startup(void)
 {
 	// not supported on DSTT
-	//is_sdhc = SCDSSendCommand(SCDS_CMD_SD_IS_SDHC);
-    return true;
+	//is_sdhc = SCDS_SendCommand(SCDS_CMD_SD_IS_SDHC) != 0 ? true : false;
+	return true;
 }
 
 // Returns true if a card is present and initialized.
 bool is_inserted(void)
 {
-    return true;
+	return true;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on
@@ -33,10 +33,10 @@ bool is_inserted(void)
 bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 {
 	if (num_sectors == 1)
-    	SCDSSDReadSingleSector(is_sdhc ? sector : sector << 9, buffer);
+		SCDS_SDReadSingleSector(is_sdhc ? sector : sector << 9, buffer);
 	else
-		SCDSSDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
-    return true;
+		SCDS_SDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+	return true;
 }
 
 // Writes 512 byte sectors from a buffer that may be unaligned. Returns true on
@@ -44,20 +44,20 @@ bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 bool write_sectors(uint32_t sector, uint32_t num_sectors, const void *buffer)
 {
 	if (num_sectors == 1)
-    	SCDSSDWriteSingleSector(is_sdhc ? sector : sector << 9, buffer);
+		SCDS_SDWriteSingleSector(is_sdhc ? sector : sector << 9, buffer);
 	else
-		SCDSSDWriteMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
-    return true;
+		SCDS_SDWriteMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+	return true;
 }
 
 // Clear error flags from the card. Returns true on success.
 bool clear_status(void)
 {
-    return true;
+	return true;
 }
 
 // Shutdowns the card. This may never be called.
 bool shutdown(void)
 {
-    return true;
+	return true;
 }

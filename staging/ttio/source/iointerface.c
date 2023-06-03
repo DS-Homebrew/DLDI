@@ -32,10 +32,7 @@ bool is_inserted(void)
 // success.
 bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 {
-	if (num_sectors == 1)
-		SCDS_SDReadSingleSector(is_sdhc ? sector : sector << 9, buffer);
-	else
-		SCDS_SDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+	SCDS_SDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
 	return true;
 }
 

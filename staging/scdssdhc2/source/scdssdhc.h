@@ -38,7 +38,7 @@
 
 // return 0 == SD
 // return non-0 == SDHC
-#define SCDS_CMD_SD_IS_SDHC      ((0x70ull << 56) | (0x7F9E0ull << 0x24))
+#define SCDS_CMD_SD_IS_SDHC      ((0x70ull << 56) | (0x7F9E0ull << 24))
 
 #define SCDS_CMD_SD_READ_REQUEST (0x80ull << 56)
 #define SCDS_CMD_SD_READ_DATA    (0x81ull << 56)

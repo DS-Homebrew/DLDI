@@ -8,7 +8,6 @@
 */
 
 #include <nds/ndstypes.h>
-#include <assert.h>
 #include "scdssdhc.h"
 #include "card.h"
 

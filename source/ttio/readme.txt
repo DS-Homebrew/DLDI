@@ -1,8 +1,10 @@
 scds.dldi / ttio.dldi
-Reimplementation of DSONE SDHC DLDI using r4tfv2 base
+Reimplementation of DSONE SDHC DLDI using r4tfv3 base
 
-- Framework by R4DS team and Chishm
-- Reimplemented by lifehackerhansol
+SPDX-License-Identifier: Zlib
+
+- Card library by Gericom
+- IO routine by lifehackerhansol
 
 To build non-SDHC:
 - `make`

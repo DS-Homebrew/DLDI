@@ -73,7 +73,7 @@ static inline u64 SCDS_CMD_SD_WRITE_MULTI_SECTOR_SEND(u32 sector)
 
 // user API
 u32 SCDS_SendCommand(const u64 command);
-void SCDS_SDReadSingleSector(u32 sector, void *buffer);
+//void SCDS_SDReadSingleSector(u32 sector, void *buffer);
 void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors);
 void SCDS_SDWriteSingleSector(u32 sector, const void *buffer);
 void SCDS_SDWriteMultiSector(u32 sector, const void *buffer, u32 num_sectors);

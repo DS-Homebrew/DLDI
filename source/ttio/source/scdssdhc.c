@@ -53,6 +53,7 @@ u32 SCDS_SendCommand(const u64 command)
 	return ret;
 }
 
+/*
 void SCDS_SDReadSingleSector(u32 sector, void *buffer)
 {
 	// instruct cart what to read
@@ -64,6 +65,7 @@ void SCDS_SDReadSingleSector(u32 sector, void *buffer)
 	// retrieve data
 	SCDS_ReadCardData(SCDS_CMD_SD_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
 }
+*/
 
 void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors)
 {

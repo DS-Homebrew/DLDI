@@ -18,9 +18,9 @@
 
 // SCDS defines
 // SCDS MCCNT1 flags
-#define SCDS_CTRL_BASE      MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LATENCY2(24) | MCCNT1_LATENCY1(0)
-#define SCDS_CTRL_READ_4B   SCDS_CTRL_BASE | MCCNT1_LEN_4
-#define SCDS_CTRL_READ_512B SCDS_CTRL_BASE | MCCNT1_LEN_512
+#define SCDS_CTRL_BASE      (MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LATENCY2(24) | MCCNT1_LATENCY1(0))
+#define SCDS_CTRL_READ_4B   (SCDS_CTRL_BASE | MCCNT1_LEN_4)
+#define SCDS_CTRL_READ_512B (SCDS_CTRL_BASE | MCCNT1_LEN_512)
 
 // SCDS MCCMDs
 
@@ -41,11 +41,11 @@
 // cc = response type
 // xx = unused
 
-#define SCDS_CMD_SDIO_BASE       (0x33ull << 56) | (0x40ull << 40)
+#define SCDS_CMD_SDIO_BASE       ((0x33ull << 56) | (0x40ull << 40))
 
 static inline u64 SCDS_CMD_SDIO(u8 response, u8 cmd, u32 argument)
 {
-    return SCDS_CMD_SDIO_BASE | ((u64)(cmd | 0x40) << 40) | ((u64)argument << 8) | (u64)response;
+    return SCDS_CMD_SDIO_BASE | ((u64)cmd << 40) | ((u64)argument << 8) | (u64)response;
 }
 
 static inline u64 SCDS_CMD_SDIO_STOP_TRANSMISSION()
@@ -77,6 +77,6 @@ static inline u64 SCDS_CMD_SD_WRITE_DATA(u32 bytes, u32 data)
 }
 
 // user API
-void SCDSSDReadSingleSector(u32 sector, void *buffer);
-void SCDSSDReadMultiSector(u32 sector, void *buffer, u32 num_sectors);
-void SCDSSDWriteSector(u32 sector, const u32 *buffer);
+void SCDS_SDReadSingleSector(u32 sector, void *buffer);
+void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors);
+void SCDS_SDWriteSector(u32 sector, const u32 *buffer);

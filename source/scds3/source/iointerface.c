@@ -24,10 +24,10 @@ bool is_inserted(void)
 // success.
 bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 {
-	if (num_sectors == 1)
-    	SCDSSDReadSingleSector(sector << 9, buffer);
-	else
-		SCDSSDReadMultiSector(sector << 9, buffer, num_sectors);
+    if (num_sectors == 1)
+        SCDS_SDReadSingleSector(sector << 9, buffer);
+    else
+        SCDS_SDReadMultiSector(sector << 9, buffer, num_sectors);
     return true;
 }
 
@@ -37,7 +37,7 @@ bool write_sectors(uint32_t sector, uint32_t num_sectors, const void *buffer)
 {
     for (int i = 0; i < num_sectors; i++)
     {
-        SCDSSDWriteSector((sector + i) << 9, (u32 *)buffer);
+        SCDS_SDWriteSector((sector + i) << 9, (u32 *)buffer);
         buffer = (u8 *)buffer + 0x200;
     }
     return true;

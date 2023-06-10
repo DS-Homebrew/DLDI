@@ -12,7 +12,7 @@
 #include "scds.h"
 #include "card.h"
 
-static inline void SCDSReadCardData(u64 command, u32 flags, void *buffer, u32 length)
+static inline void SCDS_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
 {
     card_romSetCmd(command);
     card_romStartXfer(flags, false);
@@ -22,67 +22,67 @@ static inline void SCDSReadCardData(u64 command, u32 flags, void *buffer, u32 le
         card_romCpuRead(buffer, length);
 }
 
-static inline u32 SCDSSendCommand(const u64 command)
+static inline u32 SCDS_SendCommand(const u64 command)
 {
     u32 ret;
-    SCDSReadCardData(command, SCDS_CTRL_READ_4B, &ret, 1);
+    SCDS_ReadCardData(command, SCDS_CTRL_READ_4B, &ret, 1);
     return ret;
 }
 
-static inline void SCDSFlushResponse(void)
+static inline void SCDS_FlushResponse(void)
 {
-    SCDSSendCommand(SCDS_CMD_CARD_RESPONSE);
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_SendCommand(SCDS_CMD_CARD_RESPONSE);
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
 }
 
-void SCDSSDReadSingleSector(u32 sector, void *buffer)
+void SCDS_SDReadSingleSector(u32 sector, void *buffer)
 {
     // instruct cart what to read
-    SCDSSendCommand(SCDS_CMD_SDIO_READ_SINGLE_BLOCK(sector));
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_SendCommand(SCDS_CMD_SDIO_READ_SINGLE_BLOCK(sector));
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
 
     // instruct cart to start reading
-    SCDSSendCommand(SCDS_CMD_SD_READ_REQUEST);
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_SendCommand(SCDS_CMD_SD_READ_REQUEST);
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
 
     // retrieve data
-    SCDSReadCardData(SCDS_CMD_SD_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
+    SCDS_ReadCardData(SCDS_CMD_SD_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
 }
 
-void SCDSSDReadMultiSector(u32 sector, void *buffer, u32 num_sectors)
+void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors)
 {
     // instruct cart what to read
-    SCDSSendCommand(SCDS_CMD_SDIO_READ_MULTIPLE_BLOCK(sector));
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_SendCommand(SCDS_CMD_SDIO_READ_MULTIPLE_BLOCK(sector));
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
 
     for (int i = 0; i < num_sectors; i++)
     {
         // instruct cart to start reading
-        SCDSSendCommand(SCDS_CMD_SD_READ_REQUEST);
-        while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+        SCDS_SendCommand(SCDS_CMD_SD_READ_REQUEST);
+        while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
         // retrieve data
-        SCDSReadCardData(SCDS_CMD_SD_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
+        SCDS_ReadCardData(SCDS_CMD_SD_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
         buffer = (u8 *)buffer + 0x200;
     }
 
     // end read
-    SCDSSendCommand(SCDS_CMD_SDIO_STOP_TRANSMISSION());
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
-    SCDSFlushResponse();
+    SCDS_SendCommand(SCDS_CMD_SDIO_STOP_TRANSMISSION());
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_FlushResponse();
 }
 
-void SCDSSDWriteSector(u32 sector, const u32 *buffer)
+void SCDS_SDWriteSector(u32 sector, const u32 *buffer)
 {
     // instruct cart where to write
-    SCDSSendCommand(SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(sector));
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
-    SCDSFlushResponse();
+    SCDS_SendCommand(SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(sector));
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_FlushResponse();
 
     // write
     for (u32 i = 0; i < 128; i++)
-        SCDSSendCommand(SCDS_CMD_SD_WRITE_DATA(i << 2, buffer[i]));
+        SCDS_SendCommand(SCDS_CMD_SD_WRITE_DATA(i << 2, buffer[i]));
 
     // end write
-    SCDSSendCommand(SCDS_CMD_SD_WRITE_END);
-    while(SCDSSendCommand(SCDS_CMD_CARD_BUSY));
+    SCDS_SendCommand(SCDS_CMD_SD_WRITE_END);
+    while(SCDS_SendCommand(SCDS_CMD_CARD_BUSY));
 }

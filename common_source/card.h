@@ -117,7 +117,7 @@ extern "C"
 
     static inline void card_romStartXfer(u32 settings, bool irq)
     {
-        REG_MCCNT0 = (REG_MCCNT0 & ~MCCNT0_MODE_MASK) | MCCNT0_MODE_ROM | (irq ? MCCNT0_ROM_XFER_IRQ : 0) | MCCNT0_ENABLE;
+        REG_MCCNT0 = (REG_MCCNT0 & ~(MCCNT0_MODE_MASK | MCCNT0_ROM_XFER_IRQ)) | MCCNT0_MODE_ROM | (irq ? MCCNT0_ROM_XFER_IRQ : 0) | MCCNT0_ENABLE;
         REG_MCCNT1 = MCCNT1_ENABLE | settings;
     }
 

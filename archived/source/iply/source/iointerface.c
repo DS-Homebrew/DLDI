@@ -34,7 +34,7 @@
 #endif
 
 #ifdef NDS
- #include <nds/jtypes.h>
+ #include <nds/ndstypes.h>
 #else
  #include "gba_types.h"
 #endif
@@ -49,26 +49,26 @@
 #include <nds/card.h>
 
 
-#define CARD_CR2_FLAG 0xA0180010
-#define CARD_CR2_FLAGW 0xE0180010
+#define ROMCTRL_FLAG 0xA0180010
+#define ROMCTRL_FLAGW 0xE0180010
 
 u32 cardcommand_r4(u8 cmd,u32 address,u32 data) 
 {
     u32 returndata = 0;
-	CARD_CR1H = CARD_CR1_ENABLE | CARD_CR1_IRQ;
-	CARD_COMMAND[0] = cmd;
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8) & 0xff;
-	CARD_COMMAND[4] = address & 0xff;
-	CARD_COMMAND[5] = (data>>16) & 0xff;
-	CARD_COMMAND[6] = (data>>8) & 0xff;
-	CARD_COMMAND[7] = data & 0xff;
-	CARD_CR2 = CARD_CR2_FLAG | 0x07000000;
+	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_CARD_COMMAND[0] = cmd;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8) & 0xff;
+	REG_CARD_COMMAND[4] = address & 0xff;
+	REG_CARD_COMMAND[5] = (data>>16) & 0xff;
+	REG_CARD_COMMAND[6] = (data>>8) & 0xff;
+	REG_CARD_COMMAND[7] = data & 0xff;
+	REG_ROMCTRL = ROMCTRL_FLAG | 0x07000000;
 	do{
-		if (CARD_CR2&CARD_DATA_READY) 
-			returndata=CARD_DATA_RD;
-	}while (CARD_CR2&CARD_BUSY);
+		if (REG_ROMCTRL&CARD_DATA_READY) 
+			returndata=REG_CARD_DATA_RD;
+	}while (REG_ROMCTRL&CARD_BUSY);
 	return returndata;
 }
 int wait_ack(void)
@@ -108,50 +108,50 @@ void cardcommand_r512(u8 cmd,u32 address,u32 buf)
     u32 returndata;
     cmd_begin();
 
-	CARD_COMMAND[0] = cmd;
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8) & 0xff;
-	CARD_COMMAND[4] = address & 0xff;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 2;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = CARD_CR2_FLAG;
+	REG_CARD_COMMAND[0] = cmd;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8) & 0xff;
+	REG_CARD_COMMAND[4] = address & 0xff;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 2;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = ROMCTRL_FLAG;
 	do{
-		if (CARD_CR2&CARD_DATA_READY) 
-			returndata=CARD_DATA_RD;
-	}while (CARD_CR2&CARD_BUSY);
+		if (REG_ROMCTRL&CARD_DATA_READY) 
+			returndata=REG_CARD_DATA_RD;
+	}while (REG_ROMCTRL&CARD_BUSY);
     wait_data();
 
-	CARD_COMMAND[0] = 0xe8;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
-    CARD_CR2 =CARD_CR2_FLAG | 0x01000000;
+	REG_CARD_COMMAND[0] = 0xe8;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
+    REG_ROMCTRL =ROMCTRL_FLAG | 0x01000000;
     if ((buf & 3) != 0)
     {
         do {
-            if (CARD_CR2 & CARD_DATA_READY) {
-                u32 tempdata=CARD_DATA_RD;
+            if (REG_ROMCTRL & CARD_DATA_READY) {
+                u32 tempdata=REG_CARD_DATA_RD;
                 *(u8*)buf++ = (tempdata>>0) & 0xff;
                 *(u8*)buf++ = (tempdata>>8) & 0xff;
                 *(u8*)buf++ = (tempdata>>16) & 0xff;
                 *(u8*)buf++ = (tempdata>>24) & 0xff;
                 }
-        } while (CARD_CR2 & CARD_BUSY);
+        } while (REG_ROMCTRL & CARD_BUSY);
     }
     else
     {
         do {
-            if (CARD_CR2 & CARD_DATA_READY) {
-                *(u32*)buf=CARD_DATA_RD;
+            if (REG_ROMCTRL & CARD_DATA_READY) {
+                *(u32*)buf=REG_CARD_DATA_RD;
                 buf += 4;
                 }
-        } while (CARD_CR2 & CARD_BUSY);
+        } while (REG_ROMCTRL & CARD_BUSY);
 
     }
   
@@ -164,50 +164,50 @@ void cardcommand_w512(u8 cmd,u32 address,u32 buf)
     u32 returndata;
     cmd_begin();
 
-	CARD_COMMAND[0] = 0xe9;
-	CARD_COMMAND[1] = 0;
-	CARD_COMMAND[2] = 0;
-	CARD_COMMAND[3] = 0;
-	CARD_COMMAND[4] = 0;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 0;
-	CARD_COMMAND[7] = 0;
+	REG_CARD_COMMAND[0] = 0xe9;
+	REG_CARD_COMMAND[1] = 0;
+	REG_CARD_COMMAND[2] = 0;
+	REG_CARD_COMMAND[3] = 0;
+	REG_CARD_COMMAND[4] = 0;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
 
-    CARD_CR2 =CARD_CR2_FLAGW | 0x01000000;
+    REG_ROMCTRL =ROMCTRL_FLAGW | 0x01000000;
     if ((buf & 3) != 0)
     {
         do {
-            if (CARD_CR2 & CARD_DATA_READY) {
+            if (REG_ROMCTRL & CARD_DATA_READY) {
                     u32 tempdata = ((u8*)buf)[0] | (((u8*)buf)[1] << 8) | (((u8*)buf)[2] << 16) | (((u8*)buf)[3] << 24);
-                    CARD_DATA_RD= tempdata;
+                    REG_CARD_DATA_RD= tempdata;
                     buf+=4;
                 }
-        } while (CARD_CR2 & CARD_BUSY);
+        } while (REG_ROMCTRL & CARD_BUSY);
     }
     else
     {
         do {
-            if (CARD_CR2 & CARD_DATA_READY) {
-                    CARD_DATA_RD= *(u32*)buf;
+            if (REG_ROMCTRL & CARD_DATA_READY) {
+                    REG_CARD_DATA_RD= *(u32*)buf;
                     buf+=4;
                 }
-        } while (CARD_CR2 & CARD_BUSY);
+        } while (REG_ROMCTRL & CARD_BUSY);
 
     }
 
-	CARD_COMMAND[0] = cmd;
-	CARD_COMMAND[1] = (address >> 24) & 0xff;
-	CARD_COMMAND[2] = (address >> 16) & 0xff;
-	CARD_COMMAND[3] = (address >> 8) & 0xff;
-	CARD_COMMAND[4] = address & 0xff;
-	CARD_COMMAND[5] = 0;
-	CARD_COMMAND[6] = 2;
-	CARD_COMMAND[7] = 0;
-	CARD_CR2 = CARD_CR2_FLAG;
+	REG_CARD_COMMAND[0] = cmd;
+	REG_CARD_COMMAND[1] = (address >> 24) & 0xff;
+	REG_CARD_COMMAND[2] = (address >> 16) & 0xff;
+	REG_CARD_COMMAND[3] = (address >> 8) & 0xff;
+	REG_CARD_COMMAND[4] = address & 0xff;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 2;
+	REG_CARD_COMMAND[7] = 0;
+	REG_ROMCTRL = ROMCTRL_FLAG;
 	do{
-		if (CARD_CR2&CARD_DATA_READY) 
-			returndata=CARD_DATA_RD;
-	}while (CARD_CR2&CARD_BUSY);
+		if (REG_ROMCTRL&CARD_DATA_READY) 
+			returndata=REG_CARD_DATA_RD;
+	}while (REG_ROMCTRL&CARD_BUSY);
 
     wait_ack();
 

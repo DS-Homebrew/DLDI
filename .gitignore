@@ -4,9 +4,10 @@
 !prebuilts/*.dldi
 *.elf
 *.DS_Store
+*.nds
 
 # Build Directory
-*build/
+*build*/
 out
 artifacts
 

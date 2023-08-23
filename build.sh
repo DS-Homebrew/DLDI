@@ -22,6 +22,21 @@ for FILE in *; do
         make -C $FILE clean
         make -C $FILE SDHC=1
         cp $FILE/*.dldi $OUT
+    elif [[ $FILE == "rpg_sd" ]]; then
+        # Clean before starting
+        make -C $FILE clean
+        make -C $FILE -f Makefile_ak2 clean
+        make -C $FILE -f Makefile_ak2_singlewrite clean
+        make -C $FILE -f Makefile_r4idsn clean
+
+        # Build everything
+        make -C $FILE
+        make -C $FILE -f Makefile_ak2 clean
+        make -C $FILE -f Makefile_ak2_singlewrite
+        make -C $FILE -f Makefile_r4idsn
+
+        # Copy to out
+        cp $FILE/*.dldi $OUT
     else
         make -C $FILE clean
         make -C $FILE

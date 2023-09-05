@@ -8,18 +8,10 @@
 #include "scdssdhc.h"
 #include "libtwl_card.h"
 
-#if defined(SDHC)
-#define is_sdhc 1
-#else
-#define is_sdhc 0
-#endif
-
 // Initialize the driver. Returns true on success.
 bool startup(void)
 {
-	// not supported on DSTT
-	//is_sdhc = SCDS_SendCommand(SCDS_CMD_SD_IS_SDHC) != 0 ? true : false;
-	return true;
+	return SCDS_SDInitialize();
 }
 
 // Returns true if a card is present and initialized.
@@ -32,7 +24,14 @@ bool is_inserted(void)
 // success.
 bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 {
-	SCDS_SDReadMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+// Some devices based on TTIO breaks when trying to do both types of reads,
+// so stick with multi-sector reads.
+/*
+	if (num_sectors == 1)
+    	SCDS_SDReadSingleSector(sector, buffer);
+	else
+*/
+		SCDS_SDReadMultiSector(sector, buffer, num_sectors);
 	return true;
 }
 
@@ -41,9 +40,9 @@ bool read_sectors(uint32_t sector, uint32_t num_sectors, void *buffer)
 bool write_sectors(uint32_t sector, uint32_t num_sectors, const void *buffer)
 {
 	if (num_sectors == 1)
-		SCDS_SDWriteSingleSector(is_sdhc ? sector : sector << 9, buffer);
+		SCDS_SDWriteSingleSector(sector, buffer);
 	else
-		SCDS_SDWriteMultiSector(is_sdhc ? sector : sector << 9, buffer, num_sectors);
+		SCDS_SDWriteMultiSector(sector, buffer, num_sectors);
 	return true;
 }
 

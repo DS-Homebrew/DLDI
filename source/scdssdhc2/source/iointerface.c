@@ -13,7 +13,7 @@ static bool is_sdhc = false;
 // Initialize the driver. Returns true on success.
 bool startup(void)
 {
-	is_sdhc = SCDS_SendCommand(SCDS_CMD_SD_IS_SDHC) != 0 ? true : false;
+	is_sdhc = SCDS_SendCommand(SCDS_CMD_SD_IS_SDHC()) != 0 ? true : false;
     return true;
 }
 

@@ -16,14 +16,7 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-SDHC	?= 0
-
-ifeq ($(SDHC),0)
 export TARGET		:=	$(shell basename $(CURDIR))
-else
-export TARGET		:=	$(shell basename $(CURDIR))_sdhc
-endif
-
 BUILD		:=	build
 SOURCES		:=	source ../../common_source
 DATA		:=	data
@@ -34,10 +27,6 @@ INCLUDES	:=	include ../../common_source
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb-interwork
-
-ifneq ($(SDHC),0)
-ARCH	+=	-DSDHC
-endif
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\

@@ -4,9 +4,26 @@
  *      http://www.neoflash.com
  *----------------------------------------------------------------------------*/
  
-#include "common.h"
+#include <nds/ndstypes.h>
 
-#include <nds/card.h>
+#include "tonccpy.h"
+
+#ifndef NULL
+	#define NULL 0
+#endif
+
+// Card bus
+#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
+
+#define REG_AUXSPICNT	(*(vu16*)0x040001A0)
+#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
+#define REG_AUXSPIDATA	(*(vu8*)0x040001A2)
+#define REG_ROMCTRL		(*(vu32*)0x040001A4)
+
+#define REG_CARD_COMMAND	((vu8*)0x040001A8)
+
+#define CARD_SPICNTH_ENABLE  (1<<7)  // in byte 1, i.e. 0x8000
+#define CARD_SPICNTH_IRQ     (1<<6)  // in byte 1, i.e. 0x4000
 
 #define	nrio_fattab		((u8*)0x023FEE00)				//FIXME: DLDI could not alloc global memory ??
 #define	nrio_buf		((u8*)(0x023FEE00-0x800))
@@ -14,18 +31,19 @@
 #define nrio_fattabaddr (*(vu32*)(0x023FEE00-0x800-4))
 #define nrio_bufaddr	(*(vu32*)(0x023FEE00-0x800-12))
 
+#define CARD_HEADER_CARDCONTROL13  (*(vu32*)0x02FFFE60)
 
 u32 CalcCARD_CR2_D2()
 {
 	u32 da,db,dc,ncr2;
-	da=*(vu32*)0x027FFE60;
-	db=*(vu32*)0x027FFE60;
+	da=CARD_HEADER_CARDCONTROL13;
+	db=CARD_HEADER_CARDCONTROL13;
 	da=da&0x00001FFF;
 	db=db&0x003F0000;
 	db=db>>16;
 	dc=da+db;
 	dc=(dc/2)-1;
-	ncr2=*(vu32*)0x027FFE60;
+	ncr2=CARD_HEADER_CARDCONTROL13;
 	ncr2&=~0x003F1FFF;
 	ncr2|=dc;
 	return ncr2;
@@ -33,25 +51,25 @@ u32 CalcCARD_CR2_D2()
 
 void cardreadpage(unsigned int addr,unsigned int dst,unsigned char cmd,unsigned int card_cr2)
 {
-	*(volatile unsigned char*)0x40001A1 = 0xC0;
-	*(volatile unsigned char*)0x40001A8 = cmd;
-	*(volatile unsigned char*)0x40001A9 = (addr >> 24);
-	*(volatile unsigned char*)0x40001AA = (addr >> 16);
-	*(volatile unsigned char*)0x40001AB = (addr >> 8);
-	*(volatile unsigned char*)0x40001AC = addr;
-	*(volatile unsigned char*)0x40001AD = 0;
-	*(volatile unsigned char*)0x40001AE = 0;
-	*(volatile unsigned char*)0x40001AF = 0;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
+	REG_CARD_COMMAND[0] = cmd;
+	REG_CARD_COMMAND[1] = (addr >> 24);
+	REG_CARD_COMMAND[2] = (addr >> 16);
+	REG_CARD_COMMAND[3] = (addr >> 8);
+	REG_CARD_COMMAND[4] = addr;
+	REG_CARD_COMMAND[5] = 0;
+	REG_CARD_COMMAND[6] = 0;
+	REG_CARD_COMMAND[7] = 0;
 	
 	
-	*(volatile unsigned int*)0x40001A4 = card_cr2;
+	REG_ROMCTRL = card_cr2;
 	do {
 		// Read data if available
-		if ((*(volatile unsigned int*)0x40001A4) & 0x800000) {
-			*(volatile unsigned int*)dst=*(volatile unsigned int*)0x4100010;
+		if (REG_ROMCTRL & 0x800000) {
+			*(volatile unsigned int*)dst=REG_CARD_DATA_RD;
 			dst+=4;
 		}
-	} while ((*(volatile unsigned int*)0x40001A4) & 0x80000000);
+	} while (REG_ROMCTRL & 0x80000000);
 }
 
 __inline
@@ -95,13 +113,11 @@ void _nrio_readSector (u32 sector, void* buffer)
 		}
 		else
 		{
-			u32 i;
-			u32*pbuf=(u32*)buffer;
-			for(i=0;i<512;i++)*pbuf++=0;
+			toncset((u8*)buffer, 0, 512);
 		}
 		nrio_bufaddr=(sector/0x800);
 	}
-	swiFastCopy((void*)(nrio_buf+sector%0x800),(void*)buffer,128);
+	tonccpy((void*)(nrio_buf+sector%0x800), (void*)buffer, 128);
 }
 
 

@@ -6,7 +6,7 @@
 #include <nds/ndstypes.h>
 
 #include "iom0.h"
-#include "card.h"
+#include "libtwl_card.h"
 
 // Initialize the driver. Returns true on success.
 bool startup(void)

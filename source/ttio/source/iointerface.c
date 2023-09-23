@@ -6,7 +6,7 @@
 #include <nds/ndstypes.h>
 
 #include "scdssdhc.h"
-#include "card.h"
+#include "libtwl_card.h"
 
 #if defined(SDHC)
 #define is_sdhc 1

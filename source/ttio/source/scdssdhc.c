@@ -9,7 +9,7 @@
 
 #include <nds/ndstypes.h>
 #include "scdssdhc.h"
-#include "card.h"
+#include "libtwl_card.h"
 
 static inline void SCDS_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
 {

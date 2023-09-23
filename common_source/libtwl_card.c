@@ -1,5 +1,5 @@
 /*
-    NDS Card routines
+    This file is a part of libtwl (card.c)
 
     Copyright (C) 2023 Gericom
 
@@ -7,7 +7,7 @@
 */
 
 #include <nds/ndstypes.h>
-#include "card.h"
+#include "libtwl_card.h"
 
 void card_romCpuRead(u32* dst, u32 words)
 {

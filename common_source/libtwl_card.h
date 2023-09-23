@@ -1,5 +1,5 @@
 /*
-    NDS Card routines
+    This file is a part of libtwl (card.h)
 
     Copyright (C) 2023 Gericom
 

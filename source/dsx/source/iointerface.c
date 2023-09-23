@@ -71,6 +71,10 @@
 
 #define CARD_ACTIVATE     (1<<31)           // when writing, get the ball rolling
 #define CARD_nRESET       (1<<29)           // value on the /reset pin (1 = high out, not a reset state, 0 = low out = in reset)
+#define CARD_SEC_CMD      (1<<22)           // The command transfer will be hardware encrypted (KEY2)
+#define CARD_DELAY2(n)    (((n)&0x3F)<<16)  // Transfer delay length part 2
+#define CARD_SEC_EN       (1<<14)           // Security enable
+#define CARD_SEC_DAT      (1<<13)           // The data transfer will be hardware encrypted (KEY2)
 
 // 3 bits in b10..b8 indicate something
 // read bits
@@ -154,7 +158,7 @@ void dsxSendCommand(unsigned int command[2], unsigned int pageSize, unsigned int
 		break;	
 	}
 
-	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | pageSize | ((*(unsigned int*)0x027ffe60) & ~0x07001FFF) | latency;
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | CARD_SEC_CMD | CARD_SEC_EN | CARD_SEC_DAT | CARD_DELAY2(24) | pageSize | latency;
 
 	do
 	{

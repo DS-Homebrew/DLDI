@@ -72,14 +72,12 @@ void cardreadpage(unsigned int addr,unsigned int dst,unsigned char cmd,unsigned 
 	} while (REG_ROMCTRL & 0x80000000);
 }
 
-__inline
-void cardreadpage_B7(unsigned int addr,unsigned int dst)
+inline void cardreadpage_B7(unsigned int addr,unsigned int dst)
 {
 	cardreadpage(addr,dst,0xB7,*(vu32*)0x027FFE60);
 }
 
-__inline
-void cardreadpage_D2(unsigned int addr,unsigned int dst)
+inline void cardreadpage_D2(unsigned int addr,unsigned int dst)
 {
 	cardreadpage(addr,dst,0xD2,CARD_CR2_D2);
 }

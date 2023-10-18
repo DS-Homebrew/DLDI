@@ -43,7 +43,25 @@
 		* Moved the SD initialization to a common function
 */
 
-#include "disc_io.h"
+// When compiling for NDS, make sure NDS is defined
+#ifndef NDS
+ #if defined ARM9 || defined ARM7
+  #define NDS
+ #endif
+#endif
+
+#ifdef NDS
+ #include <nds/ndstypes.h>
+#else
+ #include "gba_types.h"
+#endif
+
+#define BYTES_PER_READ 512
+
+#ifndef NULL
+ #define NULL 0
+#endif
+
 #include "io_sd_common.h"
 #include "io_m3_common.h"
 

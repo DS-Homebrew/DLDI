@@ -30,6 +30,8 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <nds/ndstypes.h>
+
 #include "io_m3_common.h"
 
 static u16 _M3_readHalfword (u32 addr) {

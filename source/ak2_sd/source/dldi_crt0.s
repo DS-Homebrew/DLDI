@@ -19,7 +19,11 @@
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
-	.asciz "Acekard AK2 (lifehackerhansol)"
+#ifndef TARGET_SINGLE_BLOCK_WRITE_ONLY
+	.asciz "Acekard AK2"
+#else
+	.asciz "Acekard AK2 (Single-Write version)"
+#endif
 	
 @---------------------------------------------------------------------------------
 @ Offsets to important sections within the data	-- 32 bytes

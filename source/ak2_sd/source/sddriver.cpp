@@ -297,6 +297,7 @@ void sddWriteBlocks( u32 addr, u32 blockCount, const void * buffer )
   const u8 * pBuffer = (u8 *)buffer;
 
   u32 address = _isSDHC ? addr : (addr << 9);
+#ifndef TARGET_SINGLE_BLOCK_WRITE_ONLY
   if( 1 == blockCount ) {
     u32 sdWriteBlock[2] = { 0xd5050018, address };
     sendSDCommandR0( sdWriteBlock );
@@ -319,4 +320,14 @@ void sddWriteBlocks( u32 addr, u32 blockCount, const void * buffer )
     //dbg_printf("cmd %d response %08x\n", 0x0C, *(u32 *)response );
     waitSDState( 0x00 );
   }
+#else
+  u32 sdWriteBlock[2] = { 0xd5050018, address };
+  while ( blockCount-- ) {
+    sendSDCommandR0( sdWriteBlock );
+    ioRpgPushData( pBuffer, 512 );
+    waitSDState( 0x00 );
+    pBuffer += 512;
+    sdWriteBlock[1] += _isSDHC ? 1 : 0x200;
+  }
+#endif
 }

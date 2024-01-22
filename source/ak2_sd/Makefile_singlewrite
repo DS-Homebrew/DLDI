@@ -22,11 +22,10 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 
-$(warning "SINGLE WRITE ONLY")
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork -DTARGET_SINGLE_BLOCK_WRITE_ONLY
+ARCH	:=	-mthumb-interwork -DTARGET_HAS_BROKEN_CMD25
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\

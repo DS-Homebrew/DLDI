@@ -19,7 +19,7 @@
 @---------------------------------------------------------------------------------
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 	.align	4
-#ifndef TARGET_SINGLE_BLOCK_WRITE_ONLY
+#ifndef TARGET_HAS_BROKEN_CMD25
 	.asciz "Acekard AK2"
 #else
 	.asciz "Acekard AK2 (Single-Write version)"

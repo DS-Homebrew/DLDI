@@ -297,7 +297,7 @@ void sddWriteBlocks( u32 addr, u32 blockCount, const void * buffer )
   const u8 * pBuffer = (u8 *)buffer;
 
   u32 address = _isSDHC ? addr : (addr << 9);
-#ifndef TARGET_SINGLE_BLOCK_WRITE_ONLY
+#ifndef TARGET_HAS_BROKEN_CMD25
   if( 1 == blockCount ) {
     u32 sdWriteBlock[2] = { 0xd5050018, address };
     sendSDCommandR0( sdWriteBlock );

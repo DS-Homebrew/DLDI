@@ -19,8 +19,6 @@
 // SCDS defines
 // SCDS ROMCTRL flags
 #define SCDS_CTRL_BASE             (MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LATENCY2(24) | MCCNT1_LATENCY1(0))
-// always used in 0x51 commands
-#define SCDS_CTRL_READ_4B_DELAY    (SCDS_CTRL_BASE | MCCNT1_LEN_4 | MCCNT1_LATENCY1(16))
 #define SCDS_CTRL_READ_4B          (SCDS_CTRL_BASE | MCCNT1_LEN_4)
 #define SCDS_CTRL_READ_512B        (SCDS_CTRL_BASE | MCCNT1_LEN_512)
 #define SCDS_CTRL_WRITE_4B         (SCDS_CTRL_BASE | MCCNT1_DIR_WRITE | MCCNT1_LEN_4)
@@ -37,9 +35,6 @@
 	BBBBBBBB = address
 */
 
-/*
-	SRAM doesn't exist in DSTT
-
 static inline u64 SCDS_CMD_SRAM_READ_DATA(u32 address)
 {
 	return (0x70ull << 56) | ((u64)address << 24);
@@ -49,7 +44,6 @@ static inline u64 SCDS_CMD_SRAM_WRITE_DATA(u32 address)
 {
 	return (0x71ull << 56) | ((u64)address << 24);
 }
-*/
 
 /*
 	This address in SRAM *usually* contains a bool for SD or SDHC
@@ -58,14 +52,10 @@ static inline u64 SCDS_CMD_SRAM_WRITE_DATA(u32 address)
 	return 0 == SD
 	return non-0 == SDHC
 */
-/*
-	SRAM doesn't exist in DSTT
-
 static inline u64 SCDS_CMD_SD_IS_SDHC(void)
 {
 	return SCDS_CMD_SRAM_READ_DATA(0x7F9E0);
 }
-*/
 
 // FIFO commands
 #define SCDS_CMD_FIFO_BUSY        (0x80ull << 56)
@@ -78,8 +68,8 @@ static inline u64 SCDS_CMD_SD_IS_SDHC(void)
 */
 enum SCDS_SD_HOST_MODES {
 	SCDS_SD_HOST_NORESPONSE = 0ull,
-	SCDS_SD_HOST_R1_4B = 1ull,
-	SCDS_SD_HOST_R1_4B_MULTI = 2ull, // use mode 3 to continue this read
+	SCDS_SD_HOST_READ_4B = 1ull,
+	SCDS_SD_HOST_READ_4B_MULTI = 2ull, // use mode 3 to continue this read
 	SCDS_SD_HOST_NEXT_4B = 3ull,
 	SCDS_SD_HOST_SEND_CLK = 4ull,
 	SCDS_SD_HOST_SEND_STOP_CLK = 5ull,
@@ -105,29 +95,9 @@ enum SCDS_SD_HOST_MODES {
 	BB = SDIO command
 	CC = SD host mode, see SCDS_SD_HOST_MODES enum
 */
-
 static inline u64 SCDS_CMD_SD_HOST_PARAM(u32 parameter, u8 sdio, u8 mode)
 {
 	return (0x51ull << 56) | ((u64)parameter << 24) | ((u64)sdio << 16) | ((u64)mode << 8);
-}
-
-// useful SDIO macros
-// CMD12
-static inline u64 SCDS_CMD_SDIO_STOP_TRANSMISSION(void)
-{
-	return SCDS_CMD_SD_HOST_PARAM(0, 12, SCDS_SD_HOST_R1_4B);
-}
-
-// CMD24
-static inline u64 SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(u32 sector)
-{
-	return SCDS_CMD_SD_HOST_PARAM(sector, 24, SCDS_SD_HOST_R1_4B);
-}
-
-// CMD25
-static inline u64 SCDS_CMD_SDIO_WRITE_MULTI_BLOCK(u32 sector)
-{
-	return SCDS_CMD_SD_HOST_PARAM(sector, 25, SCDS_SD_HOST_R1_4B);
 }
 
 // SD host misc commands
@@ -156,7 +126,7 @@ static inline u64 SCDS_CMD_SD_READ_MULTI_BLOCK(u32 sector)
 
 // user API
 u32 SCDS_SendCommand(const u64 command);
-// void SCDS_SDReadSingleSector(u32 sector, void *buffer);
+void SCDS_SDReadSingleSector(u32 sector, void *buffer);
 void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors);
 void SCDS_SDWriteSingleSector(u32 sector, const void *buffer);
 void SCDS_SDWriteMultiSector(u32 sector, const void *buffer, u32 num_sectors);

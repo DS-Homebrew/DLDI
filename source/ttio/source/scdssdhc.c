@@ -31,20 +31,17 @@ static inline void SCDS_WriteCardData(u64 command, u32 flags, const void *buffer
         card_romCpuWrite(buffer, length);
 }
 
-static inline void SCDS_FlushResponse(void)
+static inline void SCDS_SDSendR0Command(u8 sdio, u32 parameter)
 {
+	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(parameter, sdio, SCDS_SD_HOST_NORESPONSE));
 	while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
-	SCDS_SendCommand(SCDS_CMD_SD_HOST_RESPONSE);
 }
 
-// only use with 0x51 commands; they need a delay
-// this adds MCCNT1_LATENCY1(16)
-u32 SCDS_SendCommandDelay(const u64 command)
+static inline u32 SCDS_SDSendR1Command(u8 sdio, u32 parameter)
 {
-	card_romSetCmd(command);
-	card_romStartXfer(SCDS_CTRL_READ_4B_DELAY, false);
-	card_romWaitDataReady();
-	return card_romGetData();
+	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(parameter, sdio, SCDS_SD_HOST_READ_4B));
+	while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
+	return __builtin_bswap32(SCDS_SendCommand(SCDS_CMD_SD_HOST_RESPONSE));
 }
 
 u32 SCDS_SendCommand(const u64 command)
@@ -54,15 +51,6 @@ u32 SCDS_SendCommand(const u64 command)
 	card_romWaitDataReady();
 	return card_romGetData();
 }
-
-/*
-	Interchangeably using single-sector and multi-sector reads causes
-	R4i-SDHC carts and its related clones to lock into using only the first 
-	used command (in libfat's case, single-sector reads, which is used in fatInitDefault
-	to get the FAT header) until the card is reset.
-
-	To be on the safe side, only use multi-sector reads for all carts using
-	this driver.
 
 void SCDS_SDReadSingleSector(u32 sector, void *buffer)
 {
@@ -75,7 +63,6 @@ void SCDS_SDReadSingleSector(u32 sector, void *buffer)
 	// retrieve data
 	SCDS_ReadCardData(SCDS_CMD_FIFO_READ_DATA, SCDS_CTRL_READ_512B, buffer, 128);
 }
-*/
 
 void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors)
 {
@@ -93,25 +80,23 @@ void SCDS_SDReadMultiSector(u32 sector, void *buffer, u32 num_sectors)
         num_sectors--;
 		if(num_sectors == 0)
 			break;
-	    SCDS_SendCommandDelay(SCDS_CMD_SD_HOST_PARAM(0, 0, SCDS_SD_HOST_NEXT_DATABLOCK));
+	    SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(0, 0, SCDS_SD_HOST_NEXT_DATABLOCK));
 	};
 
 	// end read
-	SCDS_SendCommandDelay(SCDS_CMD_SDIO_STOP_TRANSMISSION());
-	SCDS_FlushResponse();
+	SCDS_SDSendR1Command(12, 0);
 }
 
 void SCDS_SDWriteSingleSector(u32 sector, const void *buffer)
 {
 	// instruct cart where to write
-	SCDS_SendCommandDelay(SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(sector));
-	SCDS_FlushResponse();
+	SCDS_SDSendR1Command(24, sector);
 
     // write
     SCDS_WriteCardData(SCDS_CMD_FIFO_WRITE_DATA, SCDS_CTRL_WRITE_512B, buffer, 128);
+	while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
 
 	// end write
-	while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
 	SCDS_SendCommand(SCDS_CMD_SD_WRITE_END);
 	while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
 }
@@ -119,8 +104,7 @@ void SCDS_SDWriteSingleSector(u32 sector, const void *buffer)
 void SCDS_SDWriteMultiSector(u32 sector, const void *buffer, u32 num_sectors)
 {
 	// instruct cart where to write
-	SCDS_SendCommandDelay(SCDS_CMD_SDIO_WRITE_MULTI_BLOCK(sector));
-	SCDS_FlushResponse();
+	SCDS_SDSendR1Command(25, sector);
 
     do
     {
@@ -137,8 +121,7 @@ void SCDS_SDWriteMultiSector(u32 sector, const void *buffer, u32 num_sectors)
     } while (num_sectors);
 
 	// *really* end write
-	SCDS_SendCommandDelay(SCDS_CMD_SDIO_STOP_TRANSMISSION());
-	SCDS_FlushResponse();
+	SCDS_SDSendR1Command(12, 0);
     SCDS_SendCommand(SCDS_CMD_SD_WRITE_END);
     while(SCDS_SendCommand(SCDS_CMD_SD_HOST_BUSY));
 }

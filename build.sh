@@ -14,13 +14,13 @@ set -e
 # OSS drivers first
 cd source
 for FILE in *; do
-    if [[ $FILE == "ttio" ]]; then
+    if [[ $FILE == "scdssdhc2" ]]; then
         make -C $FILE clean
-        make -C $FILE SDHC=1 clean
+        make -C $FILE -f Makefile_ttio clean
         make -C $FILE
         cp $FILE/*.dldi $OUT
         make -C $FILE clean
-        make -C $FILE SDHC=1
+        make -C $FILE -f Makefile_ttio
         cp $FILE/*.dldi $OUT
     elif [[ $FILE == "rpg_sd" ]]; then
         # Clean before starting

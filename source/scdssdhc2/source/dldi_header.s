@@ -22,7 +22,11 @@
 @ Text identifier - can be anything up to 47 chars + terminating null -- 48 bytes
 
 	.align  4
+#ifdef TTIO
+	.asciz  "TTCARD IO Library"
+#else
 	.asciz  "DSONE (Slot-1)"
+#endif
 
 @ Offsets to important sections within the data -- 32 bytes
 
@@ -38,7 +42,11 @@
 
 @ IO_INTERFACE data -- 32 bytes
 
-	.ascii  "SCDS"          @ ioType (Normally "DLDI")
+#ifdef TTIO
+	.ascii  "TTIO"          @ ioType (Normally "DLDI")
+#else
+	.ascii  "SCDS"
+#endif
 	.word   FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_NDS
 	.word   startup         @ Function pointers to standard device driver functions
 	.word   is_inserted

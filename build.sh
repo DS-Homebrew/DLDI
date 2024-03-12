@@ -22,14 +22,6 @@ for FILE in *; do
         make -C $FILE clean
         make -C $FILE SDHC=1
         cp $FILE/*.dldi $OUT
-    elif [[ $FILE == "ak2_sd" ]]; then
-        make -C $FILE clean
-        make -C $FILE -f Makefile_singlewrite clean
-        make -C $FILE
-        cp $FILE/*.dldi $OUT
-        make -C $FILE clean
-        make -C $FILE -f Makefile_singlewrite
-        cp $FILE/*.dldi $OUT
     else
         make -C $FILE clean
         make -C $FILE

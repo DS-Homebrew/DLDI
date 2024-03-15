@@ -64,10 +64,8 @@ void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 			case 2:
 				flags |= MCCNT1_LEN_1024;
 				break;
-			case 3:
-			case 4:
-				flags |= MCCNT1_LEN_2048;
 			default:
+				flags |= MCCNT1_LEN_2048;
 				break;
 		}
 

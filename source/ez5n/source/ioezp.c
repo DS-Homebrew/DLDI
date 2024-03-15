@@ -12,7 +12,7 @@
 #include "ioezp.h"
 #include "libtwl_card.h"
 
-static void ioEZP_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
+static inline void ioEZP_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
 {
 	card_romSetCmd(command);
 	card_romStartXfer(flags, false);
@@ -22,7 +22,7 @@ static void ioEZP_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
 		card_romCpuRead(buffer, length);
 }
 
-static void ioEZP_WriteCardData(u64 command, u32 flags, const void *buffer, u32 length)
+static inline void ioEZP_WriteCardData(u64 command, u32 flags, const void *buffer, u32 length)
 {
 	card_romSetCmd(command);
 	card_romStartXfer(flags, false);
@@ -32,7 +32,7 @@ static void ioEZP_WriteCardData(u64 command, u32 flags, const void *buffer, u32 
 		card_romCpuWrite(buffer, length);
 }
 
-static u32 ioEZP_SendCommand(const u64 command, u32 latency)
+static inline u32 ioEZP_SendCommand(const u64 command, u32 latency)
 {
 	card_romSetCmd(command);
 	card_romStartXfer((IOEZP_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)), false);

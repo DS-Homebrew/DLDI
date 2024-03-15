@@ -77,7 +77,6 @@ void ioEZP_SDWriteSectors(u32 sector, u32 num_sectors, const void *buffer)
 		for(u8 i=0; i < word_count; i++)
 		{
 			ioEZP_WriteCardData(IOEZP_CMD_SD_WRITE_BUFFER(i), (IOEZP_CTRL_WRITE_SD | MCCNT1_LEN_512), buffer, 128);
-			num_sectors--;
 			buffer = (u8*)buffer + 0x200;
 		}
 
@@ -85,5 +84,6 @@ void ioEZP_SDWriteSectors(u32 sector, u32 num_sectors, const void *buffer)
 		// Should return 0 when done
 		while(ioEZP_SendCommand(IOEZP_CMD_SD_WRITE_FLUSH(sector, word_count), 0x190));
 		sector += word_count;
+		num_sectors -= word_count;
 	} while(num_sectors > 0);
 }

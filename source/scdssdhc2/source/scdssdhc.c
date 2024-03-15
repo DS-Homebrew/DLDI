@@ -41,16 +41,18 @@ static inline void SCDS_FlushResponse(void)
 // this adds MCCNT1_LATENCY1(16)
 u32 SCDS_SendCommandDelay(const u64 command)
 {
-	u32 ret;
-	SCDS_ReadCardData(command, SCDS_CTRL_READ_4B_DELAY, &ret, 1);
-	return ret;
+	card_romSetCmd(command);
+	card_romStartXfer(SCDS_CTRL_READ_4B_DELAY, false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 u32 SCDS_SendCommand(const u64 command)
 {
-	u32 ret;
-	SCDS_ReadCardData(command, SCDS_CTRL_READ_4B, &ret, 1);
-	return ret;
+	card_romSetCmd(command);
+	card_romStartXfer(SCDS_CTRL_READ_4B, false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 void SCDS_SDReadSingleSector(u32 sector, void *buffer)

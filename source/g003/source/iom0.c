@@ -33,9 +33,10 @@ static inline void ioM0WriteCardData(u64 command, u32 flags, const void *buffer,
 
 u32 ioM0SendCommand(const u64 command)
 {
-	u32 ret;
-	ioM0ReadCardData(command, IOM0_CTRL_READ_4B, &ret, 1);
-	return ret;
+	card_romSetCmd(command);
+	card_romStartXfer(IOM0_CTRL_READ_4B, false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 void ioM0SDReadSector(u32 sector, void *buffer)

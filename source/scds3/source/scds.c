@@ -24,9 +24,10 @@ static inline void SCDS_ReadCardData(u64 command, u32 flags, void *buffer, u32 l
 
 static inline u32 SCDS_SendCommand(const u64 command)
 {
-    u32 ret;
-    SCDS_ReadCardData(command, SCDS_CTRL_READ_4B, &ret, 1);
-    return ret;
+	card_romSetCmd(command);
+	card_romStartXfer(SCDS_CTRL_READ_4B, false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 static inline void SCDS_FlushResponse(void)

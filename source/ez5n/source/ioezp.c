@@ -34,9 +34,10 @@ static void ioEZP_WriteCardData(u64 command, u32 flags, const void *buffer, u32 
 
 static u32 ioEZP_SendCommand(const u64 command, u32 latency)
 {
-	u32 ret;
-	ioEZP_ReadCardData(command, (IOEZP_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)), &ret, 1);
-	return ret;
+	card_romSetCmd(command);
+	card_romStartXfer((IOEZP_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)), false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 u32 ioEZP_GetChipID(void)

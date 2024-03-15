@@ -33,9 +33,10 @@ static inline void ioA3PWriteCardData(u64 command, u32 flags, const void *buffer
 
 static inline u32 ioA3PSendCommand(const u64 command)
 {
-	u32 ret;
-	ioA3PReadCardData(command, IOA3P_CTRL_READ_4B, &ret, 1);
-	return ret;
+	card_romSetCmd(command);
+	card_romStartXfer(IOA3P_CTRL_READ_4B, false);
+	card_romWaitDataReady();
+	return card_romGetData();
 }
 
 void ioA3PSDReadSector(u32 sector, void *buffer)

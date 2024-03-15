@@ -12,6 +12,8 @@
 #include "ioezp.h"
 #include "libtwl_card.h"
 
+static u32 ioEZP_ReadLengthCtrlValues[4] = {IOEZP_CTRL_READ_SD_512, IOEZP_CTRL_READ_SD_1024, IOEZP_CTRL_READ_SD_2048, IOEZP_CTRL_READ_SD_2048};
+
 static inline void ioEZP_ReadCardData(u64 command, u32 flags, void *buffer, u32 length)
 {
 	card_romSetCmd(command);
@@ -48,7 +50,6 @@ u32 ioEZP_GetChipID(void)
 void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 {
 	u8 read_size = 0;
-	u32 flags = 0;
 	do
 	{
 		read_size = num_sectors >= 4 ? 4 : num_sectors;
@@ -57,20 +58,8 @@ void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 		// request should return 0 when ready to access
 		while(ioEZP_SendCommand(IOEZP_CMD_SD_READ_REQUEST(sector, read_size), 0xC8));
 
-		flags = IOEZP_CTRL_READ_SD;
-		switch(read_size) {
-			case 1:
-				flags |= MCCNT1_LEN_512;
-				break;
-			case 2:
-				flags |= MCCNT1_LEN_1024;
-				break;
-			default:
-				flags |= MCCNT1_LEN_2048;
-				break;
-		}
 
-		ioEZP_ReadCardData(IOEZP_CMD_SD_READ_DATA, flags, buffer, 128 * read_size);
+		ioEZP_ReadCardData(IOEZP_CMD_SD_READ_DATA, ioEZP_ReadLengthCtrlValues[read_size - 1], buffer, 128 * read_size);
 		sector += read_size;
 		num_sectors -= read_size;
 		buffer = (u8*)buffer + (0x200 * read_size);

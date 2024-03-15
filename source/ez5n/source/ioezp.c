@@ -49,7 +49,7 @@ u32 ioEZP_GetChipID(void)
 
 void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 {
-	u8 word_count = 0;
+	u8 word_count;
 	do
 	{
 		word_count = num_sectors >= 4 ? 4 : num_sectors;
@@ -68,7 +68,7 @@ void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 
 void ioEZP_SDWriteSectors(u32 sector, u32 num_sectors, const void *buffer)
 {
-	u8 word_count = 0;
+	u8 word_count;
 	do
 	{
 		word_count = num_sectors >= 4 ? 4 : num_sectors;

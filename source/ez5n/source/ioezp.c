@@ -49,32 +49,32 @@ u32 ioEZP_GetChipID(void)
 
 void ioEZP_SDReadSectors(u32 sector, u32 num_sectors, void *buffer)
 {
-	u8 read_size = 0;
+	u8 word_count = 0;
 	do
 	{
-		read_size = num_sectors >= 4 ? 4 : num_sectors;
+		word_count = num_sectors >= 4 ? 4 : num_sectors;
 
 		// wait until data is ready
 		// request should return 0 when ready to access
-		while(ioEZP_SendCommand(IOEZP_CMD_SD_READ_REQUEST(sector, read_size), 0xC8));
+		while(ioEZP_SendCommand(IOEZP_CMD_SD_READ_REQUEST(sector, word_count), 0xC8));
 
 
-		ioEZP_ReadCardData(IOEZP_CMD_SD_READ_DATA, ioEZP_ReadLengthCtrlValues[read_size - 1], buffer, 128 * read_size);
-		sector += read_size;
-		num_sectors -= read_size;
-		buffer = (u8*)buffer + (0x200 * read_size);
+		ioEZP_ReadCardData(IOEZP_CMD_SD_READ_DATA, ioEZP_ReadLengthCtrlValues[word_count - 1], buffer, 128 * word_count);
+		sector += word_count;
+		num_sectors -= word_count;
+		buffer = (u8*)buffer + (0x200 * word_count);
 	} while(num_sectors > 0);
 }
 
 void ioEZP_SDWriteSectors(u32 sector, u32 num_sectors, const void *buffer)
 {
-	u8 write_size = 0;
+	u8 word_count = 0;
 	do
 	{
-		write_size = num_sectors >= 4 ? 4 : num_sectors;
+		word_count = num_sectors >= 4 ? 4 : num_sectors;
 
 		// Write to buffer
-		for(int i=0; i < write_size; i++)
+		for(u8 i=0; i < word_count; i++)
 		{
 			ioEZP_WriteCardData(IOEZP_CMD_SD_WRITE_BUFFER(i), (IOEZP_CTRL_WRITE_SD | MCCNT1_LEN_512), buffer, 128);
 			num_sectors--;
@@ -83,7 +83,7 @@ void ioEZP_SDWriteSectors(u32 sector, u32 num_sectors, const void *buffer)
 
 		// Flush to disk
 		// Should return 0 when done
-		while(ioEZP_SendCommand(IOEZP_CMD_SD_WRITE_FLUSH(sector, write_size), 0x190));
-		sector += write_size;
+		while(ioEZP_SendCommand(IOEZP_CMD_SD_WRITE_FLUSH(sector, word_count), 0x190));
+		sector += word_count;
 	} while(num_sectors > 0);
 }

@@ -99,9 +99,7 @@ bool return OUT:  true if a CF card is inserted
 bool isInserted (void) {
 	// Change register, then check if value did change
 	*REG_CF_STS = CF_STS_INSERTED;
-	// Investigate why this isn't working in modern homebrew
-	// return ((*REG_CF_STS & 0xff) == CF_STS_INSERTED);
-	return true;
+	return (*REG_CF_STS & CF_STS_INSERTED);
 }
 
 

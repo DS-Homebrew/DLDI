@@ -31,7 +31,7 @@ for FILE in *; do
 
         # Build everything
         make -C $FILE
-        make -C $FILE -f Makefile_ak2 clean
+        make -C $FILE -f Makefile_ak2
         make -C $FILE -f Makefile_ak2_singlewrite
         make -C $FILE -f Makefile_r4idsn
 

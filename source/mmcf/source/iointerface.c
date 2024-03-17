@@ -84,14 +84,10 @@ bool startup(void) {
 	u16 temp = *REG_CF_LBA1;
 	*REG_CF_LBA1 = (~temp & 0xFF);
 	temp = (~temp & 0xFF);
-	if (!(*REG_CF_LBA1 == temp)) {
-		return false;
-	}
+	if (!(*REG_CF_LBA1 == temp))return false;
 	// Make sure it is 8 bit
 	*REG_CF_LBA1 = 0xAA55;
-	if (*REG_CF_LBA1 == 0xAA55) {
-		return false;
-	}
+	if (*REG_CF_LBA1 == 0xAA55)return false;
 	return true;
 }
 
@@ -103,32 +99,8 @@ bool return OUT:  true if a CF card is inserted
 bool isInserted (void) {
 	// Change register, then check if value did change
 	*REG_CF_STS = CF_STS_INSERTED;
-	return ((*REG_CF_STS & 0xff) == CF_STS_INSERTED);
-}
-
-
-/*-----------------------------------------------------------------
-clearStatus
-Tries to make the CF card go back to idle mode
-bool return OUT:  true if a CF card is idle
------------------------------------------------------------------*/
-bool clearStatus (void) {
-	int i;
-	
-	// Wait until CF card is finished previous commands
-	i=0;
-	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT)) {
-		i++;
-	}
-	
-	// Wait until card is ready for commands
-	i = 0;
-	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT)) {
-		i++;
-	}
-	if (i >= CF_CARD_TIMEOUT)
-		return false;
-
+	// Investigate why this isn't working in modern homebrew
+	// return ((*REG_CF_STS & 0xff) == CF_STS_INSERTED);
 	return true;
 }
 
@@ -151,60 +123,45 @@ bool readSectors (u32 sector, u32 numSectors, void* buffer) {
 
 	// Wait until CF card is finished previous commands
 	i=0;
-	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT)) {
-		i++;
-	}
+	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT)) { i++; }
 	
 	// Wait until card is ready for commands
 	i = 0;
-	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT)) {
-		i++;
-	}
-	if (i >= CF_CARD_TIMEOUT)
-		return false;
+	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT)) { i++; }
+	if (i >= CF_CARD_TIMEOUT)return false;
 	
 	// Set number of sectors to read
-	*REG_CF_SEC = (numSectors < 256 ? numSectors : 0);	// Read a maximum of 256 sectors, 0 means 256	
+	*REG_CF_SEC = (numSectors < 256 ? numSectors : 0);	// Read a maximum of 256 sectors, 0 means 256
 	
 	// Set read sector
 	*REG_CF_LBA1 = sector & 0xFF;						// 1st byte of sector number
 	*REG_CF_LBA2 = (sector >> 8) & 0xFF;					// 2nd byte of sector number
 	*REG_CF_LBA3 = (sector >> 16) & 0xFF;				// 3rd byte of sector number
-	*REG_CF_LBA4 = ((sector >> 24) & 0x0F )| CF_CMD_LBA;	// last nibble of sector number
+	*REG_CF_LBA4 = ((sector >> 24) & 0x0F) | CF_CMD_LBA;	// last nibble of sector number
 	
 	// Set command to read
 	*REG_CF_CMD = CF_CMD_READ;
 	
 	
-	while (numSectors--)
-	{
+	while (numSectors--) {
 		// Wait until card is ready for reading
 		i = 0;
-		while (((*REG_CF_STS & 0xff)!= CF_STS_READY) && (i < CF_CARD_TIMEOUT))
-		{
-			i++;
-		}
-		if (i >= CF_CARD_TIMEOUT)
-			return false;
-		
+		while (((*REG_CF_STS & 0xff)!= CF_STS_READY) && (i < CF_CARD_TIMEOUT)) { i++; }
+		if (i >= CF_CARD_TIMEOUT)return false;
 		// Read data
 		i=256;
 		if ((u32)buff_u8 & 0x01) {
-			while(i--)
-			{
-				temp = *((vu16*)0x09000000);
+			while(i--) {
+				temp = *REG_CF_DATA;
 				*buff_u8++ = temp & 0xFF;
 				*buff_u8++ = temp >> 8;
 			}
 		} else {
-			while(i--)
-				*buff++ = *((vu16*)0x09000000); 
+			while(i--)*buff++ = *REG_CF_DATA; 
 		}
 	}
-
 	return true;
 }
-
 
 
 /*-----------------------------------------------------------------
@@ -225,19 +182,12 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	
 	// Wait until CF card is finished previous commands
 	i=0;
-	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT))
-	{
-		i++;
-	}
+	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT)) { i++; }
 	
 	// Wait until card is ready for commands
 	i = 0;
-	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT))
-	{
-		i++;
-	}
-	if (i >= CF_CARD_TIMEOUT)
-		return false;
+	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT)) { i++; }
+	if (i >= CF_CARD_TIMEOUT)return false;
 	
 	// Set number of sectors to write
 	*REG_CF_SEC = (numSectors < 256 ? numSectors : 0);	// Write a maximum of 256 sectors, 0 means 256	
@@ -251,32 +201,46 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	// Set command to write
 	*REG_CF_CMD = CF_CMD_WRITE;
 	
-	while (numSectors--)
-	{
+	while (numSectors--) {
 		// Wait until card is ready for writing
 		i = 0;
-		while (((*REG_CF_STS & 0xff) != CF_STS_READY) && (i < CF_CARD_TIMEOUT))
-		{
-			i++;
-		}
-		if (i >= CF_CARD_TIMEOUT)
-			return false;
+		while (((*REG_CF_STS & 0xff) != CF_STS_READY) && (i < CF_CARD_TIMEOUT)) { i++; }
+		if (i >= CF_CARD_TIMEOUT)return false;
 		
 		// Write data
 		i=256;
 		if ((u32)buff_u8 & 0x01) {
-			while(i--)
-			{
+			while(i--) {
 				temp = *buff_u8++;
 				temp |= *buff_u8++ << 8;
-				*((vu16*)0x09000000) = temp;
+				*REG_CF_DATA = temp;
 			}
 		} else {
-		while(i--)
-			*((vu16*)0x09000000) = *buff++; 
+			while(i--)*REG_CF_DATA = *buff++; 
 		}
 	}
 	
+	return true;
+}
+
+
+/*-----------------------------------------------------------------
+clearStatus
+Tries to make the CF card go back to idle mode
+bool return OUT:  true if a CF card is idle
+-----------------------------------------------------------------*/
+bool clearStatus (void) {
+	int i;
+	
+	// Wait until CF card is finished previous commands
+	i=0;
+	while ((*REG_CF_CMD & CF_STS_BUSY) && (i < CF_CARD_TIMEOUT)) { i++; }
+	
+	// Wait until card is ready for commands
+	i = 0;
+	while ((!(*REG_CF_STS & CF_STS_INSERTED)) && (i < CF_CARD_TIMEOUT)) { i++; }
+	if (i >= CF_CARD_TIMEOUT)return false;
+
 	return true;
 }
 
@@ -284,6 +248,5 @@ bool writeSectors (u32 sector, u32 numSectors, void* buffer) {
 shutdown
 shutdown the CF interface
 -----------------------------------------------------------------*/
-bool shutdown(void) {
-	return clearStatus() ;
-}
+bool shutdown(void) { return clearStatus(); }
+

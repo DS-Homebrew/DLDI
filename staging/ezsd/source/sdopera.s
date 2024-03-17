@@ -1,6 +1,6 @@
 @***********************************************************
 @
-@	by Rudolph (¹ÄÄë)
+@	by Rudolph (é¼“ç¢¾)
 @
 @	2006/11/29
 @		* CRC is read with SD_ReadData. 
@@ -45,10 +45,10 @@ SD_WriteBufferToLine:
 #  r0 - char *pBuf  , r1 - int lenght
 	stmfd	sp!,{r2-r7}
 	ldr		r3,=0x9FFFF40
-sdw_l1: 						#´Ë¶ÎÎªÃüÁî×Ö½Ú¸öÊıµÄÑ­»·
+sdw_l1: 						#æ­¤æ®µä¸ºå‘½ä»¤å­—èŠ‚ä¸ªæ•°çš„å¾ªç¯
 	ldrb		r2, [r0],#+1
 	mov		r6,#0
-sdw_l2:						#´Ë¶ÎÎª8×Ö½ÚµÄÎ»·¢ËÍÑ­»·
+sdw_l2:						#æ­¤æ®µä¸º8å­—èŠ‚çš„ä½å‘é€å¾ªç¯
 	mov		r4,r2,lsl r6
 	strh		r4,[r3]
 	add		r6,r6,#1
@@ -61,9 +61,9 @@ sdw_l2:						#´Ë¶ÎÎª8×Ö½ÚµÄÎ»·¢ËÍÑ­»·
 
 SD_ReadResponse:
 # r0 - char *pBuf , r1 - int lenght , r2 - waitlen[timeout]
-# ·µ»ØÖµ
+# è¿”å›å€¼
 	stmfd	sp!,{r3-r7}
-#	cmp		r1,#0			#³¤¶ÈÎª0ÍË³ö
+#	cmp		r1,#0			#é•¿åº¦ä¸º0é€€å‡º
 #	beq		sdexit1
 #	cmp		r2,#0
 #	beq		sdexit

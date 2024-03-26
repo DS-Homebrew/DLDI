@@ -71,9 +71,12 @@ static void SCDS_SDSendR2Command(u8 sdio, u32 parameter, u32 latency)
 	while(SCDS_IsSDHostBusy());
 }
 
+void waitByLoop(u32 count);
+
 static void SCDS_SDSetHostRegister(u8 bits)
 {
 	SCDS_SendCommand(SCDS_CMD_SD_HOST_SET_REGISTER(bits), 0);
+	waitByLoop(0x300);
 }
 
 void SCDS_SDGetSDHCStatusFromSRAM(void)
@@ -89,8 +92,6 @@ u32 SCDS_SendCommand(const u64 command, u32 latency)
 	return card_romGetData();
 }
 
-void waitByLoop(u32 count);
-
 bool SCDS_SDInitialize(void)
 {
 	u32 isSD20 = 0;
@@ -101,9 +102,8 @@ bool SCDS_SDInitialize(void)
 	// TODO: What is this command doing?
 	SCDS_ReadCardData(0x6600000000000000ull, 0xA7586000, &response, 1);
 
-	// Reset SD host and wait
+	// Reset SD host
 	SCDS_SDSetHostRegister(0);
-	waitByLoop(0x300);
 
 	// Init
 	SCDS_SDSetHostRegister(SCDS_SD_HOST_REG_RESET | SCDS_SD_HOST_REG_400KHZ_CLK | SCDS_SD_HOST_REG_CLEAN_ROM_MODE);

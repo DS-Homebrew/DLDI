@@ -67,7 +67,7 @@ static void SCDS_SDSendR2Command(u8 sdio, u32 parameter, u32 latency)
 		// TODO: parse this response
 		SCDS_SendCommand(SCDS_CMD_SD_HOST_RESPONSE, 0);
 	}
-	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(sdio, parameter, SCDS_SD_HOST_SEND_CLK), 0);
+	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(sdio, parameter, SCDS_SD_HOST_SEND_STOP_CLK), 0);
 	while(SCDS_IsSDHostBusy());
 }
 
@@ -111,6 +111,7 @@ bool SCDS_SDInitialize(void)
 
 	// CMD0
 	SCDS_SDSendR0Command(0, 0, SCDS_CTRL_SD_LOW_CLK_LATENCY);
+	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(0, 0, SCDS_SD_HOST_SEND_STOP_CLK), SCDS_CTRL_SD_LOW_CLK_LATENCY);
 
 	// CMD8
 	SCDS_SendCommand(SCDS_CMD_SD_HOST_PARAM(8, 0x1AA, SCDS_SD_HOST_READ_4B), SCDS_CTRL_SD_LOW_CLK_LATENCY);

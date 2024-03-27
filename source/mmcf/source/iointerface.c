@@ -142,7 +142,7 @@ bool ReadSectors (u32 sector, int numSecs, void* buffer) {
 
 	if (!CF_Block_Ready())return false;
 	
-	CF_SECTOR_COUNT = numSecs;
+	CF_SECTOR_COUNT = (numSecs == 256) ? 0 : numSecs;
 	CF_SECTOR_NO = sector;
 	CF_CYLINDER_LOW = sector >> 8;
 	CF_CYLINDER_HIGH = sector >> 16;
@@ -203,7 +203,7 @@ bool WriteSectors(u32 sector, int numSecs, void* buffer) {
 
 	if (!CF_Block_Ready())return false;
 	
-	CF_SECTOR_COUNT = numSecs;
+	CF_SECTOR_COUNT = (numSecs == 256) ? 0 : numSecs;
 	CF_SECTOR_NO = sector;
 	CF_CYLINDER_LOW = sector >> 8;
 	CF_CYLINDER_HIGH = sector >> 16;

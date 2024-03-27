@@ -265,13 +265,12 @@ void ioRPG_SDReadMultiSector(u32 sector, u32 num_sectors, void* buffer)
 	ioRPG_SDSendSDIOCommand(IORPG_CMD_SDIO(18, IORPG_SDIO_READ_MULTI_BLOCK, address), NULL, 0);
 	ioRPG_WaitBusy();
 
-	do
+	while(num_sectors--)
 	{
 		ioRPG_ReadCardData(IORPG_CMD_CARD_READ_DATA, (IORPG_CTRL_READ_512B | MCCNT1_LATENCY1(4)), buffer, 128);
 		ioRPG_SDWaitForState(0x7);
 		buffer = (u8 *)buffer + 0x200;
-		num_sectors--;
-	} while(num_sectors);
+	};
 
 	// CMD12
 	ioRPG_SDSendR1Command(12, 0);
@@ -291,15 +290,14 @@ void ioRPG_SDWriteMultiSector(u32 sector, u32 num_sectors, const void* buffer)
 {
 	u32 address = isSDHC ? sector : sector << 9;
 
-	do
+	while(num_sectors--)
 	{
 		// CMD25
 		ioRPG_SDSendSDIOCommand(IORPG_CMD_SDIO(25, IORPG_SDIO_WRITE_MULTI_BLOCK, address), NULL, 0);
 		ioRPG_SDWriteData(buffer, 128);
 		ioRPG_SDWaitForState(0xE);
 		buffer = (u8 *)buffer + 0x200;
-		num_sectors--;
-	} while(num_sectors);
+	};
 
 	// CMD12
 	ioRPG_SDSendR1Command(12, 0);

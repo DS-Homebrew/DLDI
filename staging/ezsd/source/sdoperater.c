@@ -1,5 +1,5 @@
 /*******************************************************
-	Modified by Rudolph (c’é)
+	Modified by Rudolph (é¼“ç¢¾)
 
 	2006/11/29
 		* CRC is checked only when there is 
@@ -185,12 +185,12 @@ bool SD_initial()
 	SD_SendCommand(0,0);
 	SD_ReadLoop(8);
 	
-	SD_SendCommand(55,0);			// Ö¸Ê¾ÏÂÒ»¸öÃEûæÇappÃEE
+	SD_SendCommand(55,0);			// æŒ‡ç¤ºä¸‹ä¸€ä¸ªè„•Eï¿½åª²appè„•Eä¸’
 	ret = SD_R16Response(pres);
 	if((!ret) || pres[0] != 55)
 		return false; 
 
-	SD_SendCommandRS3(41, pres, 0x0);		//¼EâµçÑ¹·¶Î§
+	SD_SendCommandRS3(41, pres, 0x0);		//ç´’Eç¾ç¼ªç‹—æ®µï¿½
 	do
 	{
 		ret = SD_SendCommandRS(55,0);
@@ -203,7 +203,7 @@ bool SD_initial()
 
 	do
 	{
-		SD_SendCommand(3,0);		//½øÈEtand by ×´Ì¬£¬²¢µÃµ½sd¿¨×´Ì¬
+		SD_SendCommand(3,0);		//è¿›è‘‹Stand by çŠ¶æ€ï¼Œå¹¶å¾—åˆ°sdå¡çŠ¶æ€
 		ret = SD_R16Response(pres);
 	} while((!ret) || ((pres[3] & 0x1E) != 0x6)); 	//stand by state
 	
@@ -215,7 +215,7 @@ bool SD_initial()
 
 	ret = SD_SendCommandRS(6,2);		//00, 1 bit , 10  4 bit 
 
-	ret = SD_SendCommandRS(16,0x200) ;	//Éè¶¨Ò»¸öblockÎª512´óĞ¡
+	ret = SD_SendCommandRS(16,0x200) ;	//è®¾å®šä¸€ä¸ªblockä¸º512å¤§å°
 
 	return ret ;
 }

@@ -1,5 +1,5 @@
 /*******************************************************
-	Modified by Rudolph (c’é):
+	Modified by Rudolph (¹ÄÄë):
 	2006/11/20
 		* Added write routine support
 

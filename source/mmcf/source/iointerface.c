@@ -256,15 +256,14 @@ bool return OUT: true if successful
 -----------------------------------------------------------------*/
 bool MMCF_ReadSectors(u32 sector, u32 numSecs, void* buffer) {
 	bool Result = false;
-	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
 #endif
 	while (numSecs > 0) {
 		int sector_count = (numSecs > 256) ? 256 : numSecs;
-		Result = ReadSectors(sector + i, sector_count, (u16*)buffer);
-		i += sector_count;
+		Result = ReadSectors(sector, sector_count, (u16*)buffer);
+		sector += sector_count;
 		numSecs -= sector_count;
 		buffer += (sector_count * BYTES_PER_READ);
 	}
@@ -284,15 +283,14 @@ bool return OUT: true if successful
 -----------------------------------------------------------------*/
 bool MMCF_WriteSectors(u32 sector, u32 numSecs, void* buffer) {
 	bool Result = false;
-	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
 #endif
 	while (numSecs > 0) {
 		int sector_count = (numSecs > 256) ? 256 : numSecs;
-		Result = WriteSectors(sector + i, sector_count, (u16*)buffer);
-		i += sector_count;
+		Result = WriteSectors(sector, sector_count, (u16*)buffer);
+		sector += sector_count;
 		numSecs -= sector_count;
 		buffer += (sector_count * BYTES_PER_READ);
 	}

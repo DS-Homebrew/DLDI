@@ -254,8 +254,7 @@ bool WriteSectors(u32 sector, u8 numSecs, void* buffer) {
 MMCF_ReadSectors
 Read 512 byte sector numbered "sector" into "buffer"
 u32 sector IN: address of first 512 byte sector on CF card to read
-u8 numSecs IN: number of 512 byte sectors to read,
- 1 to 256 sectors can be read, 0 = 256
+s32 numSecs IN: number of 512 byte sectors to read
 void* buffer OUT: pointer to 512 byte buffer to store data in
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
@@ -284,10 +283,9 @@ bool MMCF_ReadSectors(u32 sector, s32 numSecs, void* buffer) {
 /*-----------------------------------------------------------------
 MMCF_WriteSectors
 Write 512 byte sector numbered "sector" from "buffer"
-u32 sector IN: address of 512 byte sector on CF card to read
-u8 numSecs IN: number of 512 byte sectors to read,
- 1 to 256 sectors can be read, 0 = 256
-void* buffer IN: pointer to 512 byte buffer to read data from
+u32 sector OUT: address of 512 byte sector on CF card to write
+s32 numSecs OUT: number of 512 byte sectors to write
+void* buffer IN: pointer to 512 byte buffer to write data to
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
 bool MMCF_WriteSectors(u32 sector, s32 numSecs, void* buffer) {

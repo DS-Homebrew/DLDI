@@ -130,8 +130,7 @@ bool MMCF_ClearStatus(void) { return CF_Block_Ready(); }
 
 bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
 	int i;
-	int j = (numSecs > 0 ? numSecs : 256);
-	if (numSecs > 256)return false;
+	int j = numSecs;
 	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
 	u8 *buff_u8 = (u8*)buffer;
@@ -193,8 +192,7 @@ bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
 bool WriteSectors(u32 sector, u8 numSecs, void* buffer) {
 		
 	int i;
-	int j = (numSecs > 0 ? numSecs : 256);
-	if (numSecs > 256)return false;
+	int j = numSecs;
 	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
 	u8 *buff_u8 = (u8*)buffer;
@@ -261,14 +259,24 @@ u8 numSecs IN: number of 512 byte sectors to read,
 void* buffer OUT: pointer to 512 byte buffer to store data in
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MMCF_ReadSectors(u32 sector, u8 numSecs, void* buffer) {
+bool MMCF_ReadSectors(u32 sector, s32 numSecs, void* buffer) {
+	bool Result = false;
+	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
-	bool Result = ReadSectors(sector, numSecs, buffer);
+	while (numSecs > 0) {
+		Result = ReadSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
+		i += 256;
+		numSecs -= 256;
+	}
 	REG_EXMEMCNT = originMemStat;
 #else
-	bool Result = ReadSectors(sector, numSecs, buffer);
+	while (numSecs > 0) {
+		Result = ReadSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
+		i += 256;
+		numSecs -= 256;
+	}
 #endif	
 	return Result;
 }
@@ -282,14 +290,24 @@ u8 numSecs IN: number of 512 byte sectors to read,
 void* buffer IN: pointer to 512 byte buffer to read data from
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MMCF_WriteSectors(u32 sector, u8 numSecs, void* buffer) {
+bool MMCF_WriteSectors(u32 sector, s32 numSecs, void* buffer) {
+	bool Result = false;
+	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
-	bool Result = WriteSectors(sector, numSecs, buffer);
+	while (numSecs > 0) {
+		Result = WriteSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
+		i += 256;
+		numSecs -= 256;
+	}
 	REG_EXMEMCNT = originMemStat;
 #else
-	bool Result = WriteSectors(sector, numSecs, buffer);
+	while (numSecs > 0) {
+		Result = WriteSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
+		i += 256;
+		numSecs -= 256;
+	}
 #endif
 	return Result;
 }

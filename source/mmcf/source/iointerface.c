@@ -128,11 +128,10 @@ bool return OUT:  true if a CF card is idle
 bool MMCF_ClearStatus(void) { return CF_Block_Ready(); }
 
 
-bool ReadSectors (u32 sector, int numSecs, void* buffer) {
+bool ReadSectors (u32 sector, int numSecs, u16* buff) {
 	int i;
-	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
-	u8 *buff_u8 = (u8*)buffer;
+	u8 *buff_u8 = (u8*)buff;
 	int temp;
 #endif
 
@@ -163,7 +162,7 @@ bool ReadSectors (u32 sector, int numSecs, void* buffer) {
 		buff += BYTES_PER_READ / 2;
 #elif defined _IO_ALLOW_UNALIGNED
 		i=256;
-		if ((u32)buff_u8 & 0x01) {
+		if ((u32)buff_u8 & 1) {
 			while(i--) {
 				// if (!CF_Block_Ready())return false;
 				temp = *CF_DATA;
@@ -188,12 +187,11 @@ bool ReadSectors (u32 sector, int numSecs, void* buffer) {
 }
 
 
-bool WriteSectors(u32 sector, int numSecs, void* buffer) {
+bool WriteSectors(u32 sector, int numSecs, u16* buff) {
 		
 	int i;
-	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
-	u8 *buff_u8 = (u8*)buffer;
+	u8 *buff_u8 = (u8*)buff;
 	int temp;
 #endif
 	
@@ -225,7 +223,7 @@ bool WriteSectors(u32 sector, int numSecs, void* buffer) {
 		buff += BYTES_PER_READ / 2;
 #elif defined _IO_ALLOW_UNALIGNED
 		i=256;
-		if ((u32)buff_u8 & 0x01) {
+		if ((u32)buff_u8 & 1) {
 			while(i--) {
 				// if (!CF_Block_Ready())return false;
 				temp = *buff_u8++;
@@ -252,28 +250,26 @@ bool WriteSectors(u32 sector, int numSecs, void* buffer) {
 MMCF_ReadSectors
 Read 512 byte sector numbered "sector" into "buffer"
 u32 sector IN: address of first 512 byte sector on CF card to read
-s32 numSecs IN: number of 512 byte sectors to read
+u32 numSecs IN: number of 512 byte sectors to read
 void* buffer OUT: pointer to 512 byte buffer to store data in
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MMCF_ReadSectors(u32 sector, s32 numSecs, void* buffer) {
+bool MMCF_ReadSectors(u32 sector, u32 numSecs, void* buffer) {
 	bool Result = false;
 	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
+#endif
 	while (numSecs > 0) {
-		Result = ReadSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
-		i += 256;
-		numSecs -= 256;
+		int sector_count = (numSecs > 256) ? 256 : numSecs;
+		Result = ReadSectors(sector + i, sector_count, (u16*)buffer);
+		i += sector_count;
+		numSecs -= sector_count;
+		buffer += (sector_count * BYTES_PER_READ);
 	}
+#ifdef _IO_USEFASTCNT
 	REG_EXMEMCNT = originMemStat;
-#else
-	while (numSecs > 0) {
-		Result = ReadSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
-		i += 256;
-		numSecs -= 256;
-	}
 #endif	
 	return Result;
 }
@@ -282,29 +278,27 @@ bool MMCF_ReadSectors(u32 sector, s32 numSecs, void* buffer) {
 MMCF_WriteSectors
 Write 512 byte sector numbered "sector" from "buffer"
 u32 sector OUT: address of 512 byte sector on CF card to write
-s32 numSecs OUT: number of 512 byte sectors to write
+u32 numSecs OUT: number of 512 byte sectors to write
 void* buffer IN: pointer to 512 byte buffer to write data to
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MMCF_WriteSectors(u32 sector, s32 numSecs, void* buffer) {
+bool MMCF_WriteSectors(u32 sector, u32 numSecs, void* buffer) {
 	bool Result = false;
 	int i = 0;
 #ifdef _IO_USEFASTCNT
 	u16 originMemStat = REG_EXMEMCNT;
 	REG_EXMEMCNT = setFastCNT(originMemStat);
-	while (numSecs > 0) {
-		Result = WriteSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
-		i += 256;
-		numSecs -= 256;
-	}
-	REG_EXMEMCNT = originMemStat;
-#else
-	while (numSecs > 0) {
-		Result = WriteSectors(sector + i, (numSecs > 256) ? 256 : numSecs, buffer + (i * 512));
-		i += 256;
-		numSecs -= 256;
-	}
 #endif
+	while (numSecs > 0) {
+		int sector_count = (numSecs > 256) ? 256 : numSecs;
+		Result = WriteSectors(sector + i, sector_count, (u16*)buffer);
+		i += sector_count;
+		numSecs -= sector_count;
+		buffer += (sector_count * BYTES_PER_READ);
+	}
+#ifdef _IO_USEFASTCNT
+	REG_EXMEMCNT = originMemStat;
+#endif	
 	return Result;
 }
 /*-----------------------------------------------------------------

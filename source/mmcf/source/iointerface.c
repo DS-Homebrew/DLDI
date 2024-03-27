@@ -128,9 +128,8 @@ bool return OUT:  true if a CF card is idle
 bool MMCF_ClearStatus(void) { return CF_Block_Ready(); }
 
 
-bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
+bool ReadSectors (u32 sector, int numSecs, void* buffer) {
 	int i;
-	int j = numSecs;
 	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
 	u8 *buff_u8 = (u8*)buffer;
@@ -138,7 +137,7 @@ bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
 #endif
 
 #if (defined _IO_USE_DMA) && (defined NDS) && (defined ARM9)
-	DC_FlushRange(buffer, j * BYTES_PER_READ);
+	DC_FlushRange(buffer, numSecs * BYTES_PER_READ);
 #endif
 
 	if (!CF_Block_Ready())return false;
@@ -150,7 +149,7 @@ bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
 	CF_SEL_HEAD = ((sector >> 24) & 0x0F) | 0xE0;
 	CF_COMMAND = 0x20; // read sectors
 
-	while (j--)	{
+	while (numSecs--)	{
 		
 		if (!CF_Block_Ready())return false;
 #ifdef _IO_USE_DMA
@@ -189,10 +188,9 @@ bool ReadSectors (u32 sector, u8 numSecs, void* buffer) {
 }
 
 
-bool WriteSectors(u32 sector, u8 numSecs, void* buffer) {
+bool WriteSectors(u32 sector, int numSecs, void* buffer) {
 		
 	int i;
-	int j = numSecs;
 	u16 *buff = (u16*)buffer;
 #ifdef _IO_ALLOW_UNALIGNED
 	u8 *buff_u8 = (u8*)buffer;
@@ -200,7 +198,7 @@ bool WriteSectors(u32 sector, u8 numSecs, void* buffer) {
 #endif
 	
 #if defined _IO_USE_DMA && defined NDS && defined ARM9
-	DC_FlushRange(buffer, j * BYTES_PER_READ);
+	DC_FlushRange(buffer, numSecs * BYTES_PER_READ);
 #endif
 
 	if (!CF_Block_Ready())return false;
@@ -212,7 +210,7 @@ bool WriteSectors(u32 sector, u8 numSecs, void* buffer) {
 	CF_SEL_HEAD = ((sector >> 24) & 0x0F) | 0xE0;
 	CF_COMMAND = 0x30; // write sectors
 	
-	while (j--) {
+	while (numSecs--) {
 		
 		if (!CF_Block_Ready())return false;
 

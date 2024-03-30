@@ -18,19 +18,19 @@ jobs:
     container: devkitpro/devkitarm
     name: Build with Docker using devkitARM
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup environment
         run: git config --global safe.directory '*'
       - name: Build all drivers
         run: |
           chmod +x build.sh
           ./build.sh
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: out
           name: build
       - name: Checkout artifact branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: artifacts
           ref: builds

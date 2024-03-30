@@ -19,8 +19,6 @@ jobs:
     name: Build with Docker using devkitARM
     steps:
       - uses: actions/checkout@v4
-      - name: Setup environment
-        run: git config --global safe.directory '*'
       - name: Build all drivers
         run: |
           chmod +x build.sh

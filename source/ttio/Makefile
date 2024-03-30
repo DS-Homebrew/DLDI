@@ -39,7 +39,7 @@ ifneq ($(SDHC),0)
 ARCH	+=	-DSDHC
 endif
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Oz -flto\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
 			-ffast-math -ffreestanding \
 			$(ARCH)
@@ -49,7 +49,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map,--gc-sections -ffunction-sections -fdata-sections
+LDFLAGS	=	-nostartfiles -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map,--gc-sections -ffunction-sections -fdata-sections
 
 LIBS	:=
 

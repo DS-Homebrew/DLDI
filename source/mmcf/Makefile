@@ -33,7 +33,7 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math -ffreestanding \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC -D_IO_ALLOW_UNALIGNED
+CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC -D_IO_ALLOW_UNALIGNED -D_IO_USEFASTCNT
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 

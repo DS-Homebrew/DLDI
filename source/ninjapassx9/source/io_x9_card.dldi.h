@@ -28,21 +28,7 @@ freely, subject to the following restrictions:
 #ifndef _io_x9_card_h__
 #define _io_x9_card_h__
 
-// Card bus
-#define	REG_CARD_DATA_RD	(*(vu32*)0x04100010)
-
-#define REG_AUXSPICNTH	(*(vu8*)0x040001A1)
-#define REG_ROMCTRL		(*(vu32*)0x040001A4)
-
-#define REG_CARD_COMMAND	((vu8*)0x040001A8)
-
-#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
-#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
-
-// 3 bits in b10..b8 indicate something
-// read bits
-#define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
-#define CARD_DATA_READY   (1<<23)           // when reading, CARD_DATA_RD or CARD_DATA has another word of data and is good to go
+#include "libnds_card.h"
 
 // Shared data just to save space
 static uint32 x9Buffer[0x200];
@@ -110,7 +96,6 @@ extern "C"{
 //extern void X9CardPolledWrite(uint32 flags, const uint32* buffer, const uint8* command);
 extern void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words);
 extern void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer);
-extern void cardPolledTransfer(uint32 flags, uint32* dest,uint32 length, const uint8* command);
 
 #ifdef __cplusplus
 }

@@ -23,7 +23,7 @@
 #define IORPG_CTRL_READ_512B (IORPG_CTRL_POLL | MCCNT1_LEN_512)
 // by default all commands are using 4KB in the original driver; can this be changed?
 #define IORPG_CTRL_READ_4KB  (IORPG_CTRL_POLL | MCCNT1_LEN_4096)
-#define IORPG_CTRL_READ_16KB  (IORPG_CTRL_POLL | MCCNT1_LEN_16384)
+#define IORPG_CTRL_READ_16KB (IORPG_CTRL_POLL | MCCNT1_LEN_16384)
 
 // ret & 0x0F != provided state
 // Note, on non-AKRPG carts, the state is in the upper 4 bits, so check 0xF0 instead

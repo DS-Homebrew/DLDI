@@ -94,17 +94,6 @@ void delay(int times)
 	}
 }
 
-//------------------------------------------------------
-void Enable_Arm9DS()
-{
-    WAIT_CR &= ~0x0880;
-}
-
-void Enable_Arm7DS()
-{
-    WAIT_CR |= 0x0880;
-}
-
 //---------------------------------------------------------------------------------
 void dsCardi_SetRomOP(uint8 * command) 
 {
@@ -136,7 +125,6 @@ void    cardWriteCommand(uint8 * command)
 uint32      dsCardi_Read4ByteMode(uint8 * command)
 {
     uint32 status=0;
-    Enable_Arm9DS();
     dsCardi_SetRomOP(command);
 
 //设置控制寄存器0x40001A4
@@ -147,7 +135,6 @@ uint32      dsCardi_Read4ByteMode(uint8 * command)
     }while(!(status & 0x800000));
 
     uint32 DD = REG_CARD_DATA_RD ;
-    Enable_Arm7DS();
     return DD ;
 
 }

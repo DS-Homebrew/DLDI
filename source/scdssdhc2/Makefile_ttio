@@ -16,15 +16,8 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-SDHC	?= 0
-
-ifeq ($(SDHC),0)
-export TARGET		:=	$(shell basename $(CURDIR))
-else
-export TARGET		:=	$(shell basename $(CURDIR))_sdhc
-endif
-
-BUILD		:=	build
+export TARGET		:=	ttio
+BUILD		:=	build_ttio
 SOURCES		:=	source ../../common_source
 DATA		:=	data
 INCLUDES	:=	include ../../common_source
@@ -33,11 +26,7 @@ INCLUDES	:=	include ../../common_source
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
-
-ifneq ($(SDHC),0)
-ARCH	+=	-DSDHC
-endif
+ARCH	:=	-mthumb-interwork -DTTIO
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
@@ -109,7 +98,7 @@ all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile_ttio
 
 #---------------------------------------------------------------------------------
 clean:

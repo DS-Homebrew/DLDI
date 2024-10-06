@@ -3,7 +3,8 @@
     SPDX-License-Identifier: MIT
 */
 
-#include <nds.h>
+#include <nds/ndstypes.h>
+#include "libnds_card.h"
 #include <string.h>
 #include "io_ak_sd.h"
 

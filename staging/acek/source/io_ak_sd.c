@@ -35,7 +35,7 @@ static u8 dsd_SDCRC7( const u8 * data, int cnt )
     return (crc);
 }
 
-static u16 dsd_SDCRC16( const u8 * data, u32 length )
+u16 dsd_SDCRC16( const u8 * data, u32 length )
 {
     u32 crc = 0;
 	u32 i = 0;

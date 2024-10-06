@@ -122,7 +122,7 @@ bool _AK_writeSectors (u32 sector, u32 numSectors, const void* buffer) {
 	{
 		bool flagSucc = false;
 		const u8 * pbuffer = ((const u8 *)buffer) + (i * 512);
-		u16 buff_crc = swiCRC16( 0x0000, (void *)pbuffer, 512 );
+		u16 buff_crc = dsd_SDCRC16( (void *)pbuffer, 512 );
 		u32 address = (sector + i) * 512;
 
 		u32 retryCount = 0;
@@ -138,7 +138,7 @@ bool _AK_writeSectors (u32 sector, u32 numSectors, const void* buffer) {
 			u8 data[512];
 			memset(data, 0, 512);
 			_AK_readSectors( sector + i, 1, (void *)data );
-			data_crc = swiCRC16( 0x0000, data, 512 );
+			data_crc = dsd_SDCRC16( data, 512 );
 			if( data_crc == buff_crc )
 			{
 				flagSucc = true;

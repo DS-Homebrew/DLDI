@@ -129,8 +129,8 @@ static void dsd_write_ds_cmd( const u8 * ds_cmd )
 		cmd[i] = ds_cmd[7-i];
 	}
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000/* | CARD_27*/;
-	while( CARD_CR2 & CARD_BUSY ) {}	
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000/* | CARD_CLK_SLOW*/;
+	while( REG_ROMCTRL & CARD_BUSY ) {}	
 }
 
 
@@ -219,8 +219,8 @@ static void dsd_send_clock( u32 clock_count )
 	{
 		u8 cmd[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 		cardWriteCommand( cmd );
-		CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000/* | CARD_27*/;
-		while( CARD_CR2 & CARD_BUSY ) {}
+		REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000/* | CARD_CLK_SLOW*/;
+		while( REG_ROMCTRL & CARD_BUSY ) {}
 	}
 }
 
@@ -228,12 +228,12 @@ bool dsd_is_sd_busy()
 {
 	u8 cmd[] = { 0,0,0,0,0,0,0,0xd5 };
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x07000000 | 0x00406000/* | CARD_27*/;
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x07000000 | 0x00406000/* | CARD_CLK_SLOW*/;
 	u32 data = 0;
-	while( CARD_CR2 & CARD_BUSY )
+	while( REG_ROMCTRL & CARD_BUSY )
 	{
-		while (!(CARD_CR2 & CARD_DATA_READY)) {}
-		data = CARD_DATA_RD;
+		while (!(REG_ROMCTRL & CARD_DATA_READY)) {}
+		data = REG_CARD_DATA_RD;
 	}
 	if( data & 0x80808080 )
 		return false;

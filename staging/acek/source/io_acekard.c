@@ -20,13 +20,13 @@ static void AKP_set_direct_sd_mode()
 	u8 cmd[] = { 0, 0, 0, 0, 0, 0, 0, 0xd3 };
 
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_27;
-	while( CARD_CR2 & CARD_BUSY ) {}
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_CLK_SLOW;
+	while( REG_ROMCTRL & CARD_BUSY ) {}
 
 	memset( (void* )cmd, 0xff, 8 );// = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_27;
-	while( CARD_CR2 & CARD_BUSY ) {}
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_CLK_SLOW;
+	while( REG_ROMCTRL & CARD_BUSY ) {}
 }
 
 static void AKP_set_normal_sd_mode()
@@ -34,8 +34,8 @@ static void AKP_set_normal_sd_mode()
 	u8 cmd[] = { 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F };
 
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_27;
-	while( CARD_CR2 & CARD_BUSY ) {}
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_CLK_SLOW;
+	while( REG_ROMCTRL & CARD_BUSY ) {}
 }
 
 static void AKP_set_rom_offset( u32 offset, bool flashMode )
@@ -49,9 +49,9 @@ static void AKP_set_rom_offset( u32 offset, bool flashMode )
 	u8 cmd[] = { 0, 0, 0, b4, b3, b2, b1, 0xD0 };
 
 	cardWriteCommand( cmd );
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00406000 | 0x00000000 | CARD_27;
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00406000 | 0x00000000 | CARD_CLK_SLOW;
 
-	while( CARD_CR2 & CARD_BUSY ) {}
+	while( REG_ROMCTRL & CARD_BUSY ) {}
 }
 
 static void AKP_set_slot1_rom_mode( AK_SLOT1_ROM_MODE mode )
@@ -69,8 +69,8 @@ static void AKP_set_slot1_rom_mode( AK_SLOT1_ROM_MODE mode )
 		cardWriteCommand( cmd );
 	}
 	
-	CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x00406000 | 0x00000000 | CARD_27;
-	while( CARD_CR2 & CARD_BUSY ) {}
+	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00406000 | 0x00000000 | CARD_CLK_SLOW;
+	while( REG_ROMCTRL & CARD_BUSY ) {}
 }
 
 
@@ -102,12 +102,12 @@ bool _AK_readSectors (u32 sector, u32 numSectors, void* buffer) {
 		cardWriteCommand( cmd );
 
 		//////////////////////////////////////////////
-		CARD_CR2 = CARD_ACTIVATE | CARD_nRESET | 0x01000000 | NDSHeader.cardControl13;
+		REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW | CARD_BLK_SIZE(1) | CARD_SEC_CMD | CARD_SEC_EN | CARD_SEC_DAT | CARD_DELAY1(0x1000);
 		u32 p = 0;
 		for( p = 0; p < 512; p += 4 )
 		{
-			while (!(CARD_CR2 & CARD_DATA_READY)) {}
-			u32 data = CARD_DATA_RD;
+			while (!(REG_ROMCTRL & CARD_DATA_READY)) {}
+			u32 data = REG_CARD_DATA_RD;
 			if( NULL != pbuffer )
 				*(u32 *)(&pbuffer[p]) = data;
 		}

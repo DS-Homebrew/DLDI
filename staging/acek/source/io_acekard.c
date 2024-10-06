@@ -120,37 +120,14 @@ bool _AK_writeSectors (u32 sector, u32 numSectors, const void* buffer) {
 	u32 i = 0;
 	for( i = 0; i < numSectors; ++i )
 	{
-		bool flagSucc = false;
 		const u8 * pbuffer = ((const u8 *)buffer) + (i * 512);
-		u16 buff_crc = swiCRC16( 0x0000, (void *)pbuffer, 512 );
 		u32 address = (sector + i) * 512;
 
-		u32 retryCount = 0;
-		do
-		{
-			AKP_set_direct_sd_mode();
-			dsd_write_sd_sector( address, pbuffer);
-			AKP_set_normal_sd_mode();
-			// check sd busy
-			while( dsd_is_sd_busy() ) {}
-
-			u16 data_crc = 0;
-			u8 data[512];
-			memset(data, 0, 512);
-			_AK_readSectors( sector + i, 1, (void *)data );
-			data_crc = swiCRC16( 0x0000, data, 512 );
-			if( data_crc == buff_crc )
-			{
-				flagSucc = true;
-				break;
-			}
-			++retryCount;
-		} while( !flagSucc && retryCount < 16 );
-
-		if( !flagSucc )
-		{
-			return false;
-		}
+		AKP_set_direct_sd_mode();
+		dsd_write_sd_sector( address, pbuffer);
+		AKP_set_normal_sd_mode();
+		// check sd busy
+		while( dsd_is_sd_busy() ) {}
 	}
 	return true;
 }

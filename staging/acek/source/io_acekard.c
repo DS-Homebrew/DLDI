@@ -5,7 +5,7 @@
 
 #include <nds/ndstypes.h>
 #include "libnds_card.h"
-#include <string.h>
+#include "tonccpy.h"
 #include "io_ak_sd.h"
 
 
@@ -24,7 +24,7 @@ static void AKP_set_direct_sd_mode()
 	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_CLK_SLOW;
 	while( REG_ROMCTRL & CARD_BUSY ) {}
 
-	memset( (void* )cmd, 0xff, 8 );// = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+	toncset( (void* )cmd, 0xff, 8 );// = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 	cardWriteCommand( cmd );
 	REG_ROMCTRL = CARD_ACTIVATE | CARD_nRESET | 0x00000000 | 0x00406000 | CARD_CLK_SLOW;
 	while( REG_ROMCTRL & CARD_BUSY ) {}
@@ -136,7 +136,7 @@ bool _AK_writeSectors (u32 sector, u32 numSectors, const void* buffer) {
 
 			u16 data_crc = 0;
 			u8 data[512];
-			memset(data, 0, 512);
+			toncset(data, 0, 512);
 			_AK_readSectors( sector + i, 1, (void *)data );
 			data_crc = dsd_SDCRC16( data, 512 );
 			if( data_crc == buff_crc )

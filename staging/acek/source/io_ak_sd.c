@@ -5,7 +5,7 @@
 
 #include <nds/ndstypes.h>
 #include "libnds_card.h"
-#include <string.h>
+#include "tonccpy.h"
 #include "io_ak_sd.h"
 
 static void dsd_4way_crc( const u8 * byte512, u8 * byte520 );
@@ -137,10 +137,15 @@ static void dsd_write_ds_cmd( const u8 * ds_cmd )
 
 static void dsd_4way_crc( const u8 * byte512, u8 * byte520 )
 {
-	u8 d0[130] = {};
-	u8 d1[130] = {};
-	u8 d2[130] = {};
-	u8 d3[130] = {};
+	u8 d0[130];
+	u8 d1[130];
+	u8 d2[130];
+	u8 d3[130];
+
+    toncset(d0, 0, 130);
+    toncset(d1, 0, 130);
+    toncset(d2, 0, 130);
+    toncset(d3, 0, 130);
 
 	u32 i = 0;
 	for( i = 0; i < 128; ++i )
@@ -190,7 +195,7 @@ static void dsd_4way_crc( const u8 * byte512, u8 * byte520 )
 	d3[128] = pcrc[1];
 	d3[129] = pcrc[0];
 	
-	memset( byte520, 0, 520 );
+	toncset( byte520, 0, 520 );
 
 	for( i = 0; i < 130; ++i )
 	{

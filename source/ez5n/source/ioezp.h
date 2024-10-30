@@ -30,21 +30,21 @@
 #define IOEZP_CMD_SD_READ_DATA      (0xBAull << 56)
 
 // this reads 4 sectors???
-static inline u64 IOEZP_CMD_SD_READ_REQUEST(u32 sector, u8 num_sectors)
+static inline u64 IOEZP_CMD_SD_READ_REQUEST(u32 sector, u32 num_sectors)
 {
-	return (0xB9ull << 56) | ((u64)num_sectors << 32) | ((u64)sector);
+	return (0xB9ull << 56) | ((u64)(num_sectors & 0xFF) << 32) | ((u64)sector);
 }
 
 // Writing seems to support up to 0x800 bytes
 // It appears to work from an internal buffer, and flushes afterwards.
-static inline u64 IOEZP_CMD_SD_WRITE_BUFFER(u8 buffer_index)
+static inline u64 IOEZP_CMD_SD_WRITE_BUFFER(u32 buffer_index)
 {
-	return (0xBBull << 56) | (1ull << 32) | ((u64)buffer_index);
+	return (0xBBull << 56) | (1ull << 32) | ((u64)(buffer_index & 0xFF));
 }
 
-static inline u64 IOEZP_CMD_SD_WRITE_FLUSH(u32 sector, u8 num_sectors)
+static inline u64 IOEZP_CMD_SD_WRITE_FLUSH(u32 sector, u32 num_sectors)
 {
-	return (0xBCull << 56) | ((u64)num_sectors << 32) | ((u64)sector);
+	return (0xBCull << 56) | ((u64)(num_sectors & 0xFF) << 32) | ((u64)sector);
 }
 
 // user API

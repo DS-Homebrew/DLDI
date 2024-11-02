@@ -93,17 +93,7 @@ bool _CF_clearStatus (void) {
 	return true;
 }
 
-
-/*-----------------------------------------------------------------
-_CF_readSectors
-Read 512 byte sector numbered "sector" into "buffer"
-u32 sector IN: address of first 512 byte sector on CF card to read
-u32 numSectors IN: number of 512 byte sectors to read,
- 1 to 256 sectors can be read
-void* buffer OUT: pointer to 512 byte buffer to store data in
-bool return OUT: true if successful
------------------------------------------------------------------*/
-bool _CF_readSectors (u32 sector, u32 numSectors, void* buffer) {
+bool _CF_readCardData(u32 sector, u32 numSectors, void* buffer) {
 	int i;
 
 	u16 *buff = (u16*)buffer;
@@ -190,18 +180,31 @@ bool _CF_readSectors (u32 sector, u32 numSectors, void* buffer) {
 	return true;
 }
 
-
-
 /*-----------------------------------------------------------------
-_CF_writeSectors
-Write 512 byte sector numbered "sector" from "buffer"
-u32 sector IN: address of 512 byte sector on CF card to read
+_CF_readSectors
+Read 512 byte sector numbered "sector" into "buffer"
+u32 sector IN: address of first 512 byte sector on CF card to read
 u32 numSectors IN: number of 512 byte sectors to read,
  1 to 256 sectors can be read
-void* buffer IN: pointer to 512 byte buffer to read data from
+void* buffer OUT: pointer to 512 byte buffer to store data in
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool _CF_writeSectors (u32 sector, u32 numSectors, void* buffer) {
+bool _CF_readSectors (u32 sector, u32 numSectors, void* buffer) {
+	while(numSectors > 0)
+	{
+		u32 sector_count;
+		sector_count = numSectors >= 256 ? 256 : numSectors;
+		if (!_CF_readCardData(sector, sector_count, buffer))
+			return false;
+		sector += sector_count;
+		numSectors -= sector_count;
+		buffer = (u8*)buffer + (0x200 * sector_count);
+	}
+	return true;
+}
+
+
+bool _CF_writeCardData(u32 sector, u32 numSectors, void* buffer) {
 	int i;
 
 	u16 *buff = (u16*)buffer;
@@ -287,6 +290,29 @@ bool _CF_writeSectors (u32 sector, u32 numSectors, void* buffer) {
 	while(DMA3_CR & DMA_BUSY);
 #endif
 	
+	return true;
+}
+
+/*-----------------------------------------------------------------
+_CF_writeSectors
+Write 512 byte sector numbered "sector" from "buffer"
+u32 sector IN: address of 512 byte sector on CF card to read
+u32 numSectors IN: number of 512 byte sectors to read,
+ 1 to 256 sectors can be read
+void* buffer IN: pointer to 512 byte buffer to read data from
+bool return OUT: true if successful
+-----------------------------------------------------------------*/
+bool _CF_writeSectors (u32 sector, u32 numSectors, void* buffer) {
+	while(numSectors > 0)
+	{
+		u32 sector_count;
+		sector_count = numSectors >= 256 ? 256 : numSectors;
+		if (!_CF_writeCardData(sector, sector_count, buffer))
+			return false;
+		sector += sector_count;
+		numSectors -= sector_count;
+		buffer = (u8*)buffer + (0x200 * sector_count);
+	}
 	return true;
 }
 

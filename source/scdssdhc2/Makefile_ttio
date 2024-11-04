@@ -30,7 +30,7 @@ ARCH	:=	-mthumb-interwork -DTTIO
 
 CFLAGS	:=	-g -Wall -O2\
 			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
-			-ffast-math -ffreestanding \
+			-ffast-math -ffreestanding -ffunction-sections -fdata-sections \
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC
@@ -38,7 +38,7 @@ CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) $(INCLUDE)
-LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map,--gc-sections -ffunction-sections -fdata-sections
+LDFLAGS	=	-nostartfiles -nostdlib -T dldi.ld -g $(ARCH) -Wl,-Map,$(TARGET).map,--gc-sections
 
 LIBS	:=
 

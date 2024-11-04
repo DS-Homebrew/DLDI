@@ -11,10 +11,15 @@
 #pragma once
 
 #include <nds/ndstypes.h>
+#include "libtwl_card.h"
 
 #ifndef NULL
 	#define NULL 0
 #endif
+
+// libtwl workaround
+// Certain DSTT clones need bytewise access to MCCMD
+#define REG_SCDS_MCCMD ((vu8*)&REG_MCCMD0)
 
 // SCDS defines
 // SCDS ROMCTRL flags
@@ -36,52 +41,32 @@
 	AA = command
 	BBBBBBBB = address
 */
-
-static inline u64 SCDS_CMD_SRAM_READ_DATA(u32 address)
-{
-	return (0x70ull << 56) | ((u64)address << 24);
-}
-
-static inline u64 SCDS_CMD_SRAM_WRITE_DATA(u32 address)
-{
-	return (0x71ull << 56) | ((u64)address << 24);
-}
-
-/*
-	This address in SRAM *usually* contains a bool for SD or SDHC
-	While not exactly reliable, the original driver did it, so here goes
-
-	return 0 == SD
-	return non-0 == SDHC
-*/
-static inline u64 SCDS_CMD_SD_IS_SDHC(void)
-{
-	return SCDS_CMD_SRAM_READ_DATA(0x7F9E0);
-}
+#define SCDS_CMD_SRAM_READ_DATA  (0x70)
+#define SCDS_CMD_SRAM_WRITE_DATA (0x71)
 
 // FIFO commands
-#define SCDS_CMD_FIFO_BUSY        (0x80ull << 56)
-#define SCDS_CMD_FIFO_READ_DATA   (0x81ull << 56)
-#define SCDS_CMD_FIFO_WRITE_DATA  (0x82ull << 56)
+#define SCDS_CMD_FIFO_BUSY        (0x80)
+#define SCDS_CMD_FIFO_READ_DATA   (0x81)
+#define SCDS_CMD_FIFO_WRITE_DATA  (0x82)
 
 /*
 	SD host modes
 	Used with 0x51 command, see below
 */
 enum SCDS_SD_HOST_MODES {
-	SCDS_SD_HOST_NORESPONSE = 0ull,
-	SCDS_SD_HOST_READ_4B = 1ull,
-	SCDS_SD_HOST_READ_4B_MULTI = 2ull, // use mode 3 to continue this read
-	SCDS_SD_HOST_NEXT_4B = 3ull,
-	SCDS_SD_HOST_SEND_CLK = 4ull,
-	SCDS_SD_HOST_SEND_STOP_CLK = 5ull,
-	SCDS_SD_HOST_READ_DATABLOCK = 6ull,
-	SCDS_SD_HOST_NEXT_DATABLOCK = 7ull,
-	SCDS_SD_HOST_CMD17_READ_DATA = 8ull, // Send SDIO CMD17 & read data
-	SCDS_SD_HOST_CMD18_READ_DATA = 9ull, // Send SDIO CMD18 & read data until stop
-	SCDS_SD_HOST_COMMIT_FIFO_DATA = 0xAull, // commit data in FIFO to SD card
-	SCDS_SD_HOST_CMD24_WRITE_DATA = 0xBull, // Send SDIO CMD24 & send data in SRAM buffer
-	SCDS_SD_HOST_WAIT_BUSY = 0xCull // wait until data transfer ends
+	SCDS_SD_HOST_NORESPONSE = 0,
+	SCDS_SD_HOST_READ_4B = 1,
+	SCDS_SD_HOST_READ_4B_MULTI = 2, // use mode 3 to continue this read
+	SCDS_SD_HOST_NEXT_4B = 3,
+	SCDS_SD_HOST_SEND_CLK = 4,
+	SCDS_SD_HOST_SEND_STOP_CLK = 5,
+	SCDS_SD_HOST_READ_DATABLOCK = 6,
+	SCDS_SD_HOST_NEXT_DATABLOCK = 7,
+	SCDS_SD_HOST_CMD17_READ_DATA = 8, // Send SDIO CMD17 & read data
+	SCDS_SD_HOST_CMD18_READ_DATA = 9, // Send SDIO CMD18 & read data until stop
+	SCDS_SD_HOST_COMMIT_FIFO_DATA = 0xA, // commit data in FIFO to SD card
+	SCDS_SD_HOST_CMD24_WRITE_DATA = 0xB, // Send SDIO CMD24 & send data in SRAM buffer
+	SCDS_SD_HOST_WAIT_BUSY = 0xC // wait until data transfer ends
 };
 
 /*
@@ -97,34 +82,22 @@ enum SCDS_SD_HOST_MODES {
 	BB = SDIO command
 	CC = SD host mode, see SCDS_SD_HOST_MODES enum
 */
-static inline u64 SCDS_CMD_SD_HOST_PARAM(u8 sdio, u32 parameter, u8 mode)
-{
-	return (0x51ull << 56) | ((u64)parameter << 24) | ((u64)sdio << 16) | ((u64)mode << 8);
-}
+#define SCDS_CMD_SD_HOST_PARAM (0x51)
 
 // SD host misc commands
 // return 0 == idle
 // return non-0 == not idle
-#define SCDS_CMD_SD_HOST_BUSY     (0x50ull << 56)
+#define SCDS_CMD_SD_HOST_BUSY     (0x50)
 
 // Gets response of SD_HOST commands, if the sent mode is 1 or 2
-#define SCDS_CMD_SD_HOST_RESPONSE (0x52ull << 56)
+#define SCDS_CMD_SD_HOST_RESPONSE (0x52)
 // Stops SD host data transfer
-#define SCDS_CMD_SD_WRITE_END     (0x56ull << 56)
+#define SCDS_CMD_SD_WRITE_END     (0x56)
 
 // Sends CMD17
-// This is effectively 0x51/0x50/0x52 rolled into one command
-static inline u64 SCDS_CMD_SD_READ_SINGLE_BLOCK(u32 sector)
-{
-	return (0x53ull << 56) | ((u64)sector << 24);
-}
-
+#define SCDS_CMD_SD_READ_SINGLE_BLOCK (0x53)
 // Sends CMD18
-// This is effectively 0x51/0x50/0x52 rolled into one command
-static inline u64 SCDS_CMD_SD_READ_MULTI_BLOCK(u32 sector)
-{
-	return (0x54ull << 56) | ((u64)sector << 24);
-}
+#define SCDS_CMD_SD_READ_MULTI_BLOCK (0x54)
 
 /*
 	SD host control registers
@@ -142,14 +115,10 @@ static inline u64 SCDS_CMD_SD_READ_MULTI_BLOCK(u32 sector)
 #define SCDS_SD_HOST_REG_CLEAN_ROM_MODE BIT(2)
 #define SCDS_SD_HOST_REG_SDHC BIT(3)
 
-// This function will always set bits 4-5 to 1 and bits 6-7 to 0 for convenience
-static inline u64 SCDS_CMD_SD_HOST_SET_REGISTER(u8 bits)
-{
-	return (0x5F30ull << 48) | ((u64)bits << 48);
-}
+// Command to write to host register
+#define SCDS_CMD_SD_HOST_SET_REGISTER (0x5F)
 
 // user API
-u32 SCDS_SendCommand(const u64 command, u32 latency);
 void SCDS_SDGetSDHCStatusFromSRAM(void);
 bool SCDS_SDInitialize(void);
 void SCDS_SDReadSingleSector(u32 sector, void *buffer);

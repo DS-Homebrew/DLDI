@@ -1,6 +1,13 @@
-/* EZ5 DLDI driver */
+/*
+    EZ5 DLDI driver
+    Copyright (C) 2007 SaTa
+    Copyright (C) 2007 EZ-Flash
+    Copyright (C) 2010 Taiju Yamada
 
-#include "tonccpy.h"
+    SPDX-License-Identifier: Zlib
+*/
+
+#include <string.h>
 
 #ifndef NDS
  #if defined ARM9 || defined ARM7
@@ -367,7 +374,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     unsigned char pres[40] ;
 
     u8  pbuf[520] __attribute__ ((aligned (4)));
-    tonccpy(pbuf, ppbuf, 512);
+    memcpy(pbuf, ppbuf, 512);
 	{
 		unsigned char w1,w2,w3,w4 ;
 		unsigned short b1,b2,b3,b4 ;
@@ -574,13 +581,13 @@ bool EZ5_IsInserted (void)
 	return true;
 }
 //-----------------------------------------------------------------
-bool EZ5_ReadSectors (u32 sector, u8 numSecs, void* buffer)
+bool EZ5_ReadSectors (u32 sector, u32 numSecs, void* buffer)
 {
     SD_ReadMultiBlock(sector,(u8*)buffer,numSecs);
     return true;
 }
 //---------------------------------------------------------------
-bool EZ5_WriteSectors (u32 sector, u8 numSecs, void* buffer)
+bool EZ5_WriteSectors (u32 sector, u32 numSecs, const void* buffer)
 {
     int i;
     for(i=0;i<numSecs;i++)
@@ -604,3 +611,15 @@ bool EZ5_Shutdown(void)
 	return true;
 };
  
+#ifdef PLATFORM_ez5h
+
+#include <iointerface.h>
+
+disc_interface_t ioInterface = {.startup = EZ5_StartUp,
+                                .is_inserted = EZ5_IsInserted,
+                                .read_sectors = EZ5_ReadSectors,
+                                .write_sectors = EZ5_WriteSectors,
+                                .clear_status = EZ5_ClearStatus,
+                                .shutdown = EZ5_Shutdown};
+
+#endif

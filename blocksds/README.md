@@ -11,6 +11,7 @@ Currently supported devices:
 | acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue)           | lifehackerhansol | Zlib                    |
 | ak2         | Acekard 2/2.1/2i, r4itt.net 3DS, R4i3D (and probably others) | lifehackerhansol | Zlib                    |
 | ak2_cmd24   | Acekard 2 clones with broken CMD25                           | lifehackerhansol | Zlib                    |
+| ez5h        | EZ-Flash V                                                   | SaTa, EZ-Flash   | Zlib                    |
 | ez5n        | EZ-Flash Parallel                                            | lifehackerhansol | Zlib                    |
 | g003        | M3i Zero (GMP-Z003)                                          | lifehackerhansol | Zlib                    |
 | m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com     | lifehackerhansol | Zlib                    |

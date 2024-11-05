@@ -6,9 +6,10 @@ This repository hosts both complete and work-in-progress drivers, primarily for 
 
 Currently supported devices:
 
-| Driver name | Supported devices       | Author           | SPDX-License-Identifier |
-| ----------- | ----------------------- | ---------------- | ----------------------- |
-| r4tf        | Original R4, M3 Simply  | lifehackerhansol | Zlib                    |
+| Driver name | Supported devices                                  | Author           | SPDX-License-Identifier |
+| ----------- | -------------------------------------------------- | ---------------- | ----------------------- |
+| acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue) | lifehackerhansol | Zlib                    |
+| r4tf        | Original R4, M3 Simply                             | lifehackerhansol | Zlib                    |
 
 ## Compiling
 

@@ -1,8 +1,8 @@
+#include <string.h>
 #include <nds/ndstypes.h>
 
 #include "io_MartSD.h"
 #include "MartCartop.h"
-#include "tonccpy.h"
 
 static bool  bSDHC =false;
 static u32 SDadd ;
@@ -689,7 +689,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     unsigned char pres[40] ;
 
     u8  pbuf[520] __attribute__ ((aligned (4)));
-    tonccpy(pbuf, ppbuf, 512);
+    memcpy(pbuf, ppbuf, 512);
 	{
 		unsigned char w1,w2,w3,w4 ;
 		unsigned short b1,b2,b3,b4 ;
@@ -1044,7 +1044,7 @@ u8 numSecs IN: number of 512 byte sectors to read,
 void* buffer OUT: pointer to 512 byte buffer to store data in
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MartSD_ReadSectors (u32 sector, u8 numSecs, void* buffer)
+bool MartSD_ReadSectors (u32 sector, u32 numSecs, void* buffer)
 {
     SD_ReadMultiBlock(sector,(u8*)buffer,numSecs);
     return true;
@@ -1059,7 +1059,7 @@ u8 numSecs IN: number of 512 byte sectors to read,
 void* buffer IN: pointer to 512 byte buffer to read data from
 bool return OUT: true if successful
 -----------------------------------------------------------------*/
-bool MartSD_WriteSectors (u32 sector, u8 numSecs, void* buffer)
+bool MartSD_WriteSectors (u32 sector, u32 numSecs, const void* buffer)
 {
     /*
     int i;
@@ -1089,3 +1089,16 @@ bool MartSD_StartUp(void) {
     //init sd 
     return SD_initial();
 } ;
+
+#ifdef PLATFORM_mati
+
+#include <iointerface.h>
+
+disc_interface_t ioInterface = {.startup = MartSD_StartUp,
+                                .is_inserted = MartSD_IsInserted,
+                                .read_sectors = MartSD_ReadSectors,
+                                .write_sectors = MartSD_WriteSectors,
+                                .clear_status = MartSD_ClearStatus,
+                                .shutdown = MartSD_Shutdown};
+
+#endif

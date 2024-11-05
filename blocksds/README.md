@@ -15,6 +15,7 @@ Currently supported devices:
 | ez5n        | EZ-Flash Parallel                                            | lifehackerhansol | Zlib                    |
 | g003        | M3i Zero (GMP-Z003)                                          | lifehackerhansol | Zlib                    |
 | m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com     | lifehackerhansol | Zlib                    |
+| mati        | iSmart Premium                                               | EZ-Flash, iSmart | Zlib                    |
 | r4idsn      | R4iDSN                                                       | lifehackerhansol | Zlib                    |
 | r4tf        | Original R4, M3 Simply                                       | lifehackerhansol | Zlib                    |
 | rpgs        | Acekard RPG (SD)                                             | lifehackerhansol | Zlib                    |

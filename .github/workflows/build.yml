@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  devkitarm:
     runs-on: ubuntu-latest
     container: devkitpro/devkitarm
     name: Build with Docker using devkitARM
@@ -26,17 +26,49 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: out
-          name: build
+          name: build_dka
+  blocksds:
+    runs-on: ubuntu-latest
+    container: skylyrac/blocksds:slim-latest
+    name: Build with Docker using BlocksDS
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build all drivers
+        run: |
+          cd blocksds
+          chmod +x build.sh
+          ./build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          path: blocksds/out
+          name: build_blocks
+
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish artifacts
+    needs: [devkitarm, blocksds]
+    steps:
       - name: Checkout artifact branch
         uses: actions/checkout@v4
         with:
           path: artifacts
           ref: builds
+      - name: Download devkitARM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build_dka
+          path: /tmp/build_dka
+      - name: Download BlocksDS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build_blocks
+          path: /tmp/build_blocks
       - name: Commit artifacts
         continue-on-error: true
         run: |
           rm -rf artifacts/*.dldi
-          cp -r out/*.dldi artifacts/
+          cp -r /tmp/build_dka/*.dldi artifacts/
+          cp -r /tmp/build_blocks/*.dldi artifacts/
           cd artifacts
           git add .
           git config --local user.email "github-actions[bot]@users.noreply.github.com"

@@ -2,8 +2,11 @@
 #
 # SPDX-FileContributor: Antonio Niño Díaz, 2023
 
-BLOCKSDS	?= /opt/blocksds/core
-BLOCKSDSEXT	?= /opt/blocksds/external
+export BLOCKSDS			?= /opt/blocksds/core
+export BLOCKSDSEXT		?= /opt/blocksds/external
+
+export WONDERFUL_TOOLCHAIN	?= /opt/wonderful
+ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 
 # User config
 # ===========
@@ -35,7 +38,7 @@ LIBDIRS		:= $(BLOCKSDS)/libs/libnds
 # Build artifacts
 # -----------------
 
-BUILDDIR	:= build/
+BUILDDIR	:= build/$(NAME)
 ELF		:= build/$(NAME).elf
 DUMP		:= build/$(NAME).dump
 MAP		:= build/$(NAME).map
@@ -44,9 +47,10 @@ DLDI	:= $(NAME).dldi
 # Tools
 # -----
 
-PREFIX		:= arm-none-eabi-
+PREFIX		:= $(ARM_NONE_EABI_PATH)arm-none-eabi-
 CC		:= $(PREFIX)gcc
 CXX		:= $(PREFIX)g++
+LD		:= $(PREFIX)gcc
 OBJDUMP		:= $(PREFIX)objdump
 OBJCOPY		:= $(PREFIX)objcopy
 MKDIR		:= mkdir
@@ -77,19 +81,19 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 # -------------------------
 
 ifeq ($(DLDI_ARM9),1)
-DEFINES		+= -D__NDS__ -DARM9
-ARCH		:= -march=armv5te -mtune=arm946e-s
+	ARCH	:= -mthumb -mcpu=arm946e-s+nofp
+	SPECS	:= $(BLOCKSDS)/sys/crts/dldi_arm9.specs
 else
-DEFINES		+= -D__NDS__ -DARM7
-ARCH		:= -mcpu=arm7tdmi -mtune=arm7tdmi
+	ARCH	:= -mthumb -mcpu=arm7tdmi
+	SPECS	:= $(BLOCKSDS)/sys/crts/dldi_arm7.specs
 endif
 
 WARNFLAGS	:= -Wall
 
 ifeq ($(SOURCES_CPP),)
-    LD	:= $(CC)
+	LIBS	+= -lc
 else
-    LD	:= $(CXX)
+	LIBS	+= -lstdc++ -lc
 endif
 
 INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
@@ -97,26 +101,21 @@ INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
 
 LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
 
-ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) \
-		   -ffunction-sections -fdata-sections
+ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(INCLUDEFLAGS) \
+		   $(ARCH) -ffunction-sections -fdata-sections \
+		   -specs=$(SPECS)
 
-CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
-		   -fomit-frame-pointer -fPIC
+CFLAGS		+= -std=gnu17 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+		   $(ARCH) -O2 -ffunction-sections -fdata-sections \
+		   -specs=$(SPECS)
 
-CXXFLAGS	+= -std=gnu++14 $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
+CXXFLAGS	+= -std=gnu++17 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+		   $(ARCH) -O2 -ffunction-sections -fdata-sections \
 		   -fno-exceptions -fno-rtti \
-		   -fomit-frame-pointer -fPIC
+		   -specs=$(SPECS)
 
-LDFLAGS		:= -mthumb -mthumb-interwork $(LIBDIRSFLAGS) \
-		   -Wl,-Map,$(MAP) -Wl,--gc-sections -nostartfiles -nostdlib \
-		   -T$(BLOCKSDS)/sys/crts/dldi.ld \
-		   -Wl,--no-warn-rwx-segments \
-		   -Wl,--start-group $(LIBS) -lgcc -Wl,--end-group
+LDFLAGS		:= $(ARCH) $(LIBDIRSFLAGS) -Wl,-Map,$(MAP) $(DEFINES) \
+		   -Wl,--start-group $(LIBS) -Wl,--end-group -specs=$(SPECS)
 
 # Intermediate build files
 # ------------------------

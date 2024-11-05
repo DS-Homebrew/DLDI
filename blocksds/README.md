@@ -9,6 +9,7 @@ Currently supported devices:
 | Driver name | Supported devices                                  | Author           | SPDX-License-Identifier |
 | ----------- | -------------------------------------------------- | ---------------- | ----------------------- |
 | acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue) | lifehackerhansol | Zlib                    |
+| g003        | M3i Zero (GMP-Z003)                                | lifehackerhansol | Zlib                    |
 | r4tf        | Original R4, M3 Simply                             | lifehackerhansol | Zlib                    |
 
 ## Compiling

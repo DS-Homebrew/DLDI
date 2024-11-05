@@ -13,7 +13,9 @@ Currently supported devices:
 | m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com | lifehackerhansol | Zlib                    |
 | r4tf        | Original R4, M3 Simply                                   | lifehackerhansol | Zlib                    |
 | scds        | SuperCard DSONE                                          | lifehackerhansol | Zlib                    |
+| scdssdhc    | SuperCard DSONE SDHC                                     | lifehackerhansol | Zlib                    |
 | sg3d        | Stargate 3DS                                             | lifehackerhansol | Zlib                    |
+| ttio        | DSTT                                                     | lifehackerhansol | Zlib                    |
 
 ## Compiling
 

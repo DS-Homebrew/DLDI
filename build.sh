@@ -14,15 +14,7 @@ set -e
 # OSS drivers first
 cd source
 for FILE in *; do
-    if [[ $FILE == "scdssdhc2" ]]; then
-        make -C $FILE clean
-        make -C $FILE -f Makefile_ttio clean
-        make -C $FILE
-        cp $FILE/*.dldi $OUT
-        make -C $FILE clean
-        make -C $FILE -f Makefile_ttio
-        cp $FILE/*.dldi $OUT
-    elif [[ $FILE == "rpg_sd" ]]; then
+    if [[ $FILE == "rpg_sd" ]]; then
         # Clean before starting
         make -C $FILE clean
         make -C $FILE -f Makefile_ak2 clean

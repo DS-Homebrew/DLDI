@@ -6,11 +6,12 @@ This repository hosts both complete and work-in-progress drivers, primarily for 
 
 Currently supported devices:
 
-| Driver name | Supported devices                                  | Author           | SPDX-License-Identifier |
-| ----------- | -------------------------------------------------- | ---------------- | ----------------------- |
-| acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue) | lifehackerhansol | Zlib                    |
-| g003        | M3i Zero (GMP-Z003)                                | lifehackerhansol | Zlib                    |
-| r4tf        | Original R4, M3 Simply                             | lifehackerhansol | Zlib                    |
+| Driver name | Supported devices                                        | Author           | SPDX-License-Identifier |
+| ----------- | -------------------------------------------------------- | ---------------- | ----------------------- |
+| acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue)       | lifehackerhansol | Zlib                    |
+| g003        | M3i Zero (GMP-Z003)                                      | lifehackerhansol | Zlib                    |
+| m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com | lifehackerhansol | Zlib                    |
+| r4tf        | Original R4, M3 Simply                                   | lifehackerhansol | Zlib                    |
 
 ## Compiling
 

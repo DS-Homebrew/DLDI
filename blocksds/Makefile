@@ -17,7 +17,7 @@ NAME		:= $(PLATFORM)
 # Source code paths
 # -----------------
 
-SOURCEDIRS	:= source/base source/platform/$(PLATFORM)
+SOURCEDIRS	:= source/base source/common source/libtwl source/platform/$(PLATFORM)
 INCLUDEDIRS	:= include source/platform/$(PLATFORM)
 BINDIRS		:=
 

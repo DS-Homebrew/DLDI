@@ -13,13 +13,6 @@
 
 #include "scds.h"
 
-static inline u32 SCDS_SendCommand(const u64 command) {
-    card_romSetCmd(command);
-    card_romStartXfer(SCDS_CTRL_READ_4B, false);
-    card_romWaitDataReady();
-    return card_romGetData();
-}
-
 static inline void SCDS_WaitBusy(void) {
     while (cardExt_ReadData4Byte(SCDS_CMD_CARD_BUSY, SCDS_CTRL_READ_4B))
         ;

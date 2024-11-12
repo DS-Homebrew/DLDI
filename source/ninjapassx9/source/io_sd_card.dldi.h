@@ -30,41 +30,41 @@ freely, subject to the following restrictions:
 
 typedef struct
 {
-    const uint8  csdStructure              :  2;
-    const uint8  reserved1                 :  6;
-    const uint8  dataReadAccessTime1       :  8;  // TAAC
-    const uint8  dataReadAccessTime2       :  8;  // NSAC
-    const uint8  maxDataTransferRate       :  8;
-    const uint16 cardCommandClasses        :  12;
-    const uint8  maxReadDataBlockLength    :  4;
-    const uint8  allowPartialRead          :  1;
-    const uint8  allowWriteMisalign        :  1;
-    const uint8  allowReadMisalign         :  1;
-    const uint8  dsrImplemented            :  1;
-    const uint8  reserved2                 :  2;
-    const uint16 deviceSize                : 12;
-    const uint8  maxReadCurrentMin         :  3;
-    const uint8  maxReadCurrentMax         :  3;
-    const uint8  maxWriteCurrentMin        :  3;
-    const uint8  maxWriteCurrentMax        :  3;
-    const uint8  sizeMultiplier            :  3;
-    const uint8  allowEraseSingleBlock     :  1;
-    const uint8  eraseSectorSize           :  7;
-    const uint8  writeProtectGroupSize     :  7;
-    const uint8  writeProtectGroupEnabled  :  1;
-    const uint8  reserved3                 :  2;
-    const uint8  writeSpeedFactor          :  3;
-    const uint8  maxWriteLength            :  4;
-    const uint8  allowPartialWrite         :  1;
-    const uint8  reserved4                 :  5;
-    const uint8  fileFormatGroup           :  1;
-    const uint8  copyFlag                  :  1;
-    const uint8  permanentWriteProtection  :  1;
-          uint8  temporaryWriteProtection  :  1;
-    const uint8  fileFormat                :  2;
-          uint8  reserved5                 :  2;
-          uint8  crc7                      :  7;  // Used to ensure this header was transferred properly
-    const uint8  direction                 :  1;  // 1 == from card to host
+    const u8  csdStructure              :  2;
+    const u8  reserved1                 :  6;
+    const u8  dataReadAccessTime1       :  8;  // TAAC
+    const u8  dataReadAccessTime2       :  8;  // NSAC
+    const u8  maxDataTransferRate       :  8;
+    const u16 cardCommandClasses        :  12;
+    const u8  maxReadDataBlockLength    :  4;
+    const u8  allowPartialRead          :  1;
+    const u8  allowWriteMisalign        :  1;
+    const u8  allowReadMisalign         :  1;
+    const u8  dsrImplemented            :  1;
+    const u8  reserved2                 :  2;
+    const u16 deviceSize                : 12;
+    const u8  maxReadCurrentMin         :  3;
+    const u8  maxReadCurrentMax         :  3;
+    const u8  maxWriteCurrentMin        :  3;
+    const u8  maxWriteCurrentMax        :  3;
+    const u8  sizeMultiplier            :  3;
+    const u8  allowEraseSingleBlock     :  1;
+    const u8  eraseSectorSize           :  7;
+    const u8  writeProtectGroupSize     :  7;
+    const u8  writeProtectGroupEnabled  :  1;
+    const u8  reserved3                 :  2;
+    const u8  writeSpeedFactor          :  3;
+    const u8  maxWriteLength            :  4;
+    const u8  allowPartialWrite         :  1;
+    const u8  reserved4                 :  5;
+    const u8  fileFormatGroup           :  1;
+    const u8  copyFlag                  :  1;
+    const u8  permanentWriteProtection  :  1;
+          u8  temporaryWriteProtection  :  1;
+    const u8  fileFormat                :  2;
+          u8  reserved5                 :  2;
+          u8  crc7                      :  7;  // Used to ensure this header was transferred properly
+    const u8  direction                 :  1;  // 1 == from card to host
 } CSDRegister;
 
 typedef struct
@@ -103,8 +103,8 @@ typedef struct
     bool   start                     :  1;
     bool   direction                 :  1;
     int   commandIndex              :  6;
-    uint16 newRCA                    : 16;
-    uint16 cardStatusError           : 16;
+    u16 newRCA                    : 16;
+    u16 cardStatusError           : 16;
     int   crc7                      :  7;
     bool   end                       :  1;
 } SDResponseR6;
@@ -155,15 +155,15 @@ enum SDState
 extern "C"{
 #endif
 
-extern void SDSendCommand(enum SDCommand sdCmd, uint32 arg, uint8* response);
-extern bool SDInitialize(uint32* relativeCardAddress);
-extern bool SDWriteSingleBlock(uint32 address, const void* buffer);
-extern bool SDReadSingleBlock(uint32 address, void* destination);
-extern bool SDReadMultipleBlocks(uint32 address, unsigned int count, void* destination);
+extern void SDSendCommand(enum SDCommand sdCmd, u32 arg, u8* response);
+extern bool SDInitialize(u32* relativeCardAddress);
+extern bool SDWriteSingleBlock(u32 address, const void* buffer);
+extern bool SDReadSingleBlock(u32 address, void* destination);
+extern bool SDReadMultipleBlocks(u32 address, unsigned int count, void* destination);
 
-extern void SDSendAppCommand(enum SDAppCommand sdAppCmd, uint32 arg, uint8* response);
-extern void SDBroadcastCommand(enum SDCommand sdCmd, uint32 arg, uint8* response);
-extern void SDBroadcastAppCommand(enum SDAppCommand sdAppCmd, uint32 arg, uint8* response);
+extern void SDSendAppCommand(enum SDAppCommand sdAppCmd, u32 arg, u8* response);
+extern void SDBroadcastCommand(enum SDCommand sdCmd, u32 arg, u8* response);
+extern void SDBroadcastAppCommand(enum SDAppCommand sdAppCmd, u32 arg, u8* response);
 
 #ifdef __cplusplus
 }

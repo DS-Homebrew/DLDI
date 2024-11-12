@@ -31,10 +31,10 @@ freely, subject to the following restrictions:
 #include "libnds_card.h"
 
 // Shared data just to save space
-static uint32 x9Buffer[0x200];
-static uint8  x9Command[8];
+static u32 x9Buffer[0x200];
+static u8  x9Command[8];
 
-static inline __attribute__((always_inline)) void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words)
+static inline __attribute__((always_inline)) void X9CardIO(u8 cmd, u8 arg1, u32 arg2, u32 flags, u32* buffer, u32 words)
 {
     x9Command[7] = cmd;
     x9Command[6] = (arg2>>24)&0xFF;
@@ -63,12 +63,12 @@ static inline __attribute__((always_inline)) void cardIO_1()
     cardPolledTransfer(0xA0586000, x9Buffer, 0, x9Command);
 }
 
-static inline __attribute__((always_inline)) void cardIO_2(uint32 arg)
+static inline __attribute__((always_inline)) void cardIO_2(u32 arg)
 {
     X9CardIO(0x5D, 0, arg, 0xA0586000, x9Buffer, 0);
 }
 
-static inline __attribute__((always_inline)) void cardIO_3(uint8 arg0)
+static inline __attribute__((always_inline)) void cardIO_3(u8 arg0)
 {
     x9Command[7] = 0x58;
     x9Command[6] = 0;
@@ -83,7 +83,7 @@ static inline __attribute__((always_inline)) void cardIO_3(uint8 arg0)
     cardPolledTransfer(0xA0586000, x9Buffer, 0, x9Command);
 }
 
-static inline __attribute__((always_inline)) void cardIO_4(uint32 address)
+static inline __attribute__((always_inline)) void cardIO_4(u32 address)
 {
     X9CardIO(0x5C, 0, address, 0xA0586000, x9Buffer, 0);
 }
@@ -93,9 +93,9 @@ static inline __attribute__((always_inline)) void cardIO_4(uint32 address)
 extern "C"{
 #endif
 
-//extern void X9CardPolledWrite(uint32 flags, const uint32* buffer, const uint8* command);
-extern void X9CardIO(uint8 cmd, uint8 arg1, uint32 arg2, uint32 flags, uint32* buffer, uint32 words);
-extern void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer);
+//extern void X9CardPolledWrite(u32 flags, const u32* buffer, const u8* command);
+extern void X9CardIO(u8 cmd, u8 arg1, u32 arg2, u32 flags, u32* buffer, u32 words);
+extern void X9CardWriteData(u8 arg1, u32 arg2, const void* buffer);
 
 #ifdef __cplusplus
 }

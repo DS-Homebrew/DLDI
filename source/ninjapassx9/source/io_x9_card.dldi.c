@@ -47,7 +47,7 @@ freely, subject to the following restrictions:
    
    NOTE: buffer must be aligned to a 4 byte boundary
 */
-void X9CardPolledWrite(uint32 flags, const uint32* buffer, const uint8* command)
+void X9CardPolledWrite(u32 flags, const u32* buffer, const u8* command)
 {
     cardWriteCommand(command);
     REG_ROMCTRL = flags;
@@ -60,7 +60,7 @@ void X9CardPolledWrite(uint32 flags, const uint32* buffer, const uint8* command)
 	while(REG_ROMCTRL & CARD_BUSY);
 }
 
-void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer)
+void X9CardWriteData(u8 arg1, u32 arg2, const void* buffer)
 {
     x9Command[7] = 0x64;
     x9Command[6] = (arg2>>24)&0xFF;
@@ -72,10 +72,10 @@ void X9CardWriteData(uint8 arg1, uint32 arg2, const void* buffer)
     x9Command[0] = arg1;
 	
 	if(((int)(buffer) % 4) == 0)
-		X9CardPolledWrite(0xC1586000, (uint32*)buffer, x9Command);
+		X9CardPolledWrite(0xC1586000, (u32*)buffer, x9Command);
 	else
 	{
-	    tonccpy((uint8*)x9Buffer, (const uint8*)buffer, 512);
-        X9CardPolledWrite(0xC1586000, (uint32*)x9Buffer, x9Command);
+	    tonccpy((u8*)x9Buffer, (const u8*)buffer, 512);
+        X9CardPolledWrite(0xC1586000, (u32*)x9Buffer, x9Command);
 	}
 }

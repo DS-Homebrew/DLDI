@@ -34,8 +34,8 @@ extern bool _X9SD_isInserted(void);
 extern bool _X9SD_clearStatus (void);
 extern bool _X9SD_shutdown(void);
 extern bool _X9SD_startup(void);
-extern bool _X9SD_writeSectors(uint32 sector, uint32 sectors, const uint8* buffer);
-extern bool _X9SD_readSectors(uint32 sector, uint32 sectorCount, uint8* buffer);
+extern bool _X9SD_writeSectors(u32 sector, u32 sectors, const u8* buffer);
+extern bool _X9SD_readSectors(u32 sector, u32 sectorCount, u8* buffer);
 
 #ifdef __cplusplus
 } // extern "C"

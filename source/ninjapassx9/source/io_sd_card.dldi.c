@@ -36,7 +36,7 @@ const unsigned int READY_TIMEOUT   = 1000;
 const unsigned int blockSize = 512; // bytes
 
 // General-purpose buffer
-static uint8 scratch[0x1000];
+static u8 scratch[0x1000];
 
 
 //extern void DumpMemory(unsigned char* data, int bytes);
@@ -47,16 +47,16 @@ static uint8 scratch[0x1000];
 #define min2(a, b) ((a) < (b) ? (a) : (b))
 
 
-void SDSendCommand(enum SDCommand sdCmd, uint32 arg, uint8* response)
+void SDSendCommand(enum SDCommand sdCmd, u32 arg, u8* response)
 {
     // Each byte in var represents one bit -- bit 0 of var[x]. Thus, each group
     // of eight bytes in var is "effectively" one byte from the SD card
     // 
 	
-    static uint8 var[0x200];
+    static u8 var[0x200];
     // Send the SD command (0x60)
     // 0x80 words = 0x200 bytes
-    X9CardIO(0x60, sdCmd, arg, 0xA1586000, (uint32*)var, 0x80);
+    X9CardIO(0x60, sdCmd, arg, 0xA1586000, (u32*)var, 0x80);
 
     // Skips the first 7 effective bytes (k = 0x30)
     // 0x30 is the size in bits of an SD-mode response
@@ -96,8 +96,8 @@ void SDSendCommand(enum SDCommand sdCmd, uint32 arg, uint8* response)
     
 	if(min2(start, end) == start)
 	{
-        const uint8* end_ptr = &(var[end]);
-        uint8* ptr = &(var[start]);
+        const u8* end_ptr = &(var[end]);
+        u8* ptr = &(var[start]);
 
         int bit = 7;
         int j = 0;
@@ -119,7 +119,7 @@ void SDSendCommand(enum SDCommand sdCmd, uint32 arg, uint8* response)
 }
 
 //coto: added proper retry-ability @ bool _X9SD_writeSectors
-bool SDWriteSingleBlock(uint32 address, const void* buffer)
+bool SDWriteSingleBlock(u32 address, const void* buffer)
 {
     // Preemptively send the data before issuing the command so
     // that the X9 can compute the CRC
@@ -131,7 +131,7 @@ bool SDWriteSingleBlock(uint32 address, const void* buffer)
 
     // Uses 512 bytes of scratch
     // Overwrites scratch
-    X9CardIO(0x63, 0, 0, 0xB15863FA, (uint32*)scratch, 0x80);
+    X9CardIO(0x63, 0, 0, 0xB15863FA, (u32*)scratch, 0x80);
 
     int idx = 0;
     
@@ -140,7 +140,7 @@ bool SDWriteSingleBlock(uint32 address, const void* buffer)
 	{
 		if(idx == 0){
 			// Repeat SD command to absorb current data
-			X9CardIO(0x62, 0, 0, 0xA1586000, (uint32*)scratch, 0x80);
+			X9CardIO(0x62, 0, 0, 0xA1586000, (u32*)scratch, 0x80);
 		}
 		
 		if((idx < 0x200) && !(scratch[idx] & 0x10)){
@@ -164,7 +164,7 @@ bool SDWriteSingleBlock(uint32 address, const void* buffer)
 	{
 		if(idx == 0){
 			// Repeat SD command?
-			X9CardIO(0x62, 0, 0, 0xA1586000, (uint32*)scratch, 0x80);
+			X9CardIO(0x62, 0, 0, 0xA1586000, (u32*)scratch, 0x80);
 		}
 		
 		if((idx < 0x200) && (scratch[idx] & 0x10)){
@@ -186,7 +186,7 @@ bool SDWriteSingleBlock(uint32 address, const void* buffer)
 }
 
 
-bool SDReadSingleBlock(uint32 address, void* destination)
+bool SDReadSingleBlock(u32 address, void* destination)
 {
 	
     // scratch is split in two halves
@@ -194,7 +194,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
     // 0x60: send an SD command
     // 0xA3586000 means we don't expect the standard response? (but data) -- serial vs 4-bit? length?
     // 0x200 words = 0x800 bytes
-    X9CardIO(0x60, (uint8)ReadSingleBlock, address, 0xA1586000, (uint32*)scratch, 0x80);
+    X9CardIO(0x60, (u8)ReadSingleBlock, address, 0xA1586000, (u32*)scratch, 0x80);
 
     // Search for the start of data
     unsigned int k = 0;
@@ -204,7 +204,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
     while(k == 0x200)
     {
         // Continue reading data from SD card
-        X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)scratch, 0x80);
+        X9CardIO(0x62, 0, address, 0xA1586000, (u32*)scratch, 0x80);
         
         // Keep searching for the response-data
         for(k = 0; k < 0x200 && (scratch[k] & 0xf0); ++k)
@@ -213,14 +213,14 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 
 //    // Read another chunk because the full 512 bytes haven't yet been received
 //    if(0x800 - k < 0x400) // k > 0x400    
-//        X9CardIO(0x62, 0, address, 0xA3586000, (uint32*)&scratch[0x800], 0x200);
-    X9CardIO(0x62, 0, address, 0xA2586000, (uint32*)&scratch[0x200], 0x100);
+//        X9CardIO(0x62, 0, address, 0xA3586000, (u32*)&scratch[0x800], 0x200);
+    X9CardIO(0x62, 0, address, 0xA2586000, (u32*)&scratch[0x200], 0x100);
 
     unsigned int readIdx = k + 1; // just after the 0xf0
     unsigned int end = readIdx + 0x400; // read 0x400 half-bytes, or 0x200 bytes
 
     // IO is done with half-bytes: reconstruct full bytes
-    uint8* dest = (uint8*)destination;
+    u8* dest = (u8*)destination;
     for(; readIdx < end; readIdx+= 2)
         *dest++ = (scratch[readIdx] & 0xF0) | (scratch[readIdx+1] >> 4);
 
@@ -229,13 +229,13 @@ bool SDReadSingleBlock(uint32 address, void* destination)
     // NOTE: SDSendCommand uses 0xA1586000 and gets a response
     // the data-transfer commands use 0xA3586000 and expect no response...
     // Get the response from the SD-card (always after the transfer)
-    X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)scratch, 0x80);
+    X9CardIO(0x62, 0, address, 0xA1586000, (u32*)scratch, 0x80);
 
     return true;
 }
 
 //
-//bool SDReadMultipleBlocks(uint32 address, unsigned int count, void* destination)
+//bool SDReadMultipleBlocks(u32 address, unsigned int count, void* destination)
 //{
 //    if(count == 1)
 //        return SDReadSingleBlock(address, destination);
@@ -244,13 +244,13 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //
 //    const unsigned int readChunkSize = 0x200;
 //
-//    uint8 buffer[0x1000];// split in two halves
-//    uint8* dest = (uint8*)destination;
+//    u8 buffer[0x1000];// split in two halves
+//    u8* dest = (u8*)destination;
 //
 //    // 0x60: send an SD command
 //    // 0xA3586000 means we don't expect the standard response? (but data) -- serial vs 4-bit? length?
 //    // 0x200 words = 0x800 bytes
-//    X9CardIO(0x60, (uint8)ReadMultipleBlocks, address, 0xA1586000, (uint32*)buffer, readChunkSize/sizeof(uint32));
+//    X9CardIO(0x60, (u8)ReadMultipleBlocks, address, 0xA1586000, (u32*)buffer, readChunkSize/sizeof(u32));
 //    
 //    // Search for the start of data
 //    unsigned int readIdx = 0;
@@ -261,7 +261,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //    while(readIdx == readChunkSize)
 //    {
 //        // Continue reading data from SD card
-//        X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)buffer, readChunkSize/sizeof(uint32));
+//        X9CardIO(0x62, 0, address, 0xA1586000, (u32*)buffer, readChunkSize/sizeof(u32));
 //        
 //        // Keep searching for the response-data
 //        for(readIdx = 0; readIdx < readChunkSize && (buffer[readIdx] & 0xf0); ++readIdx)
@@ -281,7 +281,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //        // Read the remaining blocks before the last
 //        while(bytesRemaining > blockSize)
 //        {
-//            X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)buffer, blockSize*2/sizeof(uint32));
+//            X9CardIO(0x62, 0, address, 0xA1586000, (u32*)buffer, blockSize*2/sizeof(u32));
 //            for(unsigned int idx = 0; idx < 2*blockSize; idx+= 2)
 //                *dest++ = (buffer[idx] & 0xF0) | (buffer[idx+1] >> 4);
 //
@@ -289,7 +289,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //        }
 //
 //        // Read the last block
-//        X9CardIO(0x62, 0, address, 0xA2586000, (uint32*)buffer, bytesRemaining*2/sizeof(uint32)+1);
+//        X9CardIO(0x62, 0, address, 0xA2586000, (u32*)buffer, bytesRemaining*2/sizeof(u32)+1);
 //        for(unsigned int idx = 0; idx < 2*bytesRemaining; idx+= 2)
 //            *dest++ = (buffer[idx] & 0xF0) | (buffer[idx+1] >> 4);
 //    }
@@ -297,12 +297,12 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //    {
 //        for(; readIdx < readChunkSize; readIdx+= 2)
 //            *dest++ = (buffer[readIdx] & 0xF0) | (buffer[readIdx+1] >> 4);
-//        uint8 remainder = buffer[readChunkSize-1] & 0xF0;
+//        u8 remainder = buffer[readChunkSize-1] & 0xF0;
 //
 //        // Read the remaining blocks before the last
 //        while(bytesRemaining > blockSize)
 //        {
-//            X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)buffer, blockSize*2/sizeof(uint32));
+//            X9CardIO(0x62, 0, address, 0xA1586000, (u32*)buffer, blockSize*2/sizeof(u32));
 //
 //            *dest++ = remainder | (buffer[0] >> 4);
 //
@@ -314,7 +314,7 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //        }
 //
 //        // Read the last block
-//        X9CardIO(0x62, 0, address, 0xA2586000, (uint32*)buffer, bytesRemaining*2/sizeof(uint32)+1);
+//        X9CardIO(0x62, 0, address, 0xA2586000, (u32*)buffer, bytesRemaining*2/sizeof(u32)+1);
 //        *dest++ = remainder | (buffer[0] >> 4);
 //        for(unsigned int idx = 1; idx < 2*bytesRemaining; idx+= 2)
 //            *dest++ = (buffer[idx] & 0xF0) | (buffer[idx+1] >> 4);
@@ -323,19 +323,19 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //    // Stop the transfer
 //    SDSendCommand(AbortReadWrite, 0, buffer);
 //    // Get the response from the SD-card (always after the transfer)
-////    X9CardIO(0x62, 0, address, 0xA1586000, (uint32*)buffer, 0x80);
+////    X9CardIO(0x62, 0, address, 0xA1586000, (u32*)buffer, 0x80);
 //
 //    return true;
 //}
 //
 //
-//bool SDInitialize(uint32* relativeCardAddress)
+//bool SDInitialize(u32* relativeCardAddress)
 //{
 //    if(!relativeCardAddress)
 //        return false;
 //
 //    unsigned int attempts;
-//    uint8 response[0x20];
+//    u8 response[0x20];
 //
 //    DO_DEBUG(iprintf("CMD0: "));
 //  	// CMD0 initialize (reset)
@@ -419,17 +419,17 @@ bool SDReadSingleBlock(uint32 address, void* destination)
 //}
 
 
-inline void SDSendAppCommand(enum SDAppCommand sdAppCmd, uint32 arg, uint8* response)
+inline void SDSendAppCommand(enum SDAppCommand sdAppCmd, u32 arg, u8* response)
 {
     SDSendCommand((enum SDCommand)sdAppCmd,arg,response);
 }
 
-inline void SDBroadcastCommand(enum SDCommand sdCmd, uint32 arg, uint8* response)
+inline void SDBroadcastCommand(enum SDCommand sdCmd, u32 arg, u8* response)
 {
     SDSendCommand((enum SDCommand)(sdCmd|Broadcast),arg,response);
 }
 
-inline void SDBroadcastAppCommand(enum SDAppCommand sdAppCmd, uint32 arg, uint8* response)
+inline void SDBroadcastAppCommand(enum SDAppCommand sdAppCmd, u32 arg, u8* response)
 {
     SDSendCommand((enum SDCommand)(sdAppCmd|Broadcast),arg,response);
 }

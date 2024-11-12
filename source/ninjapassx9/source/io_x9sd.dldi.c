@@ -39,17 +39,17 @@ freely, subject to the following restrictions:
 #include "tonccpy.h"
 
 /*
-bool SDSendCommand6(uint8* response, uint8 command, uint32 data)
+bool SDSendCommand6(u8* response, u8 command, u32 data)
 {
-    uint8 sdResponse[32];
+    u8 sdResponse[32];
     SDBroadcastCommand((SDCommand)command, data, sdResponse);
     tonccpy(response, sdResponse, 6);
     return true;
 }
 
-bool SDSendCommand17(uint8* response, uint8 command, uint32 data)
+bool SDSendCommand17(u8* response, u8 command, u32 data)
 {
-    uint8 sdResponse[32];
+    u8 sdResponse[32];
     SDBroadcastCommand((SDCommand)command, data, sdResponse);
     tonccpy(response, sdResponse, 17);
     return true;
@@ -97,7 +97,7 @@ void DumpMemory(unsigned char* data, int bytes)
 }
 */
 
-//static uint32 relativeCardAddress;
+//static u32 relativeCardAddress;
 
 //#define DO_DEBUG(statements) do { statements; } while(0)               
 //#define DO_DEBUG(statements)
@@ -111,7 +111,7 @@ bool _X9SD_isInserted(void)
 {
 	//coto: breaks fat initdefault
 	/*
-    static uint8 response[0x20];
+    static u8 response[0x20];
     SDSendCommand(GetStatus, 0, response);
     // Make sure the card responded correctly
     return response[0] == GetStatus;
@@ -123,7 +123,7 @@ bool _X9SD_isInserted(void)
 bool _X9SD_clearStatus(void)
 {
     return true;
-    //uint8 response[0x20];
+    //u8 response[0x20];
     //return SDInitialize(&relativeCardAddress);
     //return _SD_InitCard(&SDSendCommand6, SDSendCommand17, true, &relativeCardAddress);
 }
@@ -145,10 +145,10 @@ bool _X9SD_startup(void)
 } 
 
 
-bool _X9SD_writeSectors(uint32 sector, uint32 sectorCount, const uint8* buffer)
+bool _X9SD_writeSectors(u32 sector, u32 sectorCount, const u8* buffer)
 {
     
-    const uint32 blockLength = 512;
+    const u32 blockLength = 512;
     while(sectorCount > 0)
     {
         if(SDWriteSingleBlock(sector*blockLength, buffer) == true){
@@ -161,10 +161,10 @@ bool _X9SD_writeSectors(uint32 sector, uint32 sectorCount, const uint8* buffer)
     return true;
 }
 
-bool _X9SD_readSectors(uint32 sector, uint32 sectorCount, uint8* buffer)
+bool _X9SD_readSectors(u32 sector, u32 sectorCount, u8* buffer)
 {
     
-    const uint32 blockLength = 512;
+    const u32 blockLength = 512;
 
     /*
     if(sectorCount == 1)

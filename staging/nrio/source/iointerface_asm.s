@@ -1,5 +1,4 @@
-﻿	.align	4
-	.arm
+﻿	.arm
 
 	.global sub_BF800098
 	.global sub_BF801334
@@ -56,7 +55,7 @@ loc_BF8000C8:							@ CODE XREF: sub_BF800098+14↑j
 
 sub_BF8000DC:							@ DATA XREF: RAM:BF804BF8↓o
 
-				STR			 LR, [SP]!
+				STR			 LR, [SP,#-4]!
 				LDR			 R3, =0
 				CMP			 R3, #0
 				SUB			 SP, SP, #4

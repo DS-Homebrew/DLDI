@@ -87,7 +87,8 @@ static inline u64 IORPG_CMD_SD_WRITE_DATA(const u32* buffer) {
 }
 
 // user API
-bool ioRPG_Initialize(void);
+u32 ioRPG_CardReadChipID(void);
+bool ioRPG_SDInitialize(void);
 void ioRPG_SDReadSingleSector(u32 sector, void* buffer);
 void ioRPG_SDReadMultiSector(u32 sector, u32 num_sectors, void* buffer);
 void ioRPG_SDWriteSingleSector(u32 sector, const void* buffer);

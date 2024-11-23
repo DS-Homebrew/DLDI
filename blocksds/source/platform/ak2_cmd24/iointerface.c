@@ -13,13 +13,12 @@
 
 // Initialize the driver. Returns true on success.
 bool AK2Q_Startup(void) {
-    return ioRPG_Initialize();
+    return ioRPG_SDInitialize();
 }
 
 // Returns true if a card is present and initialized.
 bool AK2Q_IsInserted(void) {
-    return cardExt_ReadData4Byte(((u64)CARD_CMD_DATA_CHIPID << 56),
-                                 IORPG_CTRL_READ_4B | MCCNT1_LATENCY1(4)) == 0xFC2;
+    return ioRPG_CardReadChipID() == 0xFC2;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on

@@ -159,8 +159,13 @@ static void ioRPG_SDWaitForState(uint8_t state) {
     } while (data != state);
 }
 
+u32 ioRPG_CardReadChipID(void) {
+    return cardExt_ReadData4Byte(((u64)CARD_CMD_DATA_CHIPID << 56),
+                                 IORPG_CTRL_READ_4B | MCCNT1_LATENCY1(4));
+}
+
 // SDIO initialization
-bool ioRPG_Initialize(void) {
+bool ioRPG_SDInitialize(void) {
     int isSD20 = 0;
     u32 responseR1 = 0;
 

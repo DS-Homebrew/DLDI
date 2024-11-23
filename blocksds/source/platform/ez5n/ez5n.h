@@ -57,5 +57,5 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer);
 u32 EZ5N_CardReadHWVersion(void);
 
 // TODO: what is the structure of this table?
-void ioEZP_SendFATOffsetTable(const u32* table, u32 num_words);
+void EZ5N_SendFATOffsetTable(const u32* table, u32 num_words);
 #endif

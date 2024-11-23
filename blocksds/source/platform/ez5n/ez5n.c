@@ -71,7 +71,7 @@ u32 EZ5N_GetVersion(void) {
 }
 
 // TODO: what is the structure of this table?
-void ioEZP_SendFATOffsetTable(const u32* table, u32 num_words) {
+void EZ5N_SendFATOffsetTable(const u32* table, u32 num_words) {
     cardExt_WriteData(EZ5N_CMD_SD_SEND_FAT_ENTRY, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
                       num_words);
 }

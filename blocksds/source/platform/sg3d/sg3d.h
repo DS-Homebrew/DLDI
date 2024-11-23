@@ -18,9 +18,7 @@
 
 // Stargate 3DS defines
 // Stargate 3DS MCCNT1 flags
-#define SG3D_CTRL_BASE                                                             \
-    (MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_CMD_SCRAMBLE | MCCNT1_LATENCY2(0) | \
-     MCCNT1_LATENCY1(0))
+#define SG3D_CTRL_BASE (MCCNT1_RESET_OFF | MCCNT1_CMD_SCRAMBLE)
 #define SG3D_CTRL_READ_4B \
     (SG3D_CTRL_BASE | MCCNT1_CLOCK_SCRAMBLER | MCCNT1_READ_DATA_DESCRAMBLE | MCCNT1_LEN_4)
 #define SG3D_CTRL_READ_512B \

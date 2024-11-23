@@ -17,15 +17,14 @@
 #endif
 
 // all RPG-based SDIO drivers use this as base, and add latency/size as needed
-#define IORPG_CTRL_BASE                                                           \
-    (MCCNT1_CMD_SCRAMBLE | MCCNT1_CLOCK_SCRAMBLER | MCCNT1_READ_DATA_DESCRAMBLE | \
-     MCCNT1_LATENCY2(0) | MCCNT1_LATENCY1(0))
-#define IORPG_CTRL_POLL (IORPG_CTRL_BASE | MCCNT1_ENABLE | MCCNT1_RESET_OFF | MCCNT1_LEN_0)
-#define IORPG_CTRL_READ_4B (IORPG_CTRL_POLL | MCCNT1_LEN_4)
-#define IORPG_CTRL_READ_512B (IORPG_CTRL_POLL | MCCNT1_LEN_512)
+#define IORPG_CTRL_BASE \
+    (MCCNT1_RESET_OFF | MCCNT1_CMD_SCRAMBLE | MCCNT1_CLOCK_SCRAMBLER | MCCNT1_READ_DATA_DESCRAMBLE)
+#define IORPG_CTRL_POLL (IORPG_CTRL_BASE | MCCNT1_LEN_0)
+#define IORPG_CTRL_READ_4B (IORPG_CTRL_BASE | MCCNT1_LEN_4)
+#define IORPG_CTRL_READ_512B (IORPG_CTRL_BASE | MCCNT1_LEN_512)
 // by default all commands are using 4KB in the original driver; can this be changed?
-#define IORPG_CTRL_READ_4KB (IORPG_CTRL_POLL | MCCNT1_LEN_4096)
-#define IORPG_CTRL_READ_16KB (IORPG_CTRL_POLL | MCCNT1_LEN_16384)
+#define IORPG_CTRL_READ_4KB (IORPG_CTRL_BASE | MCCNT1_LEN_4096)
+#define IORPG_CTRL_READ_16KB (IORPG_CTRL_BASE | MCCNT1_LEN_16384)
 
 // ret & 0x0F != provided state
 // Note, on non-AKRPG carts, the state is in the upper 4 bits, so check 0xF0 instead

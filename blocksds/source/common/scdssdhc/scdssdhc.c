@@ -18,7 +18,7 @@ static u32 isSDHC = 0;
 static u32 SCDSSDHC_SDHostSetMode(u8 sdio, u32 parameter, u8 response_type, u32 latency) {
     u64 command = ((u64)SCDSSDHC_CMD_SD_HOST_PARAM << 56) | ((u64)parameter << 24) |
                   ((u64)sdio << 16) | ((u64)response_type << 8);
-	return cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B | MCCNT1_LATENCY1(latency));
+    return cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B | MCCNT1_LATENCY1(latency));
 }
 
 static u32 SCDSSDHC_IsSDHostBusy(void) {
@@ -73,7 +73,7 @@ void waitByLoop(u32 count);
 
 static void SCDSSDHC_SDHostSetRegister(u8 bits) {
     u64 command = ((u64)SCDSSDHC_CMD_SD_HOST_SET_REGISTER << 56) | ((u64)(0x30 | bits) << 48);
-	cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
+    cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
     waitByLoop(0x300);
 }
 
@@ -106,7 +106,7 @@ static void SCDSSDHC_SDFIFOWriteData(const void* buffer, u32 length) {
 
 static u32 SCDSSDHC_SRAMReadData(u32 address) {
     u64 command = ((u64)SCDSSDHC_CMD_SRAM_READ_DATA << 56) | ((u64)address << 48);
-	return cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
+    return cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
 }
 
 void SCDSSDHC_SDGetSDHCStatusFromSRAM(void) {
@@ -120,7 +120,7 @@ bool SCDSSDHC_SDInitialize(void) {
     isSDHC = 0;
 
     // TODO: What is this command doing?
-	cardExt_ReadData4Byte(0x6600000000000000ull, 0xA7586000);
+    cardExt_ReadData4Byte(0x6600000000000000ull, 0xA7586000);
 
     // Reset SD host
     SCDSSDHC_SDHostSetRegister(0);
@@ -208,7 +208,7 @@ bool SCDSSDHC_SDInitialize(void) {
 void SCDSSDHC_SDReadSingleSector(u32 sector, void* buffer) {
     u64 command = ((u64)SCDSSDHC_CMD_SD_READ_SINGLE_BLOCK << 56) |
                   ((u64)(isSDHC ? sector : sector << 9) << 24);
-	cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
+    cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
 
     // wait until data ready
     while (SCDSSDHC_IsSDFIFOBusy())
@@ -221,7 +221,7 @@ void SCDSSDHC_SDReadSingleSector(u32 sector, void* buffer) {
 void SCDSSDHC_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
     u64 command = ((u64)SCDSSDHC_CMD_SD_READ_MULTI_BLOCK << 56) |
                   ((u64)(isSDHC ? sector : sector << 9) << 24);
-	cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
+    cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
 
     while (1) {
         // wait until data ready

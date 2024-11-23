@@ -31,7 +31,9 @@
 #define EZ5N_CTRL_READ_SD_2048 (EZ5N_CTRL_READ_SD | MCCNT1_LEN_2048)
 
 // EZParallel MCCMDs
-#define EZ5N_CMD_SD_READ_DATA (0xBAull << 56)
+#define EZ5N_CMD_CARD_VERSION 0x3E00000000000000ull
+#define EZ5N_CMD_SD_SEND_FAT_ENTRY 0xB100000100000000ull
+#define EZ5N_CMD_SD_READ_DATA 0xBA00000000000000ull
 
 // this reads 4 sectors???
 static inline u64 EZ5N_CMD_SD_READ_REQUEST(u32 sector, u32 num_sectors) {
@@ -49,6 +51,13 @@ static inline u64 EZ5N_CMD_SD_WRITE_FLUSH(u32 sector, u32 num_sectors) {
 }
 
 // user API
-u32 EZ5N_GetChipID();
+u32 EZ5N_CardReadChipID();
 void EZ5N_SDReadSectors(u32 sector, u32 num_sectors, void* buffer);
 void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer);
+
+#ifndef DLDI
+u32 EZ5N_CardReadHWVersion(void);
+
+// TODO: what is the structure of this table?
+void ioEZP_SendFATOffsetTable(const u32* table, u32 num_words);
+#endif

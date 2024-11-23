@@ -11,12 +11,12 @@
 
 // Initialize the driver. Returns true on success.
 bool EZ5N_Startup(void) {
-    return EZ5N_GetChipID() == 0xFC2;
+    return (EZ5N_CardReadChipID() & 7) == 2;
 }
 
 // Returns true if a card is present and initialized.
 bool EZ5N_IsInserted(void) {
-    return EZ5N_GetChipID() == 0xFC2;
+    return (EZ5N_CardReadChipID() & 7) == 2;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on

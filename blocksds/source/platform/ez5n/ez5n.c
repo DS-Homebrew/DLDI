@@ -21,7 +21,7 @@ static inline u32 EZ5N_SendCommand(const u64 command, u32 latency) {
     return cardExt_ReadData4Byte(command, (EZ5N_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)));
 }
 
-u32 EZ5N_GetChipID(void) {
+u32 EZ5N_CardReadChipID(void) {
     return EZ5N_SendCommand((((u64)CARD_CMD_DATA_CHIPID) << 56) | 1ull, 0x200);
 }
 
@@ -51,7 +51,7 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer) {
         // Write to buffer
         for (u32 i = 0; i < sector_count; i++) {
             cardExt_WriteData(EZ5N_CMD_SD_WRITE_BUFFER(i), (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512),
-                               buffer, 128);
+                              buffer, 128);
             buffer = (u8*)buffer + 0x200;
         }
 
@@ -63,3 +63,17 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer) {
         num_sectors -= sector_count;
     }
 }
+
+#ifndef DLDI
+
+u32 EZ5N_GetVersion(void) {
+    return EZ5N_SendCommand(EZ5N_CMD_CARD_VERSION, 0);
+}
+
+// TODO: what is the structure of this table?
+void ioEZP_SendFATOffsetTable(const u32* table, u32 num_words) {
+    cardExt_WriteData(EZ5N_CMD_SD_SEND_FAT_ENTRY, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
+                      num_words);
+}
+
+#endif

@@ -57,7 +57,7 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer) {
 
         // Flush to disk
         // Should return 0 when done
-        while (EZ5N_SendCommand(EZ5N_CMD_SD_WRITE_FLUSH(sector, sector_count), 0x190))
+        while (EZ5N_SendCommand(EZ5N_CMD_SD_FLUSH_BUFFER(sector, sector_count), 0x190))
             ;
         sector += sector_count;
         num_sectors -= sector_count;

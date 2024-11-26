@@ -269,7 +269,7 @@ bool SD_ReadResponse(unsigned char *ppbuf,int len)
     int counterFA01=0;
     u8 *p = (u8 *)(&status);
     
-    //�g�����������
+    //等待起始标志位置
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -380,7 +380,7 @@ bool SD_R2Response(unsigned char *ppbuf)
 }
 
 void SD_ReadLoop()
-{//�t��
+{//空读
     u32 i;
     u32 target = 0x80;
     WAIT_CR &= ~0x0800;
@@ -430,7 +430,7 @@ bool wait_SD()
 
 bool SD_WaitOK()
 {
-    //���̊���L�L�Q�e�ܚb
+    //这段代码……貌似无用
     u32 status ;
     WAIT_CR &= ~0x0800;
     u8 command[8];
@@ -456,7 +456,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
     u32 target = 512;
     u32 status ;
  
-    //�g�����������
+    //等待起始标志位置
     
     command[0]= 0x00;
     command[1]= 0x00;
@@ -476,7 +476,7 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
             return  false;
         }
     }while(status & 0x000000FF);
-    //��512 Byte����
+    //读512 Byte数据
     WAIT_CR &= ~0x0800;
   
     command[0]= 0x00;
@@ -584,7 +584,7 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
         status = Mart_Read4BYTE(command);
     }while(status & 0x00000001);
 
-//��CRC�S��
+//读CRC状态
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -657,7 +657,7 @@ void SD_WriteData_slow(unsigned char *ppbuf, int len,int wait)
         status = Mart_Read4BYTE(command);
     }while(status & 0x00000001);
 
-//��CRC�S��
+//读CRC状态
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -742,7 +742,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     SD_SendCommand(24,address); 
     SD_R16Response(pres); 
 
-    //����Ŗ����љ��􋿁E��������Ȗ�
+    //这里是随便加一个读，解决时间问题
     u8 command[8];   
     command[0]= 0x00;
     command[1]= 0x00;
@@ -764,7 +764,7 @@ bool  WaitCmd_return00()
 {
     u32 loop= 8;
     u8 command[8];
-    //�g�����������
+    //等待起始标志位置
     WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
@@ -825,7 +825,7 @@ bool SD_initial()
  
          //_consolePrintf("before cmd8 , press to continue \n");
          presskey();
-         //�A�lCMD8�E���SDHC
+         //发送CMD8，检测SDHC
         SD_SendCommand(8,0x1AA);
         SD_R16Response(pres);
         //_consolePrintf("responde 0[%x] 1[%x] 5[%x] \n",pres[0],pres[1],pres[5]);
@@ -842,7 +842,7 @@ bool SD_initial()
         //SD_SendCommand(0,0);
         //WaitCmd_return00();//add 2008-12-16
 
-        //SD�G
+        //SD卡
         SD_SendCommand(55,0);   
         ret = SD_R16Response(pres);   
         if(pres[0]!=55)
@@ -907,7 +907,7 @@ bool SD_initial()
     else
     {
         //_consolePrintf("enter SDHC process \n");
-        //SDHC�G
+        //SDHC卡
         u32 retry = 0;
          delay(0x1000);
         SD_SendCommand(55,0);

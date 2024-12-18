@@ -38,11 +38,11 @@
 	.ascii	"SCCF"
 	.word	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA
 	.word	startup			@ 
-	.word	_CF_isInserted		@ 
-	.word	_CF_readSectors		@   Function pointers to standard device driver functions
-	.word	_CF_writeSectors	@ 
-	.word	_CF_clearStatus		@ 
-	.word	_CF_shutdown		@ 
+	.word	isInserted		@ 
+	.word	readSectors		@   Function pointers to standard device driver functions
+	.word	writeSectors	@ 
+	.word	clearStatus		@ 
+	.word	shutdown		@ 
 	
 @---------------------------------------------------------------------------------
 _start:

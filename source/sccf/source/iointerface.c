@@ -83,22 +83,40 @@ Modified again by loopy
 #define SC_MODE_RAM 0x5
 #define SC_MODE_MEDIA 0x3 
 #define SC_MODE_RAM_RO 0x1
-void changeMode(u8 mode) {
+static void changeMode(u8 mode) {
 	vu16 *unlockAddress = (vu16*)0x09FFFFFE;
 	*unlockAddress = 0xA55A ;
 	*unlockAddress = 0xA55A ;
 	*unlockAddress = mode ;
 	*unlockAddress = mode ;
-} 
+}
 
-
-/*-----------------------------------------------------------------
-startUp
-Initializes the CF interface
-returns true if successful, otherwise returns false
------------------------------------------------------------------*/
 bool startup(void) {
-	changeMode (SC_MODE_MEDIA);
+	changeMode(SC_MODE_MEDIA);
 	return _CF_startup(&_SCCF_Registers);
 }
 
+bool isInserted(void) {
+	changeMode(SC_MODE_MEDIA);
+	return _CF_isInserted();
+}
+
+bool clearStatus(void) {
+	changeMode(SC_MODE_MEDIA);
+	return _CF_clearStatus();
+}
+
+bool readSectors(u32 sector, u32 numSectors, void* buffer) {
+	changeMode(SC_MODE_MEDIA);
+	return _CF_readSectors(sector, numSectors, buffer);
+}
+
+bool writeSectors(u32 sector, u32 numSectors, void* buffer) {
+	changeMode(SC_MODE_MEDIA);
+	return _CF_writeSectors(sector, numSectors, buffer);
+}
+
+bool shutdown(void) {
+	changeMode(SC_MODE_MEDIA);
+	return _CF_shutdown();
+}

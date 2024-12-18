@@ -35,7 +35,7 @@ bool AK2Q_ReadSectors(uint32_t sector, uint32_t num_sectors, void* buffer) {
 // success.
 bool AK2Q_WriteSectors(uint32_t sector, uint32_t num_sectors, const void* buffer) {
     for (int i = 0; i < num_sectors; i++) {
-        ioRPG_SDWriteSingleSector(sector, buffer);
+        ioRPG_SDWriteSingleSector((sector + i), buffer);
         buffer = (u8*)buffer + 0x200;
     }
     return true;

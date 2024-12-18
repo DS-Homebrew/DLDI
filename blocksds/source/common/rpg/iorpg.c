@@ -147,7 +147,7 @@ static void ioRPG_SDWriteData(const u32* buffer, u32 length) {
 static void ioRPG_SDWaitForState(uint8_t state) {
     u32 data = 0;
     u32 mask = 0x0F;
-#if defined(PLATFORM_ak2) || defined(PLATFORM_r4idsn)
+#ifndef PLATFORM_rpgs
     mask = 0xF0;
     state <<= 4;
 #endif

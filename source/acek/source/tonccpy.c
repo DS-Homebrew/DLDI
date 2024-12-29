@@ -95,6 +95,14 @@ void tonccpy(void *dst, const void *src, uint size)
 	if(size&1)
 		*dst16= (*dst16 &~ 0xFF) | *src8;
 }
+
+// DS-HOMEBREW EDIT START: Provide implementation of memcpy to avoid linker error with -nostdlib
+void *memcpy(void *dst, const void *src, uint size) {
+	tonccpy(dst, src, size);
+	return dst;
+}
+// DS-HOMEBREW EDIT END: Provide implementation of memcpy to avoid linker error with -nostdlib
+
 //# toncset.c
 
 //! VRAM-safe memset, internal routine.

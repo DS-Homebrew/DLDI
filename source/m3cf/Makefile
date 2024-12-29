@@ -26,14 +26,12 @@ INCLUDES	:=	include ../../common_source
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-mthumb-interwork
+ARCH	:=	-march=armv4t -mtune=arm7tdmi -fPIC
 
-CFLAGS	:=	-g -Wall -O2\
-			-mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer\
-			-ffast-math -ffreestanding -ffunction-sections -fdata-sections \
+CFLAGS	:=	-g -Wall -Os -ffunction-sections -fdata-sections\
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM7 -fPIC -D_IO_ALLOW_UNALIGNED
+CFLAGS	+=	$(INCLUDE) -DARM7 -ffreestanding -D_IO_ALLOW_UNALIGNED
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 

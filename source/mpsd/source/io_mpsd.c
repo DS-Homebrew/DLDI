@@ -101,7 +101,7 @@ extern u8 mpsd_crc7_s(u16* buff,u16 num);
 
 static u8 ppp7[8];
 
-inline void wait1()
+static inline void wait1()
 {
 	asm (
 	"mov r0,r0\n"
@@ -111,7 +111,7 @@ inline void wait1()
 	);
 }
 
-inline void wait5()
+static inline void wait5()
 {
 	wait1();
 	wait1();

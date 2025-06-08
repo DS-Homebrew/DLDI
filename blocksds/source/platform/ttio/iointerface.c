@@ -4,9 +4,12 @@
 // SPDX-FileContributor: lifehackerhansol, 2023
 
 #include <iointerface.h>
-#include <nds/ndstypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include <common/scdssdhc/scdssdhc.h>
+
+#define BYTES_PER_READ 512
 
 // Initialize the driver. Returns true on success.
 bool TTIO_Startup(void) {

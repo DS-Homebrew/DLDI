@@ -4,10 +4,12 @@
 // SPDX-FileContributor: lifehackerhansol, 2023
 
 #include <iointerface.h>
-#include <libtwl/card/card.h>
-#include <nds/ndstypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "acep.h"
+
+#define BYTES_PER_READ 512
 
 // Initialize the driver. Returns true on success.
 bool ACEP_Startup(void) {

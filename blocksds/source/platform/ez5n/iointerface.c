@@ -9,6 +9,8 @@
 
 #include "ez5n.h"
 
+#define BYTES_PER_READ 512
+
 // Initialize the driver. Returns true on success.
 bool EZ5N_Startup(void) {
     return (EZ5N_CardReadChipID() & 7) == 2;

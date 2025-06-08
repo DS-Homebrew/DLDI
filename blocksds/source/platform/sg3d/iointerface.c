@@ -3,12 +3,13 @@
 // SPDX-FileContributor: Antonio Niño Díaz, 2023
 // SPDX-FileContributor: lifehackerhansol, 2023
 
-#include <common/libtwl_ext.h>
 #include <iointerface.h>
-#include <libtwl/card/card.h>
-#include <nds/ndstypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "sg3d.h"
+
+#define BYTES_PER_READ 512
 
 // Initialize the driver. Returns true on success.
 bool SG3D_Startup(void) {

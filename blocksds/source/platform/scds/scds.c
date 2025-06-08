@@ -14,8 +14,7 @@
 #include "scds.h"
 
 static inline void SCDS_WaitBusy(void) {
-    while (cardExt_ReadData4Byte(SCDS_CMD_CARD_BUSY, SCDS_CTRL_READ_4B))
-        ;
+    while (cardExt_ReadData4Byte(SCDS_CMD_CARD_BUSY, SCDS_CTRL_READ_4B));
 }
 
 static inline void SCDS_FlushResponse(void) {

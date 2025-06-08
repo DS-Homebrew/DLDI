@@ -37,36 +37,31 @@ static u32 SCDSSDHC_SDHostGetResponse(void) {
 
 static void SCDSSDHC_SDSendR0Command(u8 sdio, u32 parameter, u32 latency) {
     SCDSSDHC_SDHostSetMode(sdio, parameter, SCDSSDHC_SD_HOST_NORESPONSE, latency);
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 }
 
 static u32 SCDSSDHC_SDSendR1Command(u8 sdio, u32 parameter, u32 latency) {
     SCDSSDHC_SDHostSetMode(sdio, parameter, SCDSSDHC_SD_HOST_READ_4B, latency);
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
     return SCDSSDHC_SDHostGetResponse();
 }
 
 // TODO: save the response to a buffer (also figure out in which order they're sent)
 static void SCDSSDHC_SDSendR2Command(u8 sdio, u32 parameter, u32 latency) {
     SCDSSDHC_SDHostSetMode(sdio, parameter, SCDSSDHC_SD_HOST_READ_4B_MULTI, latency);
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 
     // TODO: parse this response
     SCDSSDHC_SDHostGetResponse();
 
     for (int i = 0; i < 4; i++) {
         SCDSSDHC_SDHostSetMode(sdio, parameter, SCDSSDHC_SD_HOST_NEXT_4B, latency);
-        while (SCDSSDHC_IsSDHostBusy())
-            ;
+        while (SCDSSDHC_IsSDHostBusy());
         // TODO: parse this response
         SCDSSDHC_SDHostGetResponse();
     }
     SCDSSDHC_SDHostSetMode(sdio, parameter, SCDSSDHC_SD_HOST_SEND_STOP_CLK, 0);
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 }
 
 void waitByLoop(u32 count);
@@ -211,8 +206,7 @@ void SCDSSDHC_SDReadSingleSector(u32 sector, void* buffer) {
     cardExt_ReadData4Byte(command, SCDSSDHC_CTRL_READ_4B);
 
     // wait until data ready
-    while (SCDSSDHC_IsSDFIFOBusy())
-        ;
+    while (SCDSSDHC_IsSDFIFOBusy());
 
     // retrieve data
     SCDSSDHC_SDFIFOReadData(buffer, 128);
@@ -225,8 +219,7 @@ void SCDSSDHC_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
 
     while (1) {
         // wait until data ready
-        while (SCDSSDHC_IsSDFIFOBusy())
-            ;
+        while (SCDSSDHC_IsSDFIFOBusy());
 
         // retrieve data
         SCDSSDHC_SDFIFOReadData(buffer, 128);
@@ -246,16 +239,14 @@ void SCDSSDHC_SDWriteSingleSector(u32 sector, const void* buffer) {
 
     // write
     SCDSSDHC_SDFIFOWriteData(buffer, 128);
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 
     // end write
     REG_SCDSSDHC_MCCMD[0] = SCDSSDHC_CMD_SD_WRITE_END;
     card_romStartXfer(SCDSSDHC_CTRL_READ_4B, false);
     card_romWaitDataReady();
     card_romGetData();
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 }
 
 void SCDSSDHC_SDWriteMultiSector(u32 sector, const void* buffer, u32 num_sectors) {
@@ -270,12 +261,10 @@ void SCDSSDHC_SDWriteMultiSector(u32 sector, const void* buffer, u32 num_sectors
         card_romStartXfer(SCDSSDHC_CTRL_READ_4B, false);
         card_romWaitDataReady();
         card_romGetData();
-        while (SCDSSDHC_IsSDHostBusy())
-            ;
+        while (SCDSSDHC_IsSDHostBusy());
         // write
         SCDSSDHC_SDFIFOWriteData(buffer, 128);
-        while (SCDSSDHC_IsSDHostBusy())
-            ;
+        while (SCDSSDHC_IsSDHostBusy());
         buffer = (u8*)buffer + 0x200;
     }
 
@@ -285,6 +274,5 @@ void SCDSSDHC_SDWriteMultiSector(u32 sector, const void* buffer, u32 num_sectors
     card_romStartXfer(SCDSSDHC_CTRL_READ_4B, false);
     card_romWaitDataReady();
     card_romGetData();
-    while (SCDSSDHC_IsSDHostBusy())
-        ;
+    while (SCDSSDHC_IsSDHostBusy());
 }

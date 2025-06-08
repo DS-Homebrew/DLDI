@@ -32,8 +32,7 @@ void EZ5N_SDReadSectors(u32 sector, u32 num_sectors, void* buffer) {
 
         // wait until data is ready
         // request should return 0 when ready to access
-        while (EZ5N_SendCommand(EZ5N_CMD_SD_READ_REQUEST(sector, sector_count), 0xC8))
-            ;
+        while (EZ5N_SendCommand(EZ5N_CMD_SD_READ_REQUEST(sector, sector_count), 0xC8));
 
         cardExt_ReadData(EZ5N_CMD_SD_READ_DATA, EZ5N_ReadLengthCtrlValues[sector_count - 1], buffer,
                          128 * sector_count);
@@ -57,8 +56,7 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer) {
 
         // Flush to disk
         // Should return 0 when done
-        while (EZ5N_SendCommand(EZ5N_CMD_SD_FLUSH_BUFFER(sector, sector_count), 0x190))
-            ;
+        while (EZ5N_SendCommand(EZ5N_CMD_SD_FLUSH_BUFFER(sector, sector_count), 0x190));
         sector += sector_count;
         num_sectors -= sector_count;
     }

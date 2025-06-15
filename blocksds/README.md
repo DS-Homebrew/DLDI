@@ -6,23 +6,23 @@ This repository hosts both complete and work-in-progress drivers, primarily for 
 
 Currently supported devices:
 
-| Driver name | Supported devices                                            | Author           | SPDX-License-Identifier |
-| ----------- | ------------------------------------------------------------ | ---------------- | ----------------------- |
-| acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue)           | lifehackerhansol | Zlib                    |
-| ak2         | Acekard 2/2.1/2i, r4itt.net 3DS, R4i3D (and probably others) | lifehackerhansol | Zlib                    |
-| ak2_cmd24   | Acekard 2 clones with broken CMD25                           | lifehackerhansol | Zlib                    |
-| ez5h        | EZ-Flash V                                                   | SaTa, EZ-Flash   | Zlib                    |
-| ez5n        | EZ-Flash Parallel                                            | lifehackerhansol | Zlib                    |
-| g003        | M3i Zero (GMP-Z003)                                          | lifehackerhansol | Zlib                    |
-| m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com     | lifehackerhansol | Zlib                    |
-| mati        | iSmart Premium                                               | EZ-Flash, iSmart | Zlib                    |
-| r4idsn      | R4iDSN                                                       | lifehackerhansol | Zlib                    |
-| r4tf        | Original R4, M3 Simply                                       | lifehackerhansol | Zlib                    |
-| rpgs        | Acekard RPG (SD)                                             | lifehackerhansol | Zlib                    |
-| scds        | SuperCard DSONE                                              | lifehackerhansol | Zlib                    |
-| scdssdhc    | SuperCard DSONE SDHC                                         | lifehackerhansol | Zlib                    |
-| sg3d        | Stargate 3DS                                                 | lifehackerhansol | Zlib                    |
-| ttio        | DSTT                                                         | lifehackerhansol | Zlib                    |
+| Driver name | Supported devices                                                      | Author           | SPDX-License-Identifier |
+| ----------- | ---------------------------------------------------------------------- | ---------------- | ----------------------- |
+| acep        | Ace3DS+, R4 i.L.S., r4isdhc.com.cn, Gateway (Blue)                     | lifehackerhansol | Zlib                    |
+| ak2         | Acekard 2/2.1/2i, r4itt.net 3DS, R4i3D, r4ids.cn (and probably others) | lifehackerhansol | Zlib                    |
+| ak2_cmd24   | Acekard 2 clones with broken CMD25                                     | lifehackerhansol | Zlib                    |
+| ez5h        | EZ-Flash V                                                             | SaTa, EZ-Flash   | Zlib                    |
+| ez5n        | EZ-Flash Parallel                                                      | lifehackerhansol | Zlib                    |
+| g003        | M3i Zero (GMP-Z003)                                                    | lifehackerhansol | Zlib                    |
+| m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com               | lifehackerhansol | Zlib                    |
+| mati        | iSmart Premium                                                         | EZ-Flash, iSmart | Zlib                    |
+| r4idsn      | R4iDSN                                                                 | lifehackerhansol | Zlib                    |
+| r4tf        | Original R4, M3 Simply                                                 | lifehackerhansol | Zlib                    |
+| rpgs        | Acekard RPG (SD)                                                       | lifehackerhansol | Zlib                    |
+| scds        | SuperCard DSONE                                                        | lifehackerhansol | Zlib                    |
+| scdssdhc    | SuperCard DSONE SDHC                                                   | lifehackerhansol | Zlib                    |
+| sg3d        | Stargate 3DS                                                           | lifehackerhansol | Zlib                    |
+| ttio        | DSTT                                                                   | lifehackerhansol | Zlib                    |
 
 ## Compiling
 

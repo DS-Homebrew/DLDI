@@ -107,7 +107,7 @@ static inline void _NJSD_writeCardCommand
 
 static bool _NJSD_reset (void) {
 	int i;
-	CARD_CR1H = CARD_CR1_ENABLE;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE;
 	_NJSD_writeCardCommand (0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 	CARD_CR2 = 0xA0406000;
 	i = RESET_TIMEOUT;
@@ -155,7 +155,7 @@ static bool _NJSD_sendCMDR (int speed, u8 *rsp_buf, int type, u8 cmd, u32 param)
 
 	REG_IF = 0x100000;
 
-	CARD_CR1H = CARD_CR1_ENABLE;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE;
 
 	if ((type & 3) < 2) {
 		CARD_COMMAND[0] = 0xF0 | (speed << 2) | 1 | (type << 1);
@@ -233,7 +233,7 @@ static bool _NJSD_writeSector (u8 *buffer, u8 *crc_buf, u32 offset) {
 	REG_IME = 0;
 #endif
 
-	CARD_CR1H = CARD_CR1_ENABLE;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE;
 	_NJSD_writeCardCommand (0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 	CARD_CR2 = 0xA0406000;
 	i = COMMAND_TIMEOUT;
@@ -247,7 +247,7 @@ static bool _NJSD_writeSector (u8 *buffer, u8 *crc_buf, u32 offset) {
 
 	for (i = 0; i < 65; i++)
 	{
-		CARD_CR1H = CARD_CR1_ENABLE; // | CARD_CR1_IRQ;
+		REG_AUXSPICNTH = CARD_SPICNTH_ENABLE; // | CARD_SPICNTH_IRQ;
 		if (i < 64)
 		{
 			_NJSD_writeCardCommand (buffer[i*8+0], buffer[i*8+1], buffer[i*8+2], buffer[i*8+3],
@@ -266,7 +266,7 @@ static bool _NJSD_writeSector (u8 *buffer, u8 *crc_buf, u32 offset) {
 		} while (CARD_CR2 & CARD_BUSY);
 	}
 
-	CARD_CR1H = CARD_CR1_ENABLE;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE;
 	_NJSD_writeCardCommand (0xF0 | (1 << 2) | 1, 0x80, 0x40 | WRITE_BLOCK, (u8)(offset>>24),
 		(u8)(offset>>16), (u8)(offset>>8), (u8)(offset>>0), 0x00);
 	CARD_CR2 = 0xA7406000;
@@ -329,7 +329,7 @@ static bool _NJSD_sendCLK (int speed, int count) {
 	REG_IF = 0x100000;
 #endif
 
-	//CARD_CR1H = CARD_CR1_ENABLE; // | CARD_CR1_IRQ;
+	//REG_AUXSPICNTH = CARD_SPICNTH_ENABLE; // | CARD_SPICNTH_IRQ;
 	_NJSD_writeCardCommand (0xE0 | ((speed & 3) << 2), 0, (count - 1), 0, 0, 0, 0, 0);
 	
 	CARD_CR2 = _NJSD_cardFlags;
@@ -367,7 +367,7 @@ static bool _NJSD_sendCMDN (int speed, u8 cmd, u32 param) {
 
 	REG_IF = 0x100000;
 
-	CARD_CR1H = CARD_CR1_ENABLE; // | CARD_CR1_IRQ;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE; // | CARD_SPICNTH_IRQ;
 	_NJSD_writeCardCommand (0xF0 | ((speed & 3) << 2), 0x00, 0x40 | cmd, (param>>24) & 0xFF,
 		(param>>16) & 0xFF, (param>>8) & 0xFF, (param>>0) & 0xFF, 0x00);
 

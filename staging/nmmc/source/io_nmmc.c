@@ -63,19 +63,19 @@ int _NMMC_spi_freq = 3;
 
 static inline void _Neo_OpenSPI( u8 frequency )
 {
-	CARD_CR1 = 0x0000A040 | frequency;
+	REG_AUXSPICNT = 0x0000A040 | frequency;
 }
 
 static inline u8 _Neo_SPI( u8 dataByte )
 {
 	CARD_EEPDATA = dataByte;
-	while (CARD_CR1 & 0x80);		// card busy
+	while (REG_AUXSPICNT & 0x80);		// card busy
 	return CARD_EEPDATA;
 }
 
 static inline void _Neo_CloseSPI ( void )
 {
-	CARD_CR1 = 0;
+	REG_AUXSPICNT = 0;
 }
 
 static inline void _Neo_MK2GameMode()	{

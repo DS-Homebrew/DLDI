@@ -28,7 +28,7 @@ void Mart_SetRomOP(u8 * command)
     //5    SPI Enable          (Both Bit13 and Bit15 must be set for SPI)
     //6    Transfer Ready IRQ  (0=Disable, 1=Enable) (for ROM, not for AUXSPI)
     //7    NDS Slot Enable     (0=Disable, 1=Enable) (for both ROM and AUXSPI)   
-    REG_AUXSPICNTH = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
+    REG_AUXSPICNTH = CARD_SPICNTH_IRQ|CARD_SPICNTH_ENABLE ;
 
     for (index = 0; index < 8; index++) {
         REG_CARD_COMMAND[7-index] = command[index];
@@ -57,7 +57,7 @@ void    cardWriteCommand(const u8 * command)
 {
     int index;
 
-    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+    REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
 
     for (index = 0; index < 8; index++) {
         REG_CARD_COMMAND[7-index] = command[index];

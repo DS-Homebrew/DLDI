@@ -39,7 +39,7 @@ void __attribute__((naked)) ioRpgDelay(u32 us)
 
 void ioRpgSendCommand( u32 command[2], u32 pageSize, u32 latency, void * buffer )
 {
-  REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+  REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
 
   for( u32 i=0; i<2; ++i )
   {
@@ -115,7 +115,7 @@ bool ioRpgWaitCmdBusy( bool forceWait )
 {
   bool timeout = true;
   while( timeout && forceWait ) {
-    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+    REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
     for( u32 i=0; i<8; ++i )
       CARD_COMMAND[i] = 0xB8;
     // go

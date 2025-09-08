@@ -32,8 +32,8 @@
 #define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
 #define REG_CARD_DATA_RD   (*(vuint32*)0x04100010)
 
-#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
-#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+#define CARD_SPICNTH_ENABLE  (1 << 7) // In byte 1, i.e. 0x8000
+#define CARD_SPICNTH_IRQ     (1 << 6) // In byte 1, i.e. 0x4000
 #define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
 #define CARD_DATA_READY (1<<23)  // when reading, REG_CARD_DATA_RD has another word of data and is good to go
 
@@ -110,7 +110,7 @@ void dsCardi_SetRomOP(uint8 * command)
     }while(status&0x80000000);
        
     
-    REG_AUXSPICNTH = CARD_CR1_IRQ|CARD_CR1_ENABLE ;
+    REG_AUXSPICNTH = CARD_SPICNTH_IRQ|CARD_SPICNTH_ENABLE ;
 
     for (index = 0; index < 8; index++) {
         REG_CARD_COMMAND[7-index] = command[index];
@@ -121,7 +121,7 @@ void    cardWriteCommand(uint8 * command)
 {
     int index;
 
-    REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+    REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
 
     for (index = 0; index < 8; index++) {
         REG_CARD_COMMAND[7-index] = command[index];

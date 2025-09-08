@@ -53,13 +53,13 @@
 #define REG_AUXSPIDATA	(*(vu8*)0x040001A2)
 #define REG_ROMCTRL		(*(vu32*)0x040001A4)
 #define REG_CARD_COMMAND	((vu8*)0x040001A8)
-#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
-#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+#define CARD_SPICNTH_ENABLE  (1 << 7) // In byte 1, i.e. 0x8000
+#define CARD_SPICNTH_IRQ     (1 << 6) // In byte 1, i.e. 0x4000
 #define CARD_BUSY         (1<<31)           // when reading, still expecting incomming data?
-#define CARD_SPI_BUSY		(1<<7)
-#define CARD_CR1_EN	0x8000
-#define	CARD_CR1_SPI_EN	0x2000
-#define	CARD_CR1_SPI_HOLD	0x40
+#define CARD_ENABLE     BIT(15)
+#define CARD_SPI_ENABLE BIT(13)
+#define CARD_SPI_BUSY   BIT(7)
+#define CARD_SPI_HOLD   BIT(6)
 //---------------------------------------------------------------------------------
 
 #define SD_COMMAND_TIMEOUT 0xFFF
@@ -90,7 +90,7 @@ void openSpi (void)
 {
 	volatile u32 temp;
 	
-	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
 	REG_CARD_COMMAND[0] = 0xF2;
 	REG_CARD_COMMAND[1] = 0x00;
 	REG_CARD_COMMAND[2] = 0x00;
@@ -105,14 +105,14 @@ void openSpi (void)
 		temp = REG_CARD_DATA_RD;
 	}
 
-	REG_AUXSPICNT = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
+	REG_AUXSPICNT = CARD_ENABLE | CARD_SPI_ENABLE | CARD_SPI_HOLD;
 }
 
 void closeSpi (void)
 {
 	volatile u32 temp;
 
-	REG_AUXSPICNTH = CARD_CR1_ENABLE | CARD_CR1_IRQ;
+	REG_AUXSPICNTH = CARD_SPICNTH_ENABLE | CARD_SPICNTH_IRQ;
 	REG_CARD_COMMAND[0] = 0xF2;
 	REG_CARD_COMMAND[1] = 0x00;
 	REG_CARD_COMMAND[2] = 0x00;
@@ -127,7 +127,7 @@ void closeSpi (void)
 		temp = REG_CARD_DATA_RD;
 	}
 
-	REG_AUXSPICNT = CARD_CR1_EN | CARD_CR1_SPI_EN | CARD_CR1_SPI_HOLD;
+	REG_AUXSPICNT = CARD_ENABLE | CARD_SPI_ENABLE | CARD_SPI_HOLD;
 	REG_SPIDATA = 0xFF;
 	
 	while (REG_AUXSPICNT & CARD_SPI_BUSY) {};

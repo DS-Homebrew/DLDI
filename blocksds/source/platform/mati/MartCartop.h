@@ -10,8 +10,8 @@
 #define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
 #define REG_CARD_DATA_RD   (*(vuint32*)0x04100010)
 
-#define CARD_CR1_ENABLE  0x80  // in byte 1, i.e. 0x8000
-#define CARD_CR1_IRQ     0x40  // in byte 1, i.e. 0x4000
+#define CARD_SPICNTH_ENABLE  (1 << 7) // In byte 1, i.e. 0x8000
+#define CARD_SPICNTH_IRQ     (1 << 6) // In byte 1, i.e. 0x4000
 #define CARD_BUSY       (1<<31)  // when reading, still expecting incomming data?
 #define CARD_DATA_READY (1<<23)  // when reading, REG_CARD_DATA_RD has another word of data and is good to go
 

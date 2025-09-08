@@ -27,7 +27,6 @@
  #define NULL 0
 #endif
 
-#define WAIT_CR  (*(vuint16*)0x4000204)
 #define REG_AUXSPICNTH      (*(vuint8*)0x040001A1)
 #define REG_ROMCTRL       (*(vuint32*)0x040001A4)
 #define REG_CARD_COMMAND   ((vuint8*)0x040001A8)
@@ -169,7 +168,6 @@ bool SD_ReadResponse(unsigned char *ppbuf,int len)
     uint8 *p = (uint8 *)(&status);
     
     //等待起始标志位置
-    WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -278,7 +276,6 @@ bool SD_WaitOK()
 {
     //等待起始标志位置
     uint32 status ;
-    WAIT_CR &= ~0x0800;
     uint8 command[8];
     command[0]= 0x00;
     command[1]= 0x00;
@@ -299,7 +296,6 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
 {
     uint32 status;
     //BYTE ii;
-    WAIT_CR &= ~0x0800;
     uint8 command[8];
     int i=0;
     command[0]= 0x00;
@@ -312,7 +308,6 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
     command[7]= 0xB8;
     status = dsCardi_Read4ByteMode(command);
 
-    WAIT_CR &= ~0x0800;
    for(i=0;i<len;i+=2)
     {
         command[0]= 0x00;
@@ -329,7 +324,6 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
     }
     do
     {
-        WAIT_CR &= ~0x0800;
         command[0]= 0x00;
         command[1]= 0x00;
         command[2]= 0x00;
@@ -342,7 +336,6 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
     }while(status & 0x00000001);
 
 //读CRC状态
-    WAIT_CR &= ~0x0800;
     command[0]= 0x00;
     command[1]= 0x00;
     command[2]= 0x00;
@@ -355,7 +348,6 @@ void SD_WriteData(unsigned char *ppbuf, int len,int wait)
     
     do
     {
-        WAIT_CR &= ~0x0800;
         command[0]= 0x00;
         command[1]= 0x00;
         command[2]= 0x00;
@@ -438,8 +430,7 @@ bool    SD_WriteSingleBlock(unsigned int address , unsigned char *ppbuf, int len
     command[6]= 0xFA;
     command[7]= 0xB8;   
     dsCardi_Read4ByteMode(command);
-    
-    WAIT_CR &= ~0x0800;
+
     SD_WriteData(pbuf,520,0x10000);
     SD_WaitOK();
 
@@ -468,12 +459,10 @@ bool SD_ReadData(unsigned char *ppbuf, int len,int wait)
         wait -- ;
         if(wait<0)
         {
-            WAIT_CR &= 0x880 ;
             return  false;
         }
     }while(status & 0x000000FF);
     //读512 Byte数据
-    WAIT_CR &= ~0x0800;
   
     command[0]= 0x00;
     command[1]= 0x00;

@@ -81,10 +81,10 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 # -------------------------
 
 ifeq ($(DLDI_ARM9),1)
-	ARCH	:= -mthumb -mcpu=arm946e-s+nofp
+	ARCH	:= -marm -mcpu=arm946e-s+nofp
 	SPECS	:= $(BLOCKSDS)/sys/crts/dldi_arm9.specs
 else
-	ARCH	:= -mthumb -mcpu=arm7tdmi
+	ARCH	:= -marm -mcpu=arm7tdmi
 	SPECS	:= $(BLOCKSDS)/sys/crts/dldi_arm7.specs
 endif
 

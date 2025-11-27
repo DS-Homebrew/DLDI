@@ -38,6 +38,10 @@ jobs:
           cd blocksds
           chmod +x build.sh
           ./build.sh
+      - name: Build DSpico driver
+        run: |
+          make -C dspico
+          cp dspico/DSpico.dldi blocksds/out
       - uses: actions/upload-artifact@v4
         with:
           path: blocksds/out

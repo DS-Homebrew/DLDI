@@ -194,13 +194,11 @@ static bool ReadMultipleSectors(uint32_t sector, uint8_t* dest, uint32_t numSect
     // this message returns 1 byte of response, but it needs up to 8 bytes
     // to be polled before we get the busy bytes
     uint8_t buff[7];
-    uint8_t spiByte = sendCommandLen(STOP_TRANSMISSION, 0, buff, 8);
+    (void)sendCommandLen(STOP_TRANSMISSION, 0, buff, 8);
 
     // Wait for card to write data
     int timeout = SD_COMMAND_TIMEOUT;
-    while (spiByte == 0 && --timeout > 0) {
-        spiByte = getSpiByte();
-    }
+    while (getSpiByte() == 0 && --timeout > 0);
 
     return timeout != 0;
 }
@@ -235,9 +233,6 @@ static bool WriteSingleSector(uint32_t sector, uint8_t* src) {
     // Wait for card to write data
     int timeout = SD_WRITE_TIMEOUT;
     while (getSpiByte() == 0 && --timeout > 0);
-    if (timeout == 0) {
-        return false;
-    }
 
     return timeout != 0;
 }

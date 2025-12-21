@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <libtwl/card/card.h>
 #include <nds/ndstypes.h>
 
 // Wrapper for reading from a cartridge.

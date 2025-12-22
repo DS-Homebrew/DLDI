@@ -83,11 +83,12 @@ static inline uint8_t getSpiByte(void) {
     return REG_AUXSPIDATA;
 }
 
-static inline void initSpi(uint8_t cmd) {
-    ndsarNtrF2(0, cmd);
-
+static inline void cycleSpi() {
+    ndsarNtrF2(0, SPI_STOP);
     REG_AUXSPICNT = CARD_ENABLE | CARD_SPI_ENABLE | CARD_SPI_HOLD;
-    if (cmd == SPI_STOP) getSpiByte();
+    getSpiByte();
+    ndsarNtrF2(0, SPI_START);
+    REG_AUXSPICNT = CARD_ENABLE | CARD_SPI_ENABLE | CARD_SPI_HOLD;
 }
 
 static inline uint8_t getSpiByteTimeout() {
@@ -100,6 +101,7 @@ static inline uint8_t getSpiByteTimeout() {
 }
 
 static inline uint8_t sendCommandLen(uint8_t cmdId, uint32_t arg, void* buff, int len) {
+    cycleSpi();
     uint8_t cmd[6];
 
     // Build a SPI SD command to be sent as-is.
@@ -127,19 +129,6 @@ static inline uint8_t sendCommandLen(uint8_t cmdId, uint32_t arg, void* buff, in
 
 static inline uint8_t sendCommand(uint8_t cmdId, uint32_t arg) {
     return sendCommandLen(cmdId, arg, NULL, 1);
-}
-
-static uint8_t ndsarSdcardCommandSendLen(uint8_t cmdId, uint32_t arg, void* buff, int len) {
-    initSpi(SPI_START);
-    uint8_t r1 = sendCommandLen(cmdId, arg, buff, len);
-
-    initSpi(SPI_STOP);
-
-    return r1;
-}
-
-static uint8_t ndsarSdcardCommandSend(uint8_t cmdId, uint32_t arg) {
-    return ndsarSdcardCommandSendLen(cmdId, arg, NULL, 1);
 }
 
 static bool ReadSingleSector(uint32_t sector, uint8_t* dest) {
@@ -297,7 +286,7 @@ static bool GNM_Startup(void) {
     ndsarNtrF2(0, SPI_STOP);
 
     // Send CMD0.
-    uint8_t r1 = ndsarSdcardCommandSend(0, 0);
+    uint8_t r1 = sendCommand(0, 0);
     if (r1 != 0x01)  // Idle State.
     {
         // CMD 0 failed.
@@ -306,7 +295,7 @@ static bool GNM_Startup(void) {
 
     uint32_t r7_answer;
 
-    r1 = ndsarSdcardCommandSendLen(8, 0x1AA, &r7_answer, 5);
+    r1 = sendCommandLen(8, 0x1AA, &r7_answer, 5);
 
     uint32_t acmd41_arg = 0;
 
@@ -317,8 +306,8 @@ static bool GNM_Startup(void) {
 
     for (int i = 0; i < MAX_STARTUP_TRIES; ++i) {
         // Send ACMD41.
-        ndsarSdcardCommandSend(55, 0);
-        r1 = ndsarSdcardCommandSend(41, acmd41_arg);
+        sendCommand(55, 0);
+        r1 = sendCommand(41, acmd41_arg);
         if (r1 == 0) {
             break;
         }
@@ -327,12 +316,10 @@ static bool GNM_Startup(void) {
 
     if (isv2) {
         uint32_t r2_answer;
-        r1 = ndsarSdcardCommandSendLen(58, 0, &r2_answer, 5);
+        r1 = sendCommandLen(58, 0, &r2_answer, 5);
         isSdhc = (r2_answer & 0x40) != 0;
     }
-    ndsarSdcardCommandSend(16, 0x200);
-
-    initSpi(SPI_START);
+    sendCommand(16, 0x200);
 
     return true;
 }

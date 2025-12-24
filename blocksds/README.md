@@ -14,6 +14,7 @@ Currently supported devices:
 | ez5h        | EZ-Flash V                                                             | SaTa, EZ-Flash   | Zlib                    |
 | ez5n        | EZ-Flash Parallel                                                      | lifehackerhansol | Zlib                    |
 | g003        | M3i Zero (GMP-Z003)                                                    | lifehackerhansol | Zlib                    |
+| gmtf        | GAMES n' MUSIC                                                         | edo9300          | Zlib                    |
 | m3ds        | M3 DS Real, M3i Zero (other models), iTouchDS, r4rts.com               | lifehackerhansol | Zlib                    |
 | mati        | iSmart Premium                                                         | EZ-Flash, iSmart | Zlib                    |
 | r4idsn      | R4iDSN                                                                 | lifehackerhansol | Zlib                    |

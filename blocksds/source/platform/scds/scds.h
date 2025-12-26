@@ -13,6 +13,8 @@
 #include <libtwl/card/card.h>
 #include <nds/ndstypes.h>
 
+#include <common/sdio.h>
+
 #ifndef NULL
 #define NULL 0
 #endif
@@ -49,20 +51,20 @@ static inline u64 SCDS_CMD_SDIO(u8 response, u8 cmd, u32 argument) {
 }
 
 static inline u64 SCDS_CMD_SDIO_STOP_TRANSMISSION() {
-    return SCDS_CMD_SDIO(0, 12, 0);
+    return SCDS_CMD_SDIO(0, SDIO_CMD12_STOP_TRANSMISSION, 0);
 }
 
 static inline u64 SCDS_CMD_SDIO_READ_SINGLE_BLOCK(u32 sector) {
-    return SCDS_CMD_SDIO(1, 17, sector);
+    return SCDS_CMD_SDIO(1, SDIO_CMD17_READ_SINGLE_BLOCK, sector);
 }
 
 static inline u64 SCDS_CMD_SDIO_READ_MULTIPLE_BLOCK(u32 sector) {
-    return SCDS_CMD_SDIO(1, 18, sector);
+    return SCDS_CMD_SDIO(1, SDIO_CMD18_READ_MULTIPLE_BLOCK, sector);
 }
 
 // writing only works single sector
 static inline u64 SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(u32 sector) {
-    return SCDS_CMD_SDIO(1, 24, sector);
+    return SCDS_CMD_SDIO(1, SDIO_CMD24_WRITE_SINGLE_BLOCK, sector);
 }
 
 // bytes == number of bytes currently sent

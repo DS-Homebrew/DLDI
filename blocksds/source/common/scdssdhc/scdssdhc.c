@@ -12,6 +12,7 @@
 #include <nds/ndstypes.h>
 
 #include <common/scdssdhc/scdssdhc.h>
+#include <common/sdio.h>
 
 static u32 isSDHC = 0;
 
@@ -127,11 +128,11 @@ bool SCDSSDHC_SDInitialize(void) {
     waitByLoop(0x1000);
 
     // CMD0
-    SCDSSDHC_SDSendR0Command(0, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
-    SCDSSDHC_SDHostSetMode(0, 0, SCDSSDHC_SD_HOST_SEND_STOP_CLK, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR0Command(SDIO_CMD0_GO_IDLE_STATE, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDHostSetMode(SDIO_CMD0_GO_IDLE_STATE, 0, SCDSSDHC_SD_HOST_SEND_STOP_CLK, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     // CMD8
-    SCDSSDHC_SDHostSetMode(8, 0x1AA, SCDSSDHC_SD_HOST_READ_4B, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDHostSetMode(SDIO_CMD8_SEND_IF_COND, 0x1AA, SCDSSDHC_SD_HOST_READ_4B, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     u32 retryCount = 9999;
     while (1) {
@@ -153,7 +154,7 @@ bool SCDSSDHC_SDInitialize(void) {
 
     do {
         // CMD55
-        SCDSSDHC_SDHostSetMode(55, 0, SCDSSDHC_SD_HOST_READ_4B, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+        SCDSSDHC_SDHostSetMode(SDIO_CMD55_APP_CMD, 0, SCDSSDHC_SD_HOST_READ_4B, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
         retryCount = 9999;
         while (SCDSSDHC_IsSDHostBusy()) {
             if (--retryCount == 0) {
@@ -169,27 +170,27 @@ bool SCDSSDHC_SDInitialize(void) {
         // ACMD41
         u32 parameter = 0x00FC0000;
         if (isSD20) parameter |= BIT(30);
-        response = SCDSSDHC_SDSendR1Command(41, parameter, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+        response = SCDSSDHC_SDSendR1Command(SDIO_ACMD41_SD_SEND_OP_COND, parameter, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
     } while (!(response & BIT(31)));
 
     isSDHC = response & BIT(30) ? 1 : 0;
 
     // CMD2
-    SCDSSDHC_SDSendR2Command(2, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR2Command(SDIO_CMD2_ALL_SEND_CID, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     // CMD3
-    response = SCDSSDHC_SDSendR1Command(3, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    response = SCDSSDHC_SDSendR1Command(SDIO_CMD3_SEND_RELATIVE_ADDR, 0, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
     u32 sdio_rca = response & 0xFFFF0000;
 
     // CMD7
-    SCDSSDHC_SDSendR1Command(7, sdio_rca, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD7_SELECT_CARD, sdio_rca, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     // ACMD6
-    SCDSSDHC_SDSendR1Command(55, sdio_rca, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
-    SCDSSDHC_SDSendR1Command(6, 2, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD55_APP_CMD, sdio_rca, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR1Command(SDIO_ACMD6_SET_BUS_WIDTH, 2, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     // CMD16
-    SCDSSDHC_SDSendR1Command(16, 512, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD16_SET_BLOCK_LEN, 512, SCDSSDHC_CTRL_SD_LOW_CLK_LATENCY);
 
     SCDSSDHC_SDHostSetRegister(0);
     SCDSSDHC_SDHostSetRegister(SCDSSDHC_SD_HOST_REG_RESET | SCDSSDHC_SD_HOST_REG_CLEAN_ROM_MODE);
@@ -230,12 +231,12 @@ void SCDSSDHC_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
     };
 
     // end read
-    SCDSSDHC_SDSendR1Command(12, 0, 0);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD12_STOP_TRANSMISSION, 0, 0);
 }
 
 void SCDSSDHC_SDWriteSingleSector(u32 sector, const void* buffer) {
     // instruct cart where to write
-    SCDSSDHC_SDSendR1Command(24, isSDHC ? sector : sector << 9, 0);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD24_WRITE_SINGLE_BLOCK, isSDHC ? sector : sector << 9, 0);
 
     // write
     SCDSSDHC_SDFIFOWriteData(buffer, 128);
@@ -251,7 +252,7 @@ void SCDSSDHC_SDWriteSingleSector(u32 sector, const void* buffer) {
 
 void SCDSSDHC_SDWriteMultiSector(u32 sector, const void* buffer, u32 num_sectors) {
     // instruct cart where to write
-    SCDSSDHC_SDSendR1Command(25, isSDHC ? sector : sector << 9, 0);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD25_WRITE_MULTIPLE_BLOCK, isSDHC ? sector : sector << 9, 0);
 
     while (num_sectors--) {
         // end write
@@ -269,7 +270,7 @@ void SCDSSDHC_SDWriteMultiSector(u32 sector, const void* buffer, u32 num_sectors
     }
 
     // *really* end write
-    SCDSSDHC_SDSendR1Command(12, 0, 0);
+    SCDSSDHC_SDSendR1Command(SDIO_CMD12_STOP_TRANSMISSION, 0, 0);
     REG_SCDSSDHC_MCCMD[0] = SCDSSDHC_CMD_SD_WRITE_END;
     card_romStartXfer(SCDSSDHC_CTRL_READ_4B, false);
     card_romWaitDataReady();

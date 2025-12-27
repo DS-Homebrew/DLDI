@@ -16,13 +16,13 @@
 // Initialize the driver. Returns true on success.
 bool G003_Startup(void) {
     // Confirm card is actually responding and is actually a GMP-Z003
-    return (cardExt_ReadData4Byte(G003_CMD_CARD_INFO, G003_CTRL_READ_4B) & 7) == 4;
+    return (cardExt_RomReadData4Byte(G003_CMD_CARD_INFO, G003_CTRL_READ_4B) & 7) == 4;
 }
 
 // Returns true if a card is present and initialized.
 bool G003_IsInserted(void) {
     // Confirm card is actually responding and is actually a GMP-Z003
-    return (cardExt_ReadData4Byte(G003_CMD_CARD_INFO, G003_CTRL_READ_4B) & 7) == 4;
+    return (cardExt_RomReadData4Byte(G003_CMD_CARD_INFO, G003_CTRL_READ_4B) & 7) == 4;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on

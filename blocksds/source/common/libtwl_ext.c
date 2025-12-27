@@ -7,7 +7,7 @@
 #include <libtwl/card/card.h>
 #include <nds/ndstypes.h>
 
-void cardExt_ReadData(u64 command, u32 flags, void* buffer, u32 length) {
+void cardExt_RomReadData(u64 command, u32 flags, void* buffer, u32 length) {
     card_romSetCmd(command);
     card_romStartXfer(flags, false);
     if ((u32)buffer & 3)
@@ -16,7 +16,7 @@ void cardExt_ReadData(u64 command, u32 flags, void* buffer, u32 length) {
         card_romCpuRead(buffer, length);
 }
 
-void cardExt_WriteData(u64 command, u32 flags, const void* buffer, u32 length) {
+void cardExt_RomWriteData(u64 command, u32 flags, const void* buffer, u32 length) {
     card_romSetCmd(command);
     card_romStartXfer(flags, false);
     if ((u32)buffer & 3)
@@ -25,14 +25,14 @@ void cardExt_WriteData(u64 command, u32 flags, const void* buffer, u32 length) {
         card_romCpuWrite(buffer, length);
 }
 
-u32 cardExt_ReadData4Byte(u64 command, u32 flags) {
+u32 cardExt_RomReadData4Byte(u64 command, u32 flags) {
     card_romSetCmd(command);
     card_romStartXfer(flags | MCCNT1_LEN_4, false);
     card_romWaitDataReady();
     return card_romGetData();
 }
 
-void cardExt_SendCommand(u64 command, u32 flags) {
+void cardExt_RomSendCommand(u64 command, u32 flags) {
     card_romSetCmd(command);
     card_romStartXfer(flags | MCCNT1_LEN_0, false);
     card_romWaitBusy();

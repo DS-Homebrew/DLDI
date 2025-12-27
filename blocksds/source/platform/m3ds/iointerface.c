@@ -16,13 +16,13 @@
 // Initialize the driver. Returns true on success.
 bool M3DS_Startup(void) {
     // Confirm card is actually responding and is actually an M3
-    return (cardExt_ReadData4Byte(M3DS_CMD_CARD_INFO, M3DS_CTRL_GENERAL) & 7) == 4;
+    return (cardExt_RomReadData4Byte(M3DS_CMD_CARD_INFO, M3DS_CTRL_GENERAL) & 7) == 4;
 }
 
 // Returns true if a card is present and initialized.
 bool M3DS_IsInserted(void) {
     // Confirm card is actually responding and is actually an M3
-    return (cardExt_ReadData4Byte(M3DS_CMD_CARD_INFO, M3DS_CTRL_GENERAL) & 7) == 4;
+    return (cardExt_RomReadData4Byte(M3DS_CMD_CARD_INFO, M3DS_CTRL_GENERAL) & 7) == 4;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on

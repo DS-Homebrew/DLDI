@@ -18,7 +18,7 @@ static u32 EZ5N_ReadLengthCtrlValues[4] = {EZ5N_CTRL_READ_SD_512, EZ5N_CTRL_READ
                                            EZ5N_CTRL_READ_SD_2048, EZ5N_CTRL_READ_SD_2048};
 
 static inline u32 EZ5N_SendCommand(const u64 command, u32 latency) {
-    return cardExt_ReadData4Byte(command, (EZ5N_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)));
+    return cardExt_RomReadData4Byte(command, (EZ5N_CTRL_SEND_CMD | MCCNT1_LATENCY1(latency)));
 }
 
 u32 EZ5N_CardReadChipID(void) {
@@ -34,7 +34,7 @@ void EZ5N_SDReadSectors(u32 sector, u32 num_sectors, void* buffer) {
         // request should return 0 when ready to access
         while (EZ5N_SendCommand(EZ5N_CMD_SD_READ_REQUEST(sector, sector_count), 0xC8));
 
-        cardExt_ReadData(EZ5N_CMD_SD_READ_DATA, EZ5N_ReadLengthCtrlValues[sector_count - 1], buffer,
+        cardExt_RomReadData(EZ5N_CMD_SD_READ_DATA, EZ5N_ReadLengthCtrlValues[sector_count - 1], buffer,
                          128 * sector_count);
         sector += sector_count;
         num_sectors -= sector_count;
@@ -49,7 +49,7 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer) {
 
         // Write to buffer
         for (u32 i = 0; i < sector_count; i++) {
-            cardExt_WriteData(EZ5N_CMD_SD_WRITE_BUFFER(i), (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512),
+            cardExt_RomWriteData(EZ5N_CMD_SD_WRITE_BUFFER(i), (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512),
                               buffer, 128);
             buffer = (u8*)buffer + 0x200;
         }
@@ -70,7 +70,7 @@ u32 EZ5N_GetVersion(void) {
 
 // TODO: what is the structure of this table?
 void EZ5N_SendFATOffsetTable(const u32* table, u32 num_words) {
-    cardExt_WriteData(EZ5N_CMD_SD_SEND_FAT_ENTRY, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
+    cardExt_RomWriteData(EZ5N_CMD_SD_SEND_FAT_ENTRY, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
                       num_words);
 }
 

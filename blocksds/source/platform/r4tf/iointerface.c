@@ -16,13 +16,13 @@
 // Initialize the driver. Returns true on success.
 bool R4TF_Startup(void) {
     // Confirm card is actually responding and is actually an R4
-    return (cardExt_ReadData4Byte(R4TF_CMD_CARD_INFO, R4TF_CTRL_READ_4B) & 7) == 4;
+    return (cardExt_RomReadData4Byte(R4TF_CMD_CARD_INFO, R4TF_CTRL_READ_4B) & 7) == 4;
 }
 
 // Returns true if a card is present and initialized.
 bool R4TF_IsInserted(void) {
     // Confirm card is actually responding and is actually an R4
-    return (cardExt_ReadData4Byte(R4TF_CMD_CARD_INFO, R4TF_CTRL_READ_4B) & 7) == 4;
+    return (cardExt_RomReadData4Byte(R4TF_CMD_CARD_INFO, R4TF_CTRL_READ_4B) & 7) == 4;
 }
 
 // Reads 512 byte sectors into a buffer that may be unaligned. Returns true on

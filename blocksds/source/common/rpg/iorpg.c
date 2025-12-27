@@ -75,7 +75,7 @@ static void ioRPG_SDSendSDIOCommand(u64 command, u8* buffer, u32 length) {
     waitByLoop(33);
     // Cut transmission
     REG_MCCNT1 = 0;
-    cardExt_SendCommand(command, IORPG_CTRL_POLL);
+    cardExt_RomSendCommand(command, IORPG_CTRL_POLL);
 }
 
 // This function gets the full R1 response, and truncates it to bits
@@ -128,7 +128,7 @@ static bool ioRPG_WaitBusy(void) {
             card_romWaitDataReady();
             waitByLoop(33);
             REG_MCCNT1 = 0;
-            cardExt_SendCommand(command, IORPG_CTRL_POLL);
+            cardExt_RomSendCommand(command, IORPG_CTRL_POLL);
         }
     }
 
@@ -139,7 +139,7 @@ static bool ioRPG_WaitBusy(void) {
 // So we write two words for each transfer
 static void ioRPG_SDWriteData(const u32* buffer, u32 length) {
     for (u32 i = 0; i < length; i += 2) {
-        cardExt_ReadData(IORPG_CMD_SD_WRITE_DATA(buffer + i), IORPG_CTRL_POLL, NULL, 0);
+        cardExt_RomReadData(IORPG_CMD_SD_WRITE_DATA(buffer + i), IORPG_CTRL_POLL, NULL, 0);
     }
 }
 
@@ -153,14 +153,14 @@ static void ioRPG_SDWaitForState(uint8_t state) {
 #endif
 
     do {
-        data = cardExt_ReadData4Byte(IORPG_CMD_SD_READ_STATE,
+        data = cardExt_RomReadData4Byte(IORPG_CMD_SD_READ_STATE,
                                      IORPG_CTRL_READ_4B | MCCNT1_LATENCY1(4)) &
                mask;
     } while (data != state);
 }
 
 u32 ioRPG_CardReadChipID(void) {
-    return cardExt_ReadData4Byte(((u64)CARD_CMD_DATA_CHIPID << 56),
+    return cardExt_RomReadData4Byte(((u64)CARD_CMD_DATA_CHIPID << 56),
                                  IORPG_CTRL_READ_4B | MCCNT1_LATENCY1(4));
 }
 
@@ -227,7 +227,7 @@ void ioRPG_SDReadSingleSector(u32 sector, void* buffer) {
     ioRPG_SDSendSDIOCommand(IORPG_CMD_SDIO(17, IORPG_SDIO_READ_SINGLE_BLOCK, address), NULL, 0);
     ioRPG_WaitBusy();
 
-    cardExt_ReadData(IORPG_CMD_CARD_READ_DATA, (IORPG_CTRL_READ_512B | MCCNT1_LATENCY1(4)), buffer,
+    cardExt_RomReadData(IORPG_CMD_CARD_READ_DATA, (IORPG_CTRL_READ_512B | MCCNT1_LATENCY1(4)), buffer,
                      128);
     waitByLoop(80);  // wait for sd crc auto complete
 }
@@ -239,7 +239,7 @@ void ioRPG_SDReadMultiSector(u32 sector, u32 num_sectors, void* buffer) {
     ioRPG_WaitBusy();
 
     while (num_sectors--) {
-        cardExt_ReadData(IORPG_CMD_CARD_READ_DATA, (IORPG_CTRL_READ_512B | MCCNT1_LATENCY1(4)),
+        cardExt_RomReadData(IORPG_CMD_CARD_READ_DATA, (IORPG_CTRL_READ_512B | MCCNT1_LATENCY1(4)),
                          buffer, 128);
         ioRPG_SDWaitForState(0x7);
         buffer = (u8*)buffer + 0x200;

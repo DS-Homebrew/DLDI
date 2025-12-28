@@ -32,7 +32,7 @@
 // Others
 #define SCDS_CMD_CARD_RESPONSE (0x3040ull << 48)
 #define SCDS_CMD_SD_READ_REQUEST (0x34ull << 56)
-#define SCDS_CMD_SD_WRITE_END (0x35ull << 56)
+#define SCDS_CMD_SD_FLUSH_DATA (0x35ull << 56)
 #define SCDS_CMD_SD_READ_DATA (0x36ull << 56)
 
 // SDIO
@@ -48,10 +48,10 @@ static inline u64 SCDS_CMD_SDIO(u8 response, u8 cmd, u32 argument) {
     return SCDS_CMD_SDIO_BASE | ((u64)cmd << 40) | ((u64)argument << 8) | (u64)response;
 }
 
-// bytes == number of bytes currently sent
+// idx == index of buffer to write to
 // for each 4 bytes, write next word from buffer, up to 512 bytes
-static inline u64 SCDS_CMD_SD_WRITE_DATA(u32 bytes, u32 data) {
-    return (0x37ull << 56) | ((u64)bytes << 40) | ((u64)(__builtin_bswap32(data)) << 8);
+static inline u64 SCDS_CMD_SD_WRITE_DATA(u32 idx, u32 data) {
+    return (0x37ull << 56) | ((u64)idx << 40) | ((u64)(__builtin_bswap32(data)) << 8);
 }
 
 // user API

@@ -34,7 +34,7 @@ static u32 SCDS_SDSendSDIOCommandR1(u8 cmd, u32 parameter)
 }
 
 void SCDS_SDReadSingleSector(u32 sector, void* buffer) {
-    // instruct cart what to read
+    // CMD17
     SCDS_SDSendSDIOCommand(1, SDIO_CMD17_READ_SINGLE_BLOCK, sector);
 
     // instruct cart to start reading
@@ -46,7 +46,7 @@ void SCDS_SDReadSingleSector(u32 sector, void* buffer) {
 }
 
 void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
-    // instruct cart what to read
+    // CMD18
     SCDS_SDSendSDIOCommand(1, SDIO_CMD18_READ_MULTIPLE_BLOCK, sector);
 
     for (int i = 0; i < num_sectors; i++) {
@@ -63,10 +63,10 @@ void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
 }
 
 void SCDS_SDWriteSector(u32 sector, const void* buffer) {
-    // instruct cart where to write
+    // CMD24
     SCDS_SDSendSDIOCommandR1(SDIO_CMD24_WRITE_SINGLE_BLOCK, sector);
 
-    // write
+    // write to buffer
     if((u32)buffer & 3)
     {
         u8 *u8_buffer = (u8*)buffer;
@@ -84,7 +84,7 @@ void SCDS_SDWriteSector(u32 sector, const void* buffer) {
         }
     }
 
-    // end write
-    cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_END, SCDS_CTRL_READ_4B);
+    // flush to disk
+    cardExt_RomReadData4Byte(SCDS_CMD_SD_FLUSH_DATA, SCDS_CTRL_READ_4B);
     SCDS_WaitBusy();
 }

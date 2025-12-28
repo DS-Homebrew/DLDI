@@ -8,6 +8,7 @@
 */
 
 #include <common/libtwl_ext.h>
+#include <common/sdio.h>
 #include <libtwl/card/card.h>
 #include <nds/ndstypes.h>
 
@@ -17,15 +18,24 @@ static inline void SCDS_WaitBusy(void) {
     while (cardExt_RomReadData4Byte(SCDS_CMD_CARD_BUSY, SCDS_CTRL_READ_4B));
 }
 
-static inline void SCDS_FlushResponse(void) {
-    cardExt_RomReadData4Byte(SCDS_CMD_CARD_RESPONSE, SCDS_CTRL_READ_4B);
+static inline void SCDS_SDSendSDIOCommand(u8 response_type, u8 cmd, u32 parameter)
+{
+    cardExt_RomReadData4Byte(SCDS_CMD_SDIO(response_type, cmd, parameter), SCDS_CTRL_READ_4B);
     SCDS_WaitBusy();
+}
+
+static u32 SCDS_SDSendSDIOCommandR1(u8 cmd, u32 parameter)
+{
+    u32 data = 0;
+    SCDS_SDSendSDIOCommand(1, cmd, parameter);
+    data = cardExt_RomReadData4Byte(SCDS_CMD_CARD_RESPONSE, SCDS_CTRL_READ_4B);
+    SCDS_WaitBusy();
+    return data;
 }
 
 void SCDS_SDReadSingleSector(u32 sector, void* buffer) {
     // instruct cart what to read
-    cardExt_RomReadData4Byte(SCDS_CMD_SDIO_READ_SINGLE_BLOCK(sector), SCDS_CTRL_READ_4B);
-    SCDS_WaitBusy();
+    SCDS_SDSendSDIOCommand(1, SDIO_CMD17_READ_SINGLE_BLOCK, sector);
 
     // instruct cart to start reading
     cardExt_RomReadData4Byte(SCDS_CMD_SD_READ_REQUEST, SCDS_CTRL_READ_4B);
@@ -37,8 +47,7 @@ void SCDS_SDReadSingleSector(u32 sector, void* buffer) {
 
 void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
     // instruct cart what to read
-    cardExt_RomReadData4Byte(SCDS_CMD_SDIO_READ_MULTIPLE_BLOCK(sector), SCDS_CTRL_READ_4B);
-    SCDS_WaitBusy();
+    SCDS_SDSendSDIOCommand(1, SDIO_CMD18_READ_MULTIPLE_BLOCK, sector);
 
     for (int i = 0; i < num_sectors; i++) {
         // instruct cart to start reading
@@ -50,16 +59,12 @@ void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
     }
 
     // end read
-    cardExt_RomReadData4Byte(SCDS_CMD_SDIO_STOP_TRANSMISSION(), SCDS_CTRL_READ_4B);
-    SCDS_WaitBusy();
-    SCDS_FlushResponse();
+    SCDS_SDSendSDIOCommandR1(SDIO_CMD12_STOP_TRANSMISSION, 0);
 }
 
 void SCDS_SDWriteSector(u32 sector, const void* buffer) {
     // instruct cart where to write
-    cardExt_RomReadData4Byte(SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(sector), SCDS_CTRL_READ_4B);
-    SCDS_WaitBusy();
-    SCDS_FlushResponse();
+    SCDS_SDSendSDIOCommandR1(SDIO_CMD24_WRITE_SINGLE_BLOCK, sector);
 
     // write
     if((u32)buffer & 3)

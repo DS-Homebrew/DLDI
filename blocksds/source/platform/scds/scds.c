@@ -55,15 +55,29 @@ void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors) {
     SCDS_FlushResponse();
 }
 
-void SCDS_SDWriteSector(u32 sector, const u32* buffer) {
+void SCDS_SDWriteSector(u32 sector, const void* buffer) {
     // instruct cart where to write
     cardExt_RomReadData4Byte(SCDS_CMD_SDIO_WRITE_SINGLE_BLOCK(sector), SCDS_CTRL_READ_4B);
     SCDS_WaitBusy();
     SCDS_FlushResponse();
 
     // write
-    for (u32 i = 0; i < 128; i++)
-        cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i << 2, buffer[i]), SCDS_CTRL_READ_4B);
+    if((u32)buffer & 3)
+    {
+        u8 *u8_buffer = (u8*)buffer;
+        for (u32 i = 0; i < 512; i+=4)
+        {
+            u32 data = u8_buffer[i + 0] | (u8_buffer[i + 1] << 8) | (u8_buffer[i + 2] << 16) | (u8_buffer[i + 3] << 24);
+            cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i, data), SCDS_CTRL_READ_4B);
+        }
+    }
+    else {
+        u32 *u32_buffer = (u32*)buffer;
+        for (u32 i = 0; i < 128; i++)
+        {
+            cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i << 2, u32_buffer[i]), SCDS_CTRL_READ_4B);
+        }
+    }
 
     // end write
     cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_END, SCDS_CTRL_READ_4B);

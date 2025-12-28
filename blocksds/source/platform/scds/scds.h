@@ -76,4 +76,4 @@ static inline u64 SCDS_CMD_SD_WRITE_DATA(u32 bytes, u32 data) {
 // user API
 void SCDS_SDReadSingleSector(u32 sector, void* buffer);
 void SCDS_SDReadMultiSector(u32 sector, void* buffer, u32 num_sectors);
-void SCDS_SDWriteSector(u32 sector, const u32* buffer);
+void SCDS_SDWriteSector(u32 sector, const void* buffer);

@@ -18,14 +18,12 @@ static inline void SCDS_WaitBusy(void) {
     while (cardExt_RomReadData4Byte(SCDS_CMD_CARD_BUSY, SCDS_CTRL_READ_4B));
 }
 
-static inline void SCDS_SDSendSDIOCommand(u8 response_type, u8 cmd, u32 parameter)
-{
+static inline void SCDS_SDSendSDIOCommand(u8 response_type, u8 cmd, u32 parameter) {
     cardExt_RomReadData4Byte(SCDS_CMD_SDIO(response_type, cmd, parameter), SCDS_CTRL_READ_4B);
     SCDS_WaitBusy();
 }
 
-static u32 SCDS_SDSendSDIOCommandR1(u8 cmd, u32 parameter)
-{
+static u32 SCDS_SDSendSDIOCommandR1(u8 cmd, u32 parameter) {
     u32 data = 0;
     SCDS_SDSendSDIOCommand(1, cmd, parameter);
     data = cardExt_RomReadData4Byte(SCDS_CMD_CARD_RESPONSE, SCDS_CTRL_READ_4B);
@@ -67,20 +65,18 @@ void SCDS_SDWriteSector(u32 sector, const void* buffer) {
     SCDS_SDSendSDIOCommandR1(SDIO_CMD24_WRITE_SINGLE_BLOCK, sector);
 
     // write to buffer
-    if((u32)buffer & 3)
-    {
-        u8 *u8_buffer = (u8*)buffer;
-        for (u32 i = 0; i < 512; i+=4)
-        {
-            u32 data = u8_buffer[i + 0] | (u8_buffer[i + 1] << 8) | (u8_buffer[i + 2] << 16) | (u8_buffer[i + 3] << 24);
+    if ((u32)buffer & 3) {
+        u8* u8_buffer = (u8*)buffer;
+        for (u32 i = 0; i < 512; i += 4) {
+            u32 data = u8_buffer[i + 0] | (u8_buffer[i + 1] << 8) | (u8_buffer[i + 2] << 16) |
+                       (u8_buffer[i + 3] << 24);
             cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i, data), SCDS_CTRL_READ_4B);
         }
-    }
-    else {
-        u32 *u32_buffer = (u32*)buffer;
-        for (u32 i = 0; i < 128; i++)
-        {
-            cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i << 2, u32_buffer[i]), SCDS_CTRL_READ_4B);
+    } else {
+        u32* u32_buffer = (u32*)buffer;
+        for (u32 i = 0; i < 128; i++) {
+            cardExt_RomReadData4Byte(SCDS_CMD_SD_WRITE_DATA(i << 2, u32_buffer[i]),
+                                     SCDS_CTRL_READ_4B);
         }
     }
 

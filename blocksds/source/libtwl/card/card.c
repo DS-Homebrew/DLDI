@@ -3,7 +3,7 @@
 /*
     This file is a part of libtwl (card.c)
 
-    Copyright (C) 2023 Gericom
+    Copyright (C) 2024 Gericom
 
     SPDX-License-Identifier: Zlib
 */

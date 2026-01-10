@@ -2,7 +2,7 @@
     GMTF - Datel Games 'n' Music & Action Replay DS
 
     Copyright (C) 2023 lifehackerhansol
-    Copyright (C) 2025 Edoardo Lolletti (edo9300)
+    Copyright (C) 2025-2026 Edoardo Lolletti (edo9300)
 
     SPDX-License-Identifier: Zlib
 */
@@ -21,6 +21,13 @@ static void GMTF_CardSendCommandF2(u32 param1, u8 param2) {
 
 static u8 GMTF_SpiReadByte(void) {
     return card_spiTransferByte(MCCNT0_SPI_RATE_4_19_MHZ, GMTF_SPI_READ_BYTE);
+}
+
+static u16 GMTF_SpiReadShort(void) {
+    u16 res = 0;
+    res |= GMTF_SpiReadByte() << 0;
+    res |= GMTF_SpiReadByte() << 8;
+    return res;
 }
 
 static void GMTF_SpiDisable(void)
@@ -132,23 +139,36 @@ bool GMTF_SDInitialize(void)
     return true;
 }
 
+static bool GMTF_readSector(u8 * buffer) {
+    // Wait for data start token
+    if(GMTF_SpiReadByteTimeout() != GMTF_SPI_START_DATA_TOKEN) {
+        return false;
+    }
+
+    if((u32)buffer & 1) {
+        // byte aligned
+        for(int i=0; i < 512; i++)
+            *buffer++ = GMTF_SpiReadByte();
+    } else {
+        // halfword aligned
+        u16* buffer16 = (u16*)buffer;
+        for(int i=0; i < (512 / sizeof(u16)); i++)
+            *buffer16++ = GMTF_SpiReadShort();
+    }
+
+    // Read crc
+    (void)GMTF_SpiReadShort();
+
+    return true;
+}
+
 bool GMTF_SDReadSingleSector(u32 sector, u8 * buffer) {
     sector = isSdhc ? sector : sector << 9;
 
     if(GMTF_SpiSendSDIOCommandR0(SDIO_CMD17_READ_SINGLE_BLOCK, sector) != 0)
         return false;
 
-    // Wait for data start token
-    if(GMTF_SpiReadByteTimeout() != GMTF_SPI_START_DATA_TOKEN)
-        return false;
-
-    for(int i=0; i < 512; i++)
-        *buffer++ = GMTF_SpiReadByte();
-
-    (void)GMTF_SpiReadByte();
-    (void)GMTF_SpiReadByte();
-
-    return true;
+    return GMTF_readSector(buffer);
 }
 
 bool GMTF_SDReadMultipleSector(u32 sector, u32 num_sectors, u8 * buffer) {
@@ -159,15 +179,10 @@ bool GMTF_SDReadMultipleSector(u32 sector, u32 num_sectors, u8 * buffer) {
 
     for(int i=0; i < num_sectors; i++)
     {
-        // Wait for data start token
-        if(GMTF_SpiReadByteTimeout() != GMTF_SPI_START_DATA_TOKEN)
+        if(!GMTF_readSector(buffer))
             return false;
 
-        for(int j=0; j < 512; j++)
-            *buffer++ = GMTF_SpiReadByte();
-
-        (void)GMTF_SpiReadByte();
-        (void)GMTF_SpiReadByte();
+        buffer += 512;
     }
 
     // this message returns 1 byte of response, but it needs up to 8 bytes

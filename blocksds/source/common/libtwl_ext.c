@@ -5,6 +5,7 @@
 */
 
 #include <nds/ndstypes.h>
+#include <libtwl/card/card.h>
 
 void cardExt_RomReadData(u64 command, u32 flags, void* buffer, u32 length) {
     card_romSetCmd(command);

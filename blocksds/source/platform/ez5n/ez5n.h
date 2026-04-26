@@ -43,7 +43,7 @@
 #define EZ5N_CMD_CARD_VERSION 0x3E00000000000000ull
 
 // Sends a FAT offset table to be used with hardware-backed retail cartridge emulation.
-#define EZ5N_CMD_SD_SEND_FAT_ENTRY 0xB100000100000000ull
+#define EZ5N_CMD_SD_SEND_FAT_OFFSET_TABLE 0xB100000100000000ull
 
 // Requests block reads from the SD card up to 4 sectors at a time.
 static inline u64 EZ5N_CMD_SD_READ_REQUEST(u32 sector, u32 num_sectors) {
@@ -72,6 +72,18 @@ void EZ5N_SDWriteSectors(u32 sector, u32 num_sectors, const void* buffer);
 #ifndef DLDI
 u32 EZ5N_CardReadHWVersion(void);
 
-// TODO: what is the structure of this table?
+/*
+    The format of the table to send is two u32[64] arrays, which 
+    contains the offsets for two files, the first for the ROM, the second
+    for the save file.
+    Each array has two u32s:
+    - u32 fileOffset - file offset of the given SD sector
+    - u32 sectorBase - sector address relative to the file offset
+    When the fileOffset == 0xFFFFFFFF, the card will consider the previous 
+    sectorBase as the final FAT cluster.
+
+    The "ROM" file offsets are read using 0xB6 and 0xB7, while the "save" 
+    file offsets are read using 0xB2 and 0xB3, and written using 0xBD and 0xBE.
+*/
 void EZ5N_SendFATOffsetTable(const u32* table, u32 num_words);
 #endif

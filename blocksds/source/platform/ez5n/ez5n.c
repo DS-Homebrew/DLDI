@@ -68,9 +68,8 @@ u32 EZ5N_GetVersion(void) {
     return EZ5N_SendCommand(EZ5N_CMD_CARD_VERSION, 0);
 }
 
-// TODO: what is the structure of this table?
 void EZ5N_SendFATOffsetTable(const u32* table, u32 num_words) {
-    cardExt_RomWriteData(EZ5N_CMD_SD_SEND_FAT_ENTRY, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
+    cardExt_RomWriteData(EZ5N_CMD_SD_SEND_FAT_OFFSET_TABLE, (EZ5N_CTRL_WRITE_SD | MCCNT1_LEN_512), table,
                          num_words);
 }
 
